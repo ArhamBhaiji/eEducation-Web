@@ -2,13 +2,18 @@ import { EduRecordService } from './../../sdk/record/edu-record-service';
 import { BoardClient } from '@/components/netless-board/board-client';
 import { AppStore } from '@/stores/app';
 import { observable, action, computed } from "mobx";
+import CombinePlayerFactory from '@netless/combine-player';
 import { t } from '@/i18n';
-import { PlayerPhase } from 'white-web-sdk';
+import { AnimationMode, PlayerPhase, Room } from 'white-web-sdk';
 import { BizLogger } from '@/utils/biz-logger';
+import { getOSSUrl } from '@/utils/helper';
 
 const cdnPrefix = 'https://agora-adc-artifacts.oss-accelerate.aliyuncs.com'
 
 export class ReplayStore {
+
+  @observable
+  combinePlayer: any
 
   @observable
   roomUuid: string = ''
@@ -50,6 +55,34 @@ export class ReplayStore {
   }
 
   @observable
+  scale: number = 1
+
+  pptAutoFullScreen() {
+    if (this.room && this.online) {
+      const room = this.room
+      const scene = room.state.sceneState.scenes[room.state.sceneState.index];
+      if (scene && scene.ppt) {
+          const width = scene.ppt.width;
+          const height = scene.ppt.height;
+          room.moveCameraToContain({
+              originX: - width / 2,
+              originY: - height / 2,
+              width: width,
+              height: height,
+              animationMode: AnimationMode.Immediately,
+          });
+      }
+      // TODO: scale ppt to fit
+      // room.scalePptToFit("immediately")
+      this.scale = this.room.state.zoomScale
+    }
+  }
+
+  get room(): Room {
+    return this.boardClient.room
+  }
+
+  @observable
   player: any = undefined
 
   @observable
@@ -88,8 +121,8 @@ export class ReplayStore {
   }
 
   @action
-  async replay($el: HTMLDivElement) {
-    BizLogger.info("[replay] replayed", $el);
+  async replay($board: HTMLDivElement, $el: HTMLVideoElement) {
+    BizLogger.info("[replay] replayed", $board);
     this.boardClient.on('onCatchErrorWhenRender', error => {
       BizLogger.warn('onCatchErrorWhenRender', error)
     })
@@ -115,6 +148,7 @@ export class ReplayStore {
       BizLogger.warn('onStoppedWithError', JSON.stringify(error))
     })
     this.boardClient.on('onProgressTimeChanged', scheduleTime => {
+      console.log('')
       this.setCurrentTime(scheduleTime)
     })
     try {
@@ -122,7 +156,7 @@ export class ReplayStore {
         beginTimestamp: this.startTime,
         duration: this.duration,
         room: this.boardId,
-        mediaURL: `${cdnPrefix}/${this.mediaUrl}`,
+        // mediaURL: `${cdnPrefix}/${this.mediaUrl}`,
         roomToken: this.boardToken,
       });
       this.player = this.boardClient.player
@@ -132,7 +166,19 @@ export class ReplayStore {
       throw err
     }
 
-    this.player.bindHtmlElement($el)
+    this.player.bindHtmlElement($board)
+
+    const combinePlayerFactory = new CombinePlayerFactory(this.player, {
+      url: `${cdnPrefix}/${this.mediaUrl}`,
+      videoDOM: $el
+    }, true)
+
+    const combinePlayer = combinePlayerFactory.create()
+    combinePlayer.setOnStatusChange((status: any, message: any) => {
+      console.log("[aclass] [replay] combine player status: ", status, message)
+    })
+    
+    this.combinePlayer = combinePlayer
     this.online = true
     window.addEventListener('keydown', (evt: any) => {
       if (evt.code === 'Space') {
@@ -256,6 +302,10 @@ export class ReplayStore {
 
   @action
   reset () {
+    this.scale = 1
+    if (this.combinePlayer) {
+      this.combinePlayer = undefined
+    }
     this.roomUuid = ''
     this.boardUuid = ''
     this.boardPreparing = false
