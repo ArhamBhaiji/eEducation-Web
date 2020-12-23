@@ -16,6 +16,7 @@ import { DialogType } from '@/components/dialog';
 import { BizLogger } from '@/utils/biz-logger';
 import { EduBoardService } from '@/sdk/board/edu-board-service';
 import { EduRecordService } from '@/sdk/record/edu-record-service';
+import { CustomPeerApply, UnmuteMediaEnum } from './scene';
 
 const genStudentStreams = (num: number) => {
   const items = Array.from({length: num}, (v, i) => i)
@@ -171,6 +172,7 @@ export class MiddleRoomStore extends SimpleInterval {
 
   @action
   reset() {
+    this.didHandsUp = false
     this.appStore.mediaStore.resetRoomState()
     this.appStore.resetTime()
     this.sceneStore.reset()
@@ -199,6 +201,12 @@ export class MiddleRoomStore extends SimpleInterval {
   messages: any[] = []
 
   @observable
+  didHandsUp: boolean = false
+
+  @observable
+  isReject: boolean = false
+
+  @observable
   userGroups: UserGroup[] = []
 
   @observable
@@ -208,27 +216,92 @@ export class MiddleRoomStore extends SimpleInterval {
   notice?: any = undefined
 
   @action
-  showNotice(type: number, userUuid: string, userName: string) {
-    BizLogger.info(`type: ${type}, userUuid: ${userUuid}`)
+  async showNotice(cmd: number, action: number, userUuid: string, userName: string) {
+    BizLogger.info(`type: ${action}, userUuid: ${userUuid}`)
     let text = t('toast.you_have_a_default_message')
-    switch(type) {
-      case InvitationEnum.Apply: {
-        text = t('middle_room.student_hands_up', {reason: userName})
-        break;
+    if (cmd === CustomPeerApply.unmuteAction) {
+      switch(action) {
+        case UnmuteMediaEnum.audio: {
+          this.showUnmuteApplyDialog(userName, userUuid, "audio")
+          break;
+        }
+        case UnmuteMediaEnum.video: {
+          this.showUnmuteApplyDialog(userName, userUuid, "video")
+          break;
+        }
       }
-      case InvitationEnum.Cancel: {
-        text = t('middle_room.student_hands_down', {reason: userName})
-        break;
+    } else {
+      switch(action) {
+        case InvitationEnum.Apply: {
+          text = t('middle_room.student_hands_up', {reason: userName})
+          break;
+        }
+        case InvitationEnum.Cancel: {
+          text = t('middle_room.student_hands_down', {reason: userName})
+          break;
+        }
+        case InvitationEnum.Reject: {
+          text = t('middle_room.the_teacher_rejected')
+          break;
+        }
+        case InvitationEnum.Accept: {
+          text = t('middle_room.the_teacher_accepted')
+          break;
+        }
+        
       }
-      case InvitationEnum.Accept: 
-        text = t('middle_room.the_teacher_accepted')
-        break;
+      this.notice = {
+        reason: text,
+        userUuid
+      }
+      this.appStore.uiStore.addToast(this.notice.reason)
+  
+      if (action === InvitationEnum.Reject) {
+        this.didHandsUp = false
+        this.isReject = true
+      }
+      if (action === InvitationEnum.Accept) {
+        // this.disable_handsUp = true
+        this.didHandsUp = false
+      }
+      if (action === InvitationEnum.Apply) {
+        const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === userUuid)
+        const user = this.roomManager?.data.userList.find(it => it.user.userUuid === userUuid)
+        if (!userExists && user) {
+          this.extensionStore.applyUsers.push({
+            userName: userName,
+            userUuid: userUuid,
+            streamUuid: user.streamUuid,
+            state: true
+          })
+        }
+        this.uiStore.showShakeHands()
+      }
+      if (action === InvitationEnum.Cancel) {
+        const applyUsers = this.extensionStore.applyUsers.filter((it) => it.userUuid !== userUuid)
+        this.extensionStore.applyUsers = applyUsers
+      }
+      if (action === InvitationEnum.Accept
+        && this.isStudent()) {
+        try {
+          await this.sceneStore.prepareCamera()
+          await this.sceneStore.prepareMicrophone()
+          BizLogger.info("propertys ", this.sceneStore._hasCamera, this.sceneStore._hasMicrophone)
+          if (this.sceneStore._hasCamera) {
+            await this.sceneStore.openCamera()
+          }
+  
+          if (this.sceneStore._hasMicrophone) {
+            BizLogger.info('open microphone')
+            await this.sceneStore.openMicrophone()
+          }
+        } catch (err) {
+          BizLogger.warn('published failed', err) 
+          throw err
+        }
+        this.appStore.uiStore.addToast(t('toast.publish_rtc_success'))
+      }
     }
-    this.notice = {
-      reason: text,
-      userUuid
-    }
-    this.appStore.uiStore.addToast(this.notice.reason)
   }
 
   @action
@@ -266,6 +339,25 @@ export class MiddleRoomStore extends SimpleInterval {
         userUuid,
       },
       message: `${userName}` + t('icon.requests_to_connect_the_microphone')
+    })
+  }
+
+  showUnmuteApplyDialog(userName: string, userUuid: any, type: string) {
+    // TODO: uniq dialog by user uuid
+    const isExists = this.appStore
+      .uiStore
+      .dialogs.filter((it: DialogType) => get(it.dialog, 'option.userUuid', ''))
+      .find((it: DialogType) => get(it.dialog, 'option.userUuid', '') === userUuid && get(it.dialog, 'option.type') === type)
+    if (isExists) {
+      return
+    }
+    this.appStore.uiStore.showDialog({
+      type: 'unmuteApply',
+      option: {
+        userUuid,
+        type,
+      },
+      message: `${userName}` + (type === 'video'? t("icon.apply_unmute_video") : t("icon.apply_unmute_audio"))
     })
   }
 
@@ -489,11 +581,11 @@ export class MiddleRoomStore extends SimpleInterval {
             const msg = decodeMsg(evt.message.message)
             BizLogger.info("user-message", msg)
             if (msg) {
-              const {payload} = msg
+              const {cmd, payload} = msg
               const {action} = payload
               // const payload = msg.payload
               const {name, role, uuid} = payload.fromUser
-              this.showNotice(action, uuid, name)
+              await this.showNotice(cmd, action, uuid, name)
               if (action === InvitationEnum.Apply) {
                 const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === uuid)
                 const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === uuid)
@@ -978,6 +1070,7 @@ export class MiddleRoomStore extends SimpleInterval {
     }
     let cause = {cmd:"102"}
     await this.updateRoomBatchProperties({ properties, cause })
+    this.appStore.extensionStore.controlGrouping = false
   }
 
   @computed
@@ -1049,6 +1142,7 @@ export class MiddleRoomStore extends SimpleInterval {
   async sendClose(userUuid: string) {
     const isLocal = this.roomInfo.userUuid === userUuid
     await this.sceneStore.closeStream(userUuid, isLocal)
+    this.didHandsUp = false
   }
 
   @action

@@ -27,6 +27,19 @@ const delay = 2000
 
 const ms = 500
 
+export enum ClassStateEnum {
+  started = 1
+}
+
+export enum UnmuteMediaEnum {
+  audio = 0,
+  video = 1
+}
+
+export enum CustomPeerApply {
+  unmuteAction = 10
+}
+
 export const networkQualities: {[key: string]: string} = {
   'excellent': 'network-good',
   'good': 'network-good',
@@ -175,6 +188,30 @@ export class SceneStore extends SimpleInterval {
     if (this.screenEduStream) {
       this._screenEduStream = undefined
     }
+  }
+
+  async sendUnmuteApply(source: 'video' | 'audio', userUuid: string) {
+    const message = JSON.stringify({
+      cmd: CustomPeerApply.unmuteAction,
+      payload: {
+        action: source === 'video' ? UnmuteMediaEnum.video : UnmuteMediaEnum.audio,
+        fromUser: {
+          uuid: this.userUuid,
+          role: this.roomInfo.userRole,
+          name: this.roomInfo.userName
+        },
+        fromRoom: {
+          uuid: this.roomUuid,
+          name: this.roomInfo.roomName
+        }
+      },
+    })
+    await this.roomManager.userService.sendUserChatMessage(
+      message,
+      {
+        userUuid,
+      } as EduUser,
+    )
   }
 
   @action

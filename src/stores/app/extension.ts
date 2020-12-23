@@ -151,6 +151,9 @@ export class ExtensionStore {
 
   async acceptApply(userUuid: string, streamUuid: string) {
     const exists = this.sceneStore.streamList.find((stream) => stream.streamUuid === streamUuid)
+    const idx = this.applyUsers.findIndex((user) => user.userUuid === userUuid)
+    this.applyUsers.splice(idx, 1)
+    this.applyUsers = this.applyUsers.filter((user) => user.userName !== userUuid)
     if (exists) {
       return
     }
@@ -192,6 +195,14 @@ export class ExtensionStore {
   }
 
   @computed
+  get coVideo(): boolean {
+    // 这个地方需要修改一下 判断为当前不是 pk
+    if (this.appStore.sceneStore._cameraEduStream) return true
+    return false
+  }
+
+
+  @computed
   get middleRoomApi() {
     return this.appStore.middleRoomStore.middleRoomApi
   }
@@ -225,7 +236,7 @@ export class ExtensionStore {
           userInfo: {} as EduUser
         })
       }
-      this.handsUp = true
+      this.appStore.middleRoomStore.didHandsUp = true
       this.appStore.uiStore.addToast(t(`invitation.apply_success`))
     } catch (err) {
       console.warn(err)
@@ -245,9 +256,24 @@ export class ExtensionStore {
       setInterval(this.timer)
       this.timer = undefined
       this.appStore.uiStore.addToast(t(`invitation.stop_success`))
+      this.appStore.middleRoomStore.didHandsUp = false
     } catch (err) {
       console.warn(err)
       this.appStore.uiStore.addToast(t(`invitation.stop_failed`))
+    }
+  }
+
+  @action
+  async rejectInvitationApply (toUserUuid: string) {
+    try {
+      await this.middleRoomApi.handInvitationEnd(
+        InvitationEnum.Reject,
+        toUserUuid
+      )
+      this.appStore.uiStore.addToast(t(`invitation.reject_success`))
+    } catch (err) {
+      console.warn(err)
+      this.appStore.uiStore.addToast(t(`invitation.reject_failed`))
     }
   }
 
@@ -288,7 +314,7 @@ export class ExtensionStore {
           this.interval = undefined
         }
         this.inTick = false
-        if (!this.handsUp) {
+        if (!this.appStore.middleRoomStore.didHandsUp) {
           await this.startInvitationApply()
         } else {
           await this.stopInvitationApply()
@@ -381,9 +407,11 @@ export class ExtensionStore {
   }
 
   @action
-  removeApplyUserBy(userUuid: string) {
+  async removeApplyUserBy (userUuid: string) {
     const idx = this.applyUsers.findIndex((user) => user.userUuid === userUuid)
     this.applyUsers.splice(idx, 1)
-    // this.applyUsers = this.applyUsers.filter((user) => user.userName !== userUuid)
+    this.applyUsers = this.applyUsers.filter((user) => user.userName !== userUuid)
+    // 清空举手列表
+    await this.rejectInvitationApply(userUuid)
   }
 }

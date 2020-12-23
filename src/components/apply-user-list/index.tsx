@@ -1,4 +1,4 @@
-import React, {Fragment, useCallback, useEffect, useRef, useState} from 'react'
+import React, {Fragment, useCallback, useEffect, useMemo, useState} from 'react'
 import { useExtensionStore, useMiddleRoomStore, useRoomStore, useUIStore } from "@/hooks"
 import { observer } from 'mobx-react'
 import {CustomIcon} from '@/components/icon'
@@ -52,11 +52,11 @@ const StudentApplyCard = observer((props: StudentApplyCardProps) => {
       <div style={{width: "25px", cursor: "pointer"}}>
         <Close onClick={() => {
           uiStore.showDialog({
-            type: 'cancelConfirm',
+            type: 'rejectConfirm',
             option: {
               userUuid: props.userUuid
             },
-            message: t('cancel_confirm')
+            message: t('reject_confirm')
           })
         }}/>
       </div>
@@ -105,6 +105,18 @@ export const ApplyUserList = observer(() => {
     extensionStore.stopTick()
   }, [extensionStore.inTick])
 
+  const activeClassName = useMemo(() => {
+    // 加一个判断 用于 当台上是 pk 状态
+    if (extensionStore.coVideo) {
+      return "disable_hands_up"
+    } else {
+      if (middleRoomStore.didHandsUp) {
+        return  "inactive_hands_up"
+      }
+      return "active_hands_up"
+    }
+  }, [extensionStore.coVideo, middleRoomStore.didHandsUp])
+
   return (
     <Fragment>
     {extensionStore.showStudentHandsTool  ?
@@ -113,7 +125,9 @@ export const ApplyUserList = observer(() => {
       <div className="student_hand_tools"
         onMouseOut={onMouseOut}
       >
-        <div className={`student-apply ${extensionStore.handsUp ? "inactive_hands_up" : "active_hands_up"} ${extensionStore.inTick ? 'bg-white' : ''}`}
+        <div className={`student-apply 
+        ${activeClassName}
+        ${extensionStore.inTick ? 'bg-white' : ''}`}
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
         >

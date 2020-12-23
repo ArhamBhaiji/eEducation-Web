@@ -128,7 +128,7 @@ export const RoomNavigationDialog = observer((props: any) => {
     else if (type === 'allowConfirm') {
       await extensionStore.acceptApply(option.userUuid, option.streamUuid)
     }
-    else if (type === 'cancelConfirm') {
+    else if (type === 'rejectConfirm') {
       extensionStore.removeApplyUserBy(option.userUuid)
     }
 
