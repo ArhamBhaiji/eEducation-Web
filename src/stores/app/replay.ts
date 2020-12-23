@@ -148,7 +148,6 @@ export class ReplayStore {
       BizLogger.warn('onStoppedWithError', JSON.stringify(error))
     })
     this.boardClient.on('onProgressTimeChanged', scheduleTime => {
-      console.log('')
       this.setCurrentTime(scheduleTime)
     })
     try {
