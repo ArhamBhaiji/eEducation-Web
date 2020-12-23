@@ -49,16 +49,16 @@ const useInterval = (fn: CallableFunction, delay: number) => {
 
 export const ReplayController: React.FC<any> = observer(() => {
 
-  const boardStore = useBoardStore()
+  const replayStore = useReplayStore()
 
   const location = useLocation()
 
   const onWindowResize = useCallback(() => {
-    if (boardStore.online && boardStore.room && boardStore.room.isWritable) {
-      boardStore.pptAutoFullScreen()
-      boardStore.room && boardStore.room.refreshViewSize()
+    if (replayStore.online && replayStore.room && replayStore.room.isWritable) {
+      replayStore.pptAutoFullScreen()
+      replayStore.room && replayStore.room.refreshViewSize()
     }
-  }, [boardStore.room, boardStore.pptAutoFullScreen])
+  }, [replayStore.room, replayStore.pptAutoFullScreen])
 
   useEffect(() => {
     window.addEventListener('resize', onWindowResize)
@@ -69,19 +69,19 @@ export const ReplayController: React.FC<any> = observer(() => {
 
   const {roomUuid} = useParams<{roomUuid: string}>()
 
-  const replayStore = useReplayStore()
-
   const replayRef = useRef<HTMLDivElement | null>(null)
+
+  const videoEl = useRef<HTMLVideoElement | null>(null)
 
   useInterval(() => {
     replayStore.getCourseRecordBy(roomUuid as string)
   }, 2500)
 
   useEffect(() => {
-    if (replayRef.current && replayStore.recordStatus === 2 && replayStore.mediaUrl) {
-      replayStore.replay(replayRef.current)
+    if (replayRef.current && videoEl.current && replayStore.recordStatus === 2 && replayStore.mediaUrl) {
+      replayStore.replay(replayRef.current, videoEl.current)
     }
-  }, [replayStore.recordStatus, replayRef.current, replayStore.mediaUrl])
+  }, [replayStore.recordStatus, replayRef.current, replayStore.mediaUrl, videoEl.current])
 
   const handlePlayerClick = () => {
     replayStore.handlePlayerClick()
@@ -142,7 +142,7 @@ export const ReplayController: React.FC<any> = observer(() => {
       </div>
       <div className="video-container">
         <div className="video-player">
-          <video id="white-sdk-video-js" className="video-js video-layout" style={{width: "100%", height: "100%", objectFit: "cover"}}></video>
+          <video id="white-sdk-video-js" className="video-js video-layout" style={{width: "100%", height: "100%", objectFit: "cover"}} ref={videoEl}></video>
         </div>
         <div className="chat-holder chat-board chat-messages-container"></div>
       </div>
