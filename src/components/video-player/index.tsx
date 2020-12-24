@@ -207,7 +207,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
       { 
         account ? 
-        <div className="video-profile">
+        <div className={role === 'teacher' ? "teacher video-profile" : "video-profile"}>
           <span className="account">{account}</span>
           {/* {shake && <div className={`active_hands_up ${shake ? "infinity-shake": ""}`} style={{width: "24px"}} />} */}
           {/* {showStar ? 
