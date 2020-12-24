@@ -357,6 +357,22 @@
   background-image: url('./assets/icon-speaker-off.png');
 }
 
+.icon-speaker-off-readonly
+{
+  width: 20px;
+  height: 12px;
+}
+
+.icon-speaker-off-readonly::after {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: ' ';
+  background-image: url('./assets/icon-speaker-off-readonly.png');
+}
+
 .icons-camera-mute::after {
   width: 100%;
   height: 100%;
