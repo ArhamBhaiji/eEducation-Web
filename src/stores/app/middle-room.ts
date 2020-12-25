@@ -267,7 +267,7 @@ export class MiddleRoomStore extends SimpleInterval {
       if (action === InvitationEnum.Apply) {
         const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === userUuid)
         const user = this.roomManager?.data.userList.find(it => it.user.userUuid === userUuid)
-        if (!userExists && user) {
+        if (!userExists && user && !this.extensionStore.enableAutoHandUpCoVideo) {
           this.extensionStore.applyUsers.push({
             userName: userName,
             userUuid: userUuid,
@@ -589,7 +589,7 @@ export class MiddleRoomStore extends SimpleInterval {
               if (action === InvitationEnum.Apply) {
                 const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === uuid)
                 const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === uuid)
-                if (!userExists && user) {
+                if (!userExists && user && !this.extensionStore.enableAutoHandUpCoVideo) {
                   this.extensionStore.applyUsers.push({
                     userName: name,
                     userUuid: uuid,
@@ -873,23 +873,30 @@ export class MiddleRoomStore extends SimpleInterval {
       mainStream: null
     }
 
-    const userIdsNotInPkList = this.sceneStore
-      .userList.filter((user: any) => !this.pkList.includes(user.userUuid))
-      .map((user: any) => user.userUuid)
-
-    if (userIdsNotInPkList) {
-      const streams = this.sceneStore.studentStreams.filter((stream: any) => userIdsNotInPkList.includes(stream.userUuid))
-      allStudents.studentStreams = allStudents.studentStreams.concat(streams)
-      allStudents.studentStreams = allStudents.studentStreams.map((stream) => ({
+    const userUuids = this.sceneStore.userList.map((user: any) => user.userUuid)
+    if (userUuids) {
+        const streams = this.sceneStore.studentStreams.filter((stream: any) => userUuids.includes(stream.userUuid))
+        allStudents.studentStreams = streams.map((stream) => ({
         ...stream,
         showStar: true,
         showControls: false,
         showHover: this.roomInfo.userRole === 'teacher',
         rewardNum: this.getUserReward(stream.userUuid)
-      }))
+        }))
     }
-
     return allStudents
+  }
+
+  @computed
+  get g1PlatformStreams() {
+
+    let oldPlatformStreamIds = [...this.platformState.g1Members, ...this.platformState.g2Members].map(e => e.streamUuid)
+    let handsupStreams: EduMediaStream[] = this.allStudentStreams
+      .studentStreams
+      .filter(e => !oldPlatformStreamIds.includes(e.streamUuid))
+    
+    let streams: EduMediaStream[] = [...this.platformState.g1Members, ...handsupStreams]
+    return streams
   }
 
   @computed
@@ -899,10 +906,10 @@ export class MiddleRoomStore extends SimpleInterval {
     // let g1 = this.roomProperties?.interactOutGroups?.
     let g1MemberIds = g1? get(this.roomProperties, `groups.${g1}.members`, []) : []
     let g2MemberIds = g2? get(this.roomProperties, `groups.${g2}.members`, []) : []
-  
-    let g1Members: any[] = []
-    let g2Members: any[] = []
-    this.allStudentStreams.studentStreams.forEach((e:any) => {
+
+    let g1Members: EduMediaStream[] = []
+    let g2Members: EduMediaStream[] = []
+    this.allStudentStreams.studentStreams.forEach((e: EduMediaStream) => {
       g1MemberIds.forEach((uid: any) => {
         if(uid === e.userUuid) {
           g1Members.push(e)
@@ -953,9 +960,18 @@ export class MiddleRoomStore extends SimpleInterval {
     let id = group.groupUuid
     let cause = {cmd:"104"} // 开关 pk
     
-    // 该组在台上
-    
+    // 该组在台上 下台
     if (this.platformState.g1 === id || this.platformState.g2 === id) {
+      // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
+      let streams:any = []
+      group.members.forEach((item:any) => {
+        let stu = {
+          userUuid: item.userUuid,
+          streamUuid: item.streamUuid,
+        }
+        streams.push(stu)
+      })
+      await this.batchDeleteStream(streams)
       let properties: any = {}
       console.log('该组在台上 下台')
       let t = this.platformState.g1 === id? 'g1' : 'g2'
@@ -970,18 +986,7 @@ export class MiddleRoomStore extends SimpleInterval {
           [`interactOutGroups.${t}`]: '',
         }
       }
-      // 下台 or 下台并更新状态
       await this.updateRoomBatchProperties({properties, cause})
-      // 删流
-      let streams:any = []
-      group.members.forEach((item:any) => {
-        let stu = {
-          userUuid: item.userUuid,
-          streamUuid: item.streamUuid,
-        }
-        streams.push(stu)
-      })
-      await this.batchDeleteStream(streams)
       return 
     }
     // 台上两组满
@@ -990,7 +995,17 @@ export class MiddleRoomStore extends SimpleInterval {
       return
     }
     console.log('该组不在台上 上台')
-    // 以上条件都不满足，台上有空位
+
+    // 以上条件都不满足，台上有空位 上台
+    // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
+    let t = !this.platformState.g1 ? 'g1' : 'g2'
+    let properties: any = {
+      'groupStates.state':1,
+      'groupStates.interactInGroup': 0, // 组内
+      'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
+      [`interactOutGroups.${t}`]: id,
+    }
+    await this.updateRoomBatchProperties({ properties, cause })
     let streams:any = []
     group.members.forEach((item:any) => {
       let stu = {
@@ -1006,15 +1021,6 @@ export class MiddleRoomStore extends SimpleInterval {
     })
     // 增流
     await this.batchUpsertStream(streams)
-    // 上台
-    let t = !this.platformState.g1 ? 'g1' : 'g2'
-    let properties: any = {
-      'groupStates.state':1,
-      'groupStates.interactInGroup': 0, // 组内
-      'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
-      [`interactOutGroups.${t}`]: id,
-    }
-    await this.updateRoomBatchProperties({ properties, cause })
   }
 
   // 整组加星

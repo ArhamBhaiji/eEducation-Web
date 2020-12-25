@@ -22,7 +22,6 @@ interface StreamsProps {
 const GroupVideoMarquee: React.FC<StreamsProps> = observer(
   ({othersStreams, mainStream}) => { 
   return <VideoMarquee
-    className="group first-group"
     canHover={true}
     mainStream={mainStream}
     othersStreams={othersStreams}
@@ -40,19 +39,14 @@ export const MiddleClass = observer(() => {
   const uiStore = useUIStore()
 
   const {
-    roomProperties,
     userGroups,
     roomStudentUserList,
-    studentUserList,
     studentsList,
-    studentTotal
   } = middleRoomStore
 
   const {
     mutedChat,
-    muteControl,
     teacherStream: teacher,
-    studentStreams,
   } = sceneStore
 
   const [chat, setChat] = useState<string>('')
@@ -126,8 +120,9 @@ export const MiddleClass = observer(() => {
       <div className="live-container">
         <div className="platform-room">
           {
-            middleRoomStore.platformState.g1 ?
-              <GroupVideoMarquee mainStream={null} othersStreams={middleRoomStore.platformState.g1Members}/>
+            middleRoomStore.g1PlatformStreams.length > 0?
+              <GroupVideoMarquee mainStream={null} 
+              othersStreams={middleRoomStore.g1PlatformStreams}/>
             : null
           }
         </div>

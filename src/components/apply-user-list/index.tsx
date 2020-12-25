@@ -106,7 +106,6 @@ export const ApplyUserList = observer(() => {
   }, [extensionStore.inTick])
 
   const activeClassName = useMemo(() => {
-    // 加一个判断 用于 当台上是 pk 状态
     if (extensionStore.coVideo) {
       return "disable_hands_up"
     } else {

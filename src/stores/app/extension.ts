@@ -196,7 +196,6 @@ export class ExtensionStore {
 
   @computed
   get coVideo(): boolean {
-    // 这个地方需要修改一下 判断为当前不是 pk
     if (this.appStore.sceneStore._cameraEduStream) return true
     return false
   }
@@ -231,7 +230,7 @@ export class ExtensionStore {
           audioSourceType: EduAudioSourceType.mic,
           streamName: '',
           streamUuid: localStream.stream.streamUuid,
-          hasVideo: false,
+          hasVideo: true,
           hasAudio: true,
           userInfo: {} as EduUser
         })
@@ -290,7 +289,7 @@ export class ExtensionStore {
           userUuid: userUuid,
           videoSourceType: EduVideoSourceType.camera,
           audioSourceType: EduAudioSourceType.mic,
-          videoState: MediaState.disableVideo,
+          videoState: MediaState.hasVideo,
           audioState: MediaState.hasAudio,
         }])
       }
