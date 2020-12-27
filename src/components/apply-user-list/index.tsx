@@ -107,11 +107,14 @@ export const ApplyUserList = observer(() => {
 
   const activeClassName = useMemo(() => {
     if (extensionStore.coVideo) {
+      // 禁用
       return "disable_hands_up"
     } else {
       if (middleRoomStore.didHandsUp) {
+        // 可取消
         return  "inactive_hands_up"
       }
+      // 默认
       return "active_hands_up"
     }
   }, [extensionStore.coVideo, middleRoomStore.didHandsUp])

@@ -581,18 +581,17 @@ export class MiddleRoomStore extends SimpleInterval {
             const msg = decodeMsg(evt.message.message)
             BizLogger.info("user-message", msg)
             if (msg) {
-              const {cmd, payload} = msg
-              const {action} = payload
-              // const payload = msg.payload
-              const {name, role, uuid} = payload.fromUser
-              await this.showNotice(cmd, action, uuid, name)
+              const {cmd, data} = msg
+              const {action, fromUser, payload} = data
+              const {userUuid, userName, role} = fromUser
+              await this.showNotice(cmd, action, userUuid, userName)
               if (action === InvitationEnum.Apply) {
-                const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === uuid)
-                const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === uuid)
+                const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === userUuid)
+                const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === userUuid)
                 if (!userExists && user && !this.extensionStore.enableAutoHandUpCoVideo) {
                   this.extensionStore.applyUsers.push({
-                    userName: name,
-                    userUuid: uuid,
+                    userName: userName,
+                    userUuid: userUuid,
                     streamUuid: user.streamUuid,
                     state: true
                   })
@@ -600,10 +599,10 @@ export class MiddleRoomStore extends SimpleInterval {
                 this.uiStore.showShakeHands()
               }
               if (action === InvitationEnum.Cancel) {
-                const applyUsers = this.extensionStore.applyUsers.filter((it) => it.userUuid !== uuid)
+                const applyUsers = this.extensionStore.applyUsers.filter((it) => it.userUuid !== userUuid)
                 this.extensionStore.applyUsers = applyUsers
               }
-              if (action === PeerInviteEnum.teacherAccept 
+              if (action === InvitationEnum.Accept 
                 && this.isStudent()) {
                 try {
                   await this.sceneStore.prepareCamera()
@@ -630,6 +629,68 @@ export class MiddleRoomStore extends SimpleInterval {
           }
         })
       })
+      // this.eduManager.on('user-message', async (evt: any) => {
+      //   await this.sceneStore.mutex.dispatch<Promise<void>>(async () => {
+      //     if (!this.sceneStore.joiningRTC) {
+      //       return 
+      //     }
+      //     try {
+      //       BizLogger.info('[rtm] user-message', evt)
+      //       const fromUserUuid = evt.message.fromUser.userUuid
+      //       const fromUserName = evt.message.fromUser.userName
+      //       const msg = decodeMsg(evt.message.message)
+      //       BizLogger.info("user-message", msg)
+      //       if (msg) {
+      //         const {cmd, payload} = msg
+      //         const {action} = payload
+      //         // const payload = msg.payload
+      //         const {name, role, uuid} = payload.fromUser
+      //         await this.showNotice(cmd, action, uuid, name)
+      //         if (action === InvitationEnum.Apply) {
+      //           const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === uuid)
+      //           const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === uuid)
+      //           if (!userExists && user && !this.extensionStore.enableAutoHandUpCoVideo) {
+      //             this.extensionStore.applyUsers.push({
+      //               userName: name,
+      //               userUuid: uuid,
+      //               streamUuid: user.streamUuid,
+      //               state: true
+      //             })
+      //           }
+      //           this.uiStore.showShakeHands()
+      //         }
+      //         if (action === InvitationEnum.Cancel) {
+      //           const applyUsers = this.extensionStore.applyUsers.filter((it) => it.userUuid !== uuid)
+      //           this.extensionStore.applyUsers = applyUsers
+      //         }
+      //         if (action === PeerInviteEnum.teacherAccept 
+      //           && this.isStudent()) {
+      //           try {
+      //             await this.sceneStore.prepareCamera()
+      //             await this.sceneStore.prepareMicrophone()
+      //             BizLogger.info("propertys ", this.sceneStore._hasCamera, this.sceneStore._hasMicrophone)
+      //             if (this.sceneStore._hasCamera) {
+      //               await this.sceneStore.openCamera()
+      //             }
+      
+      //             if (this.sceneStore._hasMicrophone) {
+      //               BizLogger.info('open microphone')
+      //               await this.sceneStore.openMicrophone()
+      //             }
+      //           } catch (err) {
+      //             BizLogger.warn('published failed', err) 
+      //             throw err
+      //           }
+      //           this.appStore.uiStore.addToast(t('toast.publish_rtc_success'))
+      //         }
+      //       }
+      //     } catch (error) {
+      //       BizLogger.error(`[demo] user-message async handler failed`)
+      //       BizLogger.error(error)
+      //     }
+      //   })
+      // })
+
       // 教室更新
       roomManager.on('classroom-property-updated', (classroom: any) => {
         BizLogger.info("classroom-property-updated", classroom)
@@ -1215,6 +1276,12 @@ export class MiddleRoomStore extends SimpleInterval {
       // offline: this.sceneStore.userList.find((user) => user.userUuid === it.userUuid) ? false : true
     }))
   }
+  
+
+  @computed
+  get onLineStudentsList() {
+    return this.roomStudentUserList.filter((item) => this.studentsList.find((it) => item.userUuid === it.userUuid))
+  }
 
   @computed
   get rawStudentsList() {
@@ -1247,7 +1314,8 @@ export class MiddleRoomStore extends SimpleInterval {
 
   @computed
   get studentTotal(): number {
-    return this.roomStudentUserList.length
+    // return this.roomStudentUserList.length
+    return this.onLineStudentsList.length
   }
 
   @computed

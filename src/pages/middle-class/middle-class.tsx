@@ -42,6 +42,8 @@ export const MiddleClass = observer(() => {
     userGroups,
     roomStudentUserList,
     studentsList,
+    rawStudentsList,
+    onLineStudentsList
   } = middleRoomStore
 
   const {
@@ -131,8 +133,8 @@ export const MiddleClass = observer(() => {
           <ScreenSharing />
           {
             extensionStore.controlGrouping ?
-            <MiddleGrouping dataList={roomStudentUserList} 
-            studentTotal={middleRoomStore && middleRoomStore.studentSum}
+            <MiddleGrouping dataList={onLineStudentsList} 
+            studentTotal={onLineStudentsList.length}
             onSave={ async (groups) => { await middleRoomStore.groupOnSave(groups)}} 
             onRemove={ async () => await middleRoomStore.removeGroup()} />
             : null
@@ -170,7 +172,7 @@ export const MiddleClass = observer(() => {
         <div className={`small-class chat-board`}>
           <div className="menu">
             <div className={`item ${uiStore.activeTab === 'student_list' ? 'active' : ''}`}
-                onClick={() => {
+                onClick={() => {  
                   uiStore.switchTab('student_list')
                 }}
               >
@@ -216,7 +218,7 @@ export const MiddleClass = observer(() => {
             :
             <StudentList
               userRole={userRole}
-              students={roomStudentUserList}
+              students={onLineStudentsList}
               grantUsers={grantUsers}
               handleClick={handleClick}
               isMiddleClassRoom={true}
