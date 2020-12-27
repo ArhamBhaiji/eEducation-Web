@@ -1,6 +1,13 @@
 import OSS from 'ali-oss';
 import {get} from 'lodash';
 
+const OSS_PREFIX = process.env.REACT_APP_AGORA_RECORDING_OSS_URL as string;
+
+export function getOSSUrl (mediaUrl: string): string {
+  const res = `${OSS_PREFIX}/${mediaUrl}`;
+  console.log("resolve: ", res, OSS_PREFIX);
+  return res;
+}
 export interface OSSConfig {
   accessKeyId: string,
   accessKeySecret: string,

@@ -111,7 +111,7 @@ function GroupingBoard(props: MiddleGroupProps) {
                 style={getListStyle(snapshot.isDraggingOver)}>
                 <div className="group-item-title">
                   <span className="group">组{groupsIndex + 1}</span>
-                  <span className="num">({groupItems.length}人)</span>
+                  <span className="num">({getList(groupsIndex).length}人)</span>
                 </div>
                 {getList(groupsIndex).map((item:any, index:any) => (
                     <Draggable
@@ -381,7 +381,7 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
                   onChange={handleChangeType}
                 >
                   <MenuItem value={0}>{t('middle_room.order')}</MenuItem>
-                  <MenuItem value={1}>{t('middle_room.order')}</MenuItem>
+                  <MenuItem value={1}>{t('middle_room.random')}</MenuItem>
                 </Select>
               </FormControl>
               <div className="creat-btn-box">
