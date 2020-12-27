@@ -1141,7 +1141,7 @@ export class BoardStore {
   }
 
   @action
-  toggleExtension() {
+  hideExtension() {
     this.showExtension = false
   }
 }

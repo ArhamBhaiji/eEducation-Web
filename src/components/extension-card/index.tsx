@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { useExtensionStore } from '@/hooks';
+import { useExtensionStore, useBoardStore } from '@/hooks';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
@@ -10,13 +10,16 @@ import { t } from '@/i18n';
 export const ExtensionCard: React.FC<any> = observer(() => {
 
   const extensionStore = useExtensionStore()
+  const boardStore = useBoardStore()
 
   const bindMiddleGroup = function() {
     extensionStore.showGrouping()
+    boardStore.hideExtension()
   }
 
   const bindMiddleHand = function() {
     extensionStore.toggleCard()
+    boardStore.hideExtension()
   }
 
   return (

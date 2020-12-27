@@ -51,7 +51,7 @@ export const Tools = observer(() => {
         break;
       }
       case 'extension_tool': {
-        boardStore.toggleExtension()
+        boardStore.hideExtension()
         break;
       }
     }
