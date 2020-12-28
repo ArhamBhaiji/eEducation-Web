@@ -279,7 +279,8 @@ export class ExtensionStore {
   @action
   async answerAcceptInvitationApply (userUuid: string, streamUuid: string) {
     try {
-      await this.middleRoomApi.handInvitationStart(
+      // 老师接受学生举手需要走结束接口
+      await this.middleRoomApi.handInvitationEnd(
         InvitationEnum.Accept,
         userUuid,
       )
