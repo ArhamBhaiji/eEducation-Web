@@ -279,6 +279,7 @@ const en = {
     'sure': 'sure',
     'cancel': 'cancel',
     'grouping': 'grouping',
+    'group': 'group',
     'students_total': 'Total',
     'regroup': 'Regroup',
     'save_changes': 'Save',

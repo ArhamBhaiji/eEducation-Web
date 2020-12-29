@@ -10,7 +10,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
-import {useExtensionStore} from '@/hooks';
+import {useExtensionStore, useMiddleRoomStore} from '@/hooks';
 import { orderBy, shuffle } from 'lodash';
 import { observer } from 'mobx-react';
 import { t } from '@/i18n';
@@ -110,7 +110,7 @@ function GroupingBoard(props: MiddleGroupProps) {
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}>
                 <div className="group-item-title">
-                  <span className="group">组{groupsIndex + 1}</span>
+                  <span className="group">{t('middle_room.group')} {groupsIndex + 1}</span>
                   <span className="num">({getList(groupsIndex).length}人)</span>
                 </div>
                 {getList(groupsIndex).map((item:any, index:any) => (
@@ -172,6 +172,11 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
     await controlMicrophone(1)
     setIsClose(false)
   }
+  const middleRoomStore = useMiddleRoomStore()
+
+  const isOffline = ()=> {
+
+  }
   
   return (
     <div className="middle-group-card">
@@ -203,7 +208,10 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
       <div className="group-body">
       {group.members.map((item: any, idx: number) => (
         <div className="group-stu" key={idx}>
-          <div className="stu-head"></div>
+          {
+            middleRoomStore.onLineStuUuidList.includes(item.userUuid) ?
+            <div className="stu-head"></div> : <div className="stu-head-offline"></div>
+          }
           <span className="stu-name">{item.userName}</span>
           <div className="star-box">
             <div className="stu-star"></div>

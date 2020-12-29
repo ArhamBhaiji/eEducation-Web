@@ -147,7 +147,7 @@ export class MiddleRoomApi {
         action: action,
         payload: {
           fromRoom: this.room,
-          fromUser: this.me,
+          // fromUser: this.me,
         },
       },
       token: this.userToken
@@ -164,7 +164,7 @@ export class MiddleRoomApi {
         fromUserUuid: this.me.uuid,
         action: action,
         payload: {
-          fromUser: this.me,
+          // fromUser: this.me,
           fromRoom: this.room,
         },
         // waitAck: 

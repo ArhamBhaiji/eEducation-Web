@@ -950,14 +950,13 @@ export class MiddleRoomStore extends SimpleInterval {
 
   @computed
   get g1PlatformStreams() {
+    return [...this.platformState.g1Members, ...this.handsUpStreams]
+  }
 
+  @computed
+  get handsUpStreams() {
     let oldPlatformStreamIds = [...this.platformState.g1Members, ...this.platformState.g2Members].map(e => e.streamUuid)
-    let handsupStreams: EduMediaStream[] = this.allStudentStreams
-      .studentStreams
-      .filter(e => !oldPlatformStreamIds.includes(e.streamUuid))
-    
-    let streams: EduMediaStream[] = [...this.platformState.g1Members, ...handsupStreams]
-    return streams
+    return this.allStudentStreams.studentStreams.filter(e => !oldPlatformStreamIds.includes(e.streamUuid))
   }
 
   @computed
@@ -1288,6 +1287,11 @@ export class MiddleRoomStore extends SimpleInterval {
   @computed
   get onLineStudentsList() {
     return this.roomStudentUserList.filter((item) => this.studentsList.find((it) => item.userUuid === it.userUuid))
+  }
+
+  @computed
+  get onLineStuUuidList() {
+    return this.onLineStudentsList.map((e)=> e.userUuid)
   }
 
   @computed

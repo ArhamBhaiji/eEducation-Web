@@ -277,6 +277,7 @@ const zhCN: any = {
     'sure': '确定',
     'cancel': '取消',
     'grouping': '分组',
+    'group': '组',
     'students_total': '学生总数',
     'regroup': '重新分组',
     'save_changes': '保存修改',

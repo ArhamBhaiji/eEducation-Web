@@ -16,13 +16,14 @@ export const ExtensionCard: React.FC<any> = observer(() => {
   const middleRoomStore = useMiddleRoomStore()
 
   const bindMiddleGroup = function() {
-    // 当前有举手学生在台上 这个判断条件不对 要改
-    // if(sceneStore._cameraEduStream) {
-    //   uiStore.addToast(t('middle_room.student_down_platform'))
-    //   return
-    // }
+    // 当前有举手学生在台上 
+    if(middleRoomStore.handsUpStreams.length !== 0) {
+      uiStore.addToast(t('middle_room.student_down_platform'))
+      return
+    }
     // 当前有组在台上
-    if(middleRoomStore.platformState.outGroups === 1) {
+    let platformState = middleRoomStore.platformState
+    if(platformState.g1Members.length !== 0 || platformState.g2Members.length !== 0 ) {
       uiStore.addToast(t('middle_room.group_down_platform'))
       return
     }
