@@ -235,10 +235,12 @@ export class ExtensionStore {
           userInfo: {} as EduUser
         })
       }
-      this.appStore.middleRoomStore.didHandsUp = true
       this.appStore.uiStore.addToast(t(`invitation.apply_success`))
+      this.appStore.middleRoomStore.didHandsUp = true
+      console.log('apply success')
     } catch (err) {
       console.warn(err)
+      console.log('apply failed')
       this.appStore.uiStore.addToast(t(`invitation.apply_failed`))
     }
   }
@@ -256,8 +258,10 @@ export class ExtensionStore {
       this.timer = undefined
       this.appStore.uiStore.addToast(t(`invitation.stop_success`))
       this.appStore.middleRoomStore.didHandsUp = false
+      console.log('stop invitation success')
     } catch (err) {
       console.warn(err)
+      console.log('stop invitation failed')
       this.appStore.uiStore.addToast(t(`invitation.stop_failed`))
     }
   }
@@ -269,9 +273,11 @@ export class ExtensionStore {
         InvitationEnum.Reject,
         toUserUuid
       )
+      console.log('reject success')
       this.appStore.uiStore.addToast(t(`invitation.reject_success`))
     } catch (err) {
       console.warn(err)
+      console.log('reject failed')
       this.appStore.uiStore.addToast(t(`invitation.reject_failed`))
     }
   }
@@ -294,9 +300,12 @@ export class ExtensionStore {
           audioState: MediaState.hasAudio,
         }])
       }
+      this.appStore.uiStore.addToast(t(`invitation.accept_success`))
+      console.log('accept success')
     } catch (err) {
       console.warn(err)
-      this.appStore.uiStore.addToast(t(`invitation.apply_failed`))
+      console.log('accept failed')
+      this.appStore.uiStore.addToast(t(`invitation.accept_failed`))
     }
   }
   

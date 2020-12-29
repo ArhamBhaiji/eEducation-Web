@@ -8,6 +8,8 @@ const zhCN: any = {
     "hands_up_timeout": "举手已超时",
   },
   "invitation": {
+    "accept_success": "接受举手成功",
+    "accept_failed": "接受举手失败",
     "apply_success": "发起举手成功",
     "stop_success": "取消举手成功",
     "reject_success": "拒绝举手成功",

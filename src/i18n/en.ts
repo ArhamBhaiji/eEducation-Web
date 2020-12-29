@@ -8,6 +8,8 @@ const en = {
     "hands_up_timeout": "Hand up end, time over max wait seconds",
   },
   "invitation": {
+    "accept_success": "Accept Success",
+    "accept_failed": "Accept Failed",
     "apply_success": "Apply Success",
     "stop_success": "Stop Success",
     "reject_success": "Reject Success",

@@ -130,7 +130,7 @@ export class MiddleRoomApi {
       method: 'PUT',
       data: {
         maxWait: 4,
-        timeout: 30,
+        timeout: -1,  // 原超时为 30
       },
       token: this.userToken
     })
