@@ -154,10 +154,11 @@ interface MiddleGroupCardProps {
   addStar: EventHandler<any>
   controlMicrophone: EventHandler<any>
   isTeacher: boolean
+  onTheStage: boolean
 }
 
 export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
-  ({group, platform, addStar, controlMicrophone, isTeacher}) => {
+  ({group, platform, addStar, controlMicrophone, isTeacher, onTheStage}) => {
 
   const [isClose, setIsClose] = useState<boolean>(false)
 
@@ -176,8 +177,13 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
     <div className="middle-group-card">
       <div className="head">
         <div className="text">
-          <div className="group-text">{group.groupName}:</div>
-          <div className="group-stu-num">({group.members.length}人)</div>
+          <div className="group-text">{group.groupName}</div>
+          {
+            onTheStage ?
+            <div className="group-stage">({t('middle_room.on_the_stage')})</div>
+            :
+            <div className="group-stu-num">({group.members.length}人)</div>
+          }
         </div>
         {
           isTeacher?

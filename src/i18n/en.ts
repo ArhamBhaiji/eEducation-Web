@@ -280,6 +280,10 @@ const en = {
     'students_total': 'Total',
     'regroup': 'Regroup',
     'save_changes': 'Save',
+    'on_the_stage': 'on the stage',
+    'group_is_empty': 'The group is currently empty, please regroup',
+    'student_down_platform': 'Please let the students go first',
+    'group_down_platform': 'Please let the group go first',
     'groupText': 'Group: maximum number of students in a group. For a classroom with 5 students, 2 divides the group into 3 groups (2,2,1), 4 divides the students into 2 groups (4,1), 6 leaves the students into just one group(5)'
   },
   'course_recording': 'course recording',

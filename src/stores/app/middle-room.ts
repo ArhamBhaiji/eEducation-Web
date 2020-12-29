@@ -962,6 +962,7 @@ export class MiddleRoomStore extends SimpleInterval {
 
   @computed
   get platformState () {
+    let outGroups = get(this.roomProperties, 'groupStates.interactOutGroup', '')
     let g1 = get(this.roomProperties, 'interactOutGroups.g1', '')
     let g2 = get(this.roomProperties, 'interactOutGroups.g2', '')
     // let g1 = this.roomProperties?.interactOutGroups?.
@@ -987,6 +988,7 @@ export class MiddleRoomStore extends SimpleInterval {
       g2, 
       g1Members,
       g2Members,
+      outGroups
     }
   }
 
@@ -1118,6 +1120,11 @@ export class MiddleRoomStore extends SimpleInterval {
   async groupOnSave (groups:any) {
     let backendGroups: Object = {}
     for(let i = 0; i < groups.length; i++) {
+      if(groups[i].length === 0) {
+        console.log('当前有小组为空，请重新分组')
+        this.appStore.uiStore.addToast(t('middle_room.group_is_empty'))
+        return
+      }
       let groupNum: number = i + 1
       let groupItem: any = {
         groupName: "",

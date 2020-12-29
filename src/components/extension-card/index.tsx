@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { useExtensionStore, useBoardStore } from '@/hooks';
+import { useExtensionStore, useBoardStore , useSceneStore, useUIStore, useMiddleRoomStore} from '@/hooks';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
@@ -11,8 +11,21 @@ export const ExtensionCard: React.FC<any> = observer(() => {
 
   const extensionStore = useExtensionStore()
   const boardStore = useBoardStore()
+  const sceneStore = useSceneStore()
+  const uiStore = useUIStore()
+  const middleRoomStore = useMiddleRoomStore()
 
   const bindMiddleGroup = function() {
+    // 当前有举手学生在台上 这个判断条件不对 要改
+    // if(sceneStore._cameraEduStream) {
+    //   uiStore.addToast(t('middle_room.student_down_platform'))
+    //   return
+    // }
+    // 当前有组在台上
+    if(middleRoomStore.platformState.outGroups === 1) {
+      uiStore.addToast(t('middle_room.group_down_platform'))
+      return
+    }
     extensionStore.showGrouping()
     boardStore.hideExtension()
   }
