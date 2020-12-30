@@ -28,11 +28,16 @@ export const useTimeout = (fn: CallableFunction, delay: number) => {
   useEffect(() => {
     timer.current = setTimeout(() => {
       fn && mounted && fn()
+      if (timer.current) {
+        clearTimeout(timer.current)
+        timer.current = null
+      }
     }, delay)
 
     return () => {
       if (timer.current) {
         clearTimeout(timer.current)
+        timer.current = null
       }
     }
   }, [timer])

@@ -3,6 +3,7 @@ import { IAgoraRTCClient, ICameraVideoTrack, IMicrophoneAudioTrack, ILocalVideoT
 import { EventEmitter } from "events";
 import { EduLogger } from '../../logger';
 import { IWebRTCWrapper, WebRtcWrapperInitOption, CameraOption, MicrophoneOption, PrepareScreenShareParams, StartScreenShareParams } from '../interfaces';
+import {GenericErrorWrapper} from '../../utils/generic-error';
 
 export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
 
@@ -383,7 +384,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
       await Promise.all(asyncList)
       this.videoMuted = val
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -397,7 +398,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
       await Promise.all(asyncList)
       this.audioMuted = val
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -582,7 +583,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
           EduLogger.info(`[agora-web] close camera [${trackId}] success`)
           this.cameraTrack = undefined
         }
-        throw err
+        throw new GenericErrorWrapper(err)
       }
     }
   }
@@ -663,7 +664,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
           EduLogger.info('[agora-web] close microphone success')
           this.microphoneTrack = undefined
         }
-        throw err
+        throw new GenericErrorWrapper(err)
       }
     }
   }
@@ -734,7 +735,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
       this._screenClient = screenClient
       return 
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 

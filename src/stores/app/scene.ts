@@ -151,6 +151,16 @@ export class SceneStore extends SimpleInterval {
     return this.appStore.recordService
   }
 
+  @computed
+  get canChat(): boolean {
+    const userRole = get(this.roomInfo, 'userRole', '')
+    if (userRole === 'teacher') {
+      return true
+    }
+
+    return false
+  }
+
   @observable
   sharing: boolean = false;
 
@@ -1321,7 +1331,7 @@ export class SceneStore extends SimpleInterval {
   async muteChat() {
     const sceneType = +this.roomInfo.roomType === 2 ? EduSceneType.SceneLarge : +this.roomInfo.roomType
     const roles = ['broadcaster']
-    if (sceneType === EduSceneType.SceneLarge) {
+    if ([EduSceneType.SceneLarge, EduSceneType.SceneMedium].includes(sceneType)) {
       roles.push('audience')
     }
     await this.roomManager?.userService.muteStudentChatByRoles(roles)
@@ -1332,7 +1342,7 @@ export class SceneStore extends SimpleInterval {
   async unmuteChat() {
     const sceneType = +this.roomInfo.roomType === 2 ? EduSceneType.SceneLarge : +this.roomInfo.roomType
     const roles = ['broadcaster']
-    if (sceneType === EduSceneType.SceneLarge) {
+    if ([EduSceneType.SceneLarge, EduSceneType.SceneMedium].includes(sceneType)) {
       roles.push('audience')
     }
     await this.roomManager?.userService.unmuteStudentChatByRoles(roles)
