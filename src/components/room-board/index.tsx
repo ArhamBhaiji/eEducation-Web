@@ -113,7 +113,7 @@ const RoomBoardController = observer((props: any) => {
       </div>
       <div className={`chat-container ${uiStore.activeTab === 'chatroom' ? '' : 'hide'}`}>
         <ChatPanel
-          canChat={sceneStore.roomInfo.userRole === 'teacher'}
+          canChat={sceneStore.canChat}
           muteControl={sceneStore.muteControl}
           muteChat={sceneStore.mutedChat}
           handleMute={handleMute}

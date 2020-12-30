@@ -193,7 +193,7 @@ export const MiddleClass = observer(() => {
           </div>
           <div className={`chat-container ${uiStore.activeTab === 'chatroom' ? '' : 'hide'}`}>
             <ChatPanel
-              canChat={true}
+              canChat={sceneStore.canChat}
               muteControl={sceneStore.muteControl}
               muteChat={sceneStore.mutedChat}
               handleMute={handleMute}

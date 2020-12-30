@@ -1,3 +1,4 @@
+import { GenericErrorWrapper } from './generic-error';
 import { EduLogger } from "../logger"
 
 const FETCH_TIMEOUT = 10000
@@ -50,8 +51,8 @@ export async function AgoraFetch(input: RequestInfo, init?: RequestInit, retryCo
     return await Fetch(input, init, retryCount);
   } catch(err) {
     if (err && err.message === 'request timeout') {
-      return {code: err.code, msg: null, response: null}
+      new GenericErrorWrapper({code: err.code, msg: null, response: null})
     }
-    throw err
+    new GenericErrorWrapper(err)
   }
 }

@@ -4,6 +4,7 @@ import { wait } from '../utils';
 import { CameraOption, StartScreenShareParams, MicrophoneOption, ElectronWrapperInitOption, IElectronRTCWrapper } from '../interfaces/index';
 import { CustomBtoa } from '@/utils/helper';
 import { EduLogger } from '../../logger';
+import { GenericErrorWrapper } from '../../utils/generic-error';
 
 interface ScreenShareOption {
   profile: number,
@@ -92,10 +93,10 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     this.client = options.AgoraRtcEngine
     let ret = this.client.initialize(this.appId)
     if (ret < 0) {
-      throw {
+      throw new GenericErrorWrapper({
         message: `AgoraRtcEngine initialize with APPID: ${this.appId} failured`,
         code: ret
-      }
+      })
     }
     this.client.setChannelProfile(1)
     this.client.enableVideo()
@@ -379,7 +380,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       let ret = subChannel.joinChannel(option.token, option.info, option.uid)
       EduLogger.info(`ELECTRON joinChannel: ret: ${ret}`)
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
   
@@ -388,15 +389,15 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       let ret = this.client.joinChannel(option.token, option.channel, option.info, option.uid)
       EduLogger.info("electron joinSubChannel ", ret)
       if (ret < 0) {
-        throw {
+        throw new GenericErrorWrapper({
           message: `joinSubChannel failure`,
           code: ret
-        }
+        })
       }
       this.joined = true;
       return
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -413,7 +414,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       }
       return
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -421,31 +422,31 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     try {
       let ret = this.client.setClientRole(2)
       if (ret < 0) {
-        throw {
+        throw new GenericErrorWrapper({
           message: `setClientRole failure`,
           code: ret
-        }
+        })
       }
       ret = this.client.leaveChannel()
       if (ret < 0) {
-        throw {
+        throw new GenericErrorWrapper({
           message: `leaveSubChannel failure`,
           code: ret
-        }
+        })
       }
       return
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
   release() {
     let ret = this.client.release()
     if (ret < 0) {
-      throw {
-        message: 'release failure',
+      throw new GenericErrorWrapper({
+        message: `release failure`,
         code: ret
-      }
+      })
     }
     this.reset()
   }
@@ -454,10 +455,10 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     try {
       let ret = this.client.enableLocalVideo(true)
       if (ret < 0) {
-        throw {
+        throw new GenericErrorWrapper({
           message: `enableLocalVideo failure`,
           code: ret
-        }
+        })
       }
       if (option) {
         option.deviceId && this.client.setVideoDevice(option.deviceId)
@@ -469,7 +470,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         this.videoMuted = false
       }
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -495,7 +496,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         EduLogger.info("electron: muteCamera")
       }
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -509,7 +510,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         }
       }
     } catch (err) {
-      throw err;
+      throw new GenericErrorWrapper(err);
     }
   }
 
@@ -549,7 +550,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     //     }
     //   }
     // } catch (err) {
-    //   throw err;
+    //   new GenericErrorWrapper(err);
     // }
   }
 
@@ -571,7 +572,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         EduLogger.info("living muteLocalAudioStream, ret: ", ret)
       }
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -590,7 +591,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         this.audioMuted = true
       }
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -604,7 +605,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         }
       }
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -622,7 +623,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         image: CustomBtoa(it.image),
       }))
     } catch (err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -703,7 +704,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     try {
       await stopScreenSharePromise
     } catch(err) {
-      throw err
+      throw new GenericErrorWrapper(err)
     }
   }
 

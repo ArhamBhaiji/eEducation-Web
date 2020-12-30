@@ -8,6 +8,7 @@ import { EduClassroomManager } from '../room/edu-classroom-manager';
 import { AgoraEduApi } from '../core/services/edu-api';
 import { EduConfiguration } from '../interfaces';
 import { EduClassroomDataController } from '../room/edu-classroom-data-controller';
+import { GenericErrorWrapper } from '../core/utils/generic-error';
 
 export type ClassroomInitParams = {
   roomUuid: string
@@ -166,7 +167,7 @@ export class EduManager extends EventEmitter {
       EduLogger.debug(`login userUuid: ${userUuid} success`)
       this._rtmWrapper = rtmWrapper
     } catch (err) {
-      throw err
+      new GenericErrorWrapper(err)
     }
   }
 

@@ -1,3 +1,4 @@
+import { GenericErrorWrapper } from './../utils/generic-error';
 import { EduLogger } from './../logger';
 import { LocalUserRenderer, RemoteUserRenderer } from './renderer/index';
 import { EventEmitter } from 'events';
@@ -335,7 +336,7 @@ export class MediaService extends EventEmitter implements IMediaService {
 
   async leaveSubChannel(channelName: string): Promise<any> {
     EduLogger.info(`call leaveSubChannel `, `${JSON.stringify(channelName)}`)
-    if (!channelName) throw 'channelName is invalid'
+    if (!channelName) throw new GenericErrorWrapper({ message: 'channelName is invalid' })
     if (this.isWeb) {
       await this.sdkWrapper.leaveSubChannel(channelName)
     } else {

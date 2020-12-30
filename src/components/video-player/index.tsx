@@ -40,10 +40,6 @@ export const MediaMenu = observer((props: RewardMenuPropsType) => {
   const {video, audio, userUuid, rewardNum} = props
   const sceneStore = useSceneStore()
   const middleRoomStore = useMiddleRoomStore() 
-
-  // const userReward = useMemo(() => {
-  //   return middleRoomStore.getUserReward(userUuid)
-  // } ,[middleRoomStore.getUserReward, userUuid, middleRoomStore.roomStudentUserList])
   
   const handleAudioClick = async () => {
     if (props.audio) {
@@ -86,7 +82,7 @@ export const MediaMenu = observer((props: RewardMenuPropsType) => {
   )
 })
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   className,
   showClose,
   streamUuid,
@@ -135,7 +131,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }
 
-  const extensionStore = useExtensionStore()
+  // const extensionStore = useExtensionStore()
 
   // const shake = useMemo(() => {
   //   return extensionStore.coVideoStudentsList.find((it) => it.userUuid === userUuid) ? true : false
@@ -167,11 +163,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [showReward])
 
   useEffect(() => {
+    // console.log(" prevNumber.current : ", prevNumber.current, rewardNumber, userUuid)
     if (prevNumber.current !== rewardNumber) {
       showReward(true)
+      // console.log(" prevNumber.current changed: ", userUuid)
       prevNumber.current = rewardNumber
     }
-  }, [prevNumber, rewardNumber, showReward])
+  }, [prevNumber.current, rewardNumber, showReward])
 
   return (
     <div className={`${className ? className : 'agora-video-view'}`}>
@@ -220,4 +218,4 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
     </div>
   )
-}
+})

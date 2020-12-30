@@ -107,6 +107,7 @@ export class MessageSerializer {
           streamUuid: it.streamUuid,
           updateTime: it.updateTime,
           state: it.state,
+          type: it.type,
         })
 
         const rawStreams = get(it, 'streams', [])
@@ -142,6 +143,7 @@ export class MessageSerializer {
           streamUuid: it.streamUuid,
           updateTime: it.updateTime,
           state: it.state,
+          type: it.type,
         })
 
         const rawStreams = get(it, 'streams', [])

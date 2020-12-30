@@ -153,7 +153,9 @@ export interface EduClassroomManagerInit {
 export enum EduSceneType {
   Scene1v1 = 0,
   SceneSmall = 1,
-  SceneLarge = 2
+  SceneLarge = 2,
+  // Scene = 2,
+  SceneMedium = 4
 }
 
 export interface EduClassroomParams {
@@ -414,6 +416,7 @@ export interface EduUserAttrs extends EduUser {
   rtcToken?: string
   screenRtcToken?: string
   rtmToken?: string
+  type?: string
 }
 
 export class EduUserData {
@@ -423,6 +426,8 @@ export class EduUserData {
   private _ts?: number
 
   private _state?: number
+
+  private _type?: number
 
   private _streamUuid?: string
 
@@ -435,6 +440,10 @@ export class EduUserData {
     return this._rtmToken as string
   }
 
+  get type(): string {
+    return this._type as string;
+  }
+
   constructor(data: EduUserAttrs) {
     this.updateUser(data)
     if (data.hasOwnProperty('rtcToken')) {
@@ -445,6 +454,9 @@ export class EduUserData {
     }
     if (data.hasOwnProperty('rtmToken')) {
       this._rtmToken = data.rtmToken as any
+    }
+    if (data.hasOwnProperty('type')) {
+      this._type = data.type as string
     }
   }
 
@@ -528,7 +540,8 @@ export class EduUserData {
         role: item.role,
         userProperties: item.userProperties,
         isChatAllowed: item.isChatAllowed,
-        streamUuid: item.streamUuid
+        streamUuid: item.streamUuid,
+        type: item.type,
       }))
       return acc;
     }, []);

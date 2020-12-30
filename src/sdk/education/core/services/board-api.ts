@@ -3,6 +3,7 @@ import { get } from "lodash";
 import { BoardInfoResponse } from "./interface";
 import { APP_ID, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "../utils/http-client";
+import { GenericErrorWrapper } from "../utils/generic-error";
 
 export class AgoraBoardApi {
 
@@ -79,12 +80,16 @@ export class AgoraBoardApi {
   }
   
   async getBoardRoomInfo(roomUuid: string): Promise<any> {
-    let res = await this.fetch({
-      type: 'board',
-      url: `/v1/rooms/${roomUuid}`,
-      method: 'GET',
-    })
-    return res.data
+    try {
+      let res = await this.fetch({
+        type: 'board',
+        url: `/v1/rooms/${roomUuid}`,
+        method: 'GET',
+      })
+      return res.data
+    } catch (err) {
+      throw new GenericErrorWrapper(err)
+    }
   }
 
   async updateBoardUserState(roomUuid: string, userUuid: string, grantPermission: number) {

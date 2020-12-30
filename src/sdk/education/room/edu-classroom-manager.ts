@@ -152,7 +152,7 @@ export class EduClassroomManager extends EventEmitter {
       }
       EduLogger.debug('[EDU-STATE] add ChannelMessage onChannelMessageHandler')
       observer.on('ChannelMessage', onChannelMessageHandler)
-
+      this.data.setLocalData(joinRoomData)
       EduLogger.debug('[EDU-STATE] join')
       await this.rtmWrapper.join(
         channel, observer,
@@ -164,7 +164,6 @@ export class EduClassroomManager extends EventEmitter {
       EduLogger.debug('[EDU-STATE] join success')
 
       this._rtmObserver = observer
-      this.data.setLocalData(joinRoomData)
       await this.data.syncFullSequence()
       this.data.BatchUpdateData()
       this._userService = new EduUserService(this)
