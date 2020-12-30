@@ -962,7 +962,7 @@ export class MiddleRoomStore extends SimpleInterval {
   @computed
   get handsUpStreams() {
     let oldPlatformStreamIds = [...this.platformState.g1Members, ...this.platformState.g2Members].map(e => e.streamUuid)
-    return this.allStudentStreams.studentStreams.filter(e => !oldPlatformStreamIds.includes(e.streamUuid))
+    return this.allStudentStreams.studentStreams.filter(e => !oldPlatformStreamIds.includes(e.streamUuid)).map((stream: any) => ({...stream, showMediaBtn: true}))
   }
 
   @computed
@@ -979,11 +979,13 @@ export class MiddleRoomStore extends SimpleInterval {
     this.allStudentStreams.studentStreams.forEach((e: EduMediaStream) => {
       g1MemberIds.forEach((uid: any) => {
         if(uid === e.userUuid) {
+          e.showMediaBtn = true
           g1Members.push(e)
         }
       })
       g2MemberIds.forEach((uid: any) => {
         if(uid === e.userUuid) {
+          e.showMediaBtn = true
           g2Members.push(e)
         }
       })

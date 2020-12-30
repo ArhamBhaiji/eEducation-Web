@@ -105,6 +105,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
 
   const sceneStore = useSceneStore()
 
+  const middleRoomStore = useMiddleRoomStore()
+
   const handleClose = async () => {
     await sceneStore.closeStream(userUuid, local)
   }
@@ -131,13 +133,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
     }
   }
 
-  // const extensionStore = useExtensionStore()
-
-  // const shake = useMemo(() => {
-  //   return extensionStore.coVideoStudentsList.find((it) => it.userUuid === userUuid) ? true : false
-  // }, [extensionStore.coVideoStudentsList])
-
-
   const StartEffect = (props: any) => {
     useTimeout(() => {
       console.log("show effect")
@@ -146,7 +141,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
 
     return (
       <div className="stars-effect">
-        {/* <!-- work around use timestamp solve gif only play once --> */}
         <img src={`${starsUrl}?${Date.now()}`}></img>
       </div>
     )
@@ -154,7 +148,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
 
   const rewardNumber: number = rewardNum as number
 
-  const prevNumber = useRef<number>(rewardNumber)
+  const [prevNumber, setPrevNumber] = useState<number>(rewardNumber)
 
   const [rewardVisible, showReward] = useState<boolean>(false)
 
@@ -163,13 +157,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   }, [showReward])
 
   useEffect(() => {
-    // console.log(" prevNumber.current : ", prevNumber.current, rewardNumber, userUuid)
-    if (prevNumber.current !== rewardNumber) {
+    console.log(" prevNumber.current : ", prevNumber, rewardNumber, userUuid, middleRoomStore.getUserReward(userUuid))
+    if (prevNumber < rewardNumber) {
       showReward(true)
-      // console.log(" prevNumber.current changed: ", userUuid)
-      prevNumber.current = rewardNumber
+      console.log(" prevNumber.current changed: ", userUuid)
+      setPrevNumber(rewardNumber)
     }
-  }, [prevNumber.current, rewardNumber, showReward])
+  }, [prevNumber, rewardNumber, setPrevNumber, showReward, middleRoomStore])
 
   return (
     <div className={`${className ? className : 'agora-video-view'}`}>
@@ -198,6 +192,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
         account ? 
         <div className="video-profile">
           <span className="account">{account}</span>
+          {showMediaBtn ?
+          <span className="media-btn no-hover">
+            <CustomIcon onClick={() => {}} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
+            {/* <CustomIcon onClick={() => {}} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} /> */}
+          </span> : null}
           {/* {shake && <div className={`active_hands_up ${shake ? "infinity-shake": ""}`} style={{width: "24px"}} />} */}
           {showStar ? 
             // <CustomIcon onClick={() => {}} className={audio ? "icon-hollow-white-star" : "icon-inactive-star"} data={"active-star"} />
@@ -208,11 +207,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
               <CustomIcon onClick={handleAudioClick} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
               <CustomIcon onClick={handleVideoClick} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} />
             </span> : null}
-          {/* {showMediaBtn ?
-          <span className="media-btn no-hover">
-            <CustomIcon onClick={() => {}} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
-            <CustomIcon onClick={() => {}} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} />
-          </span> : null} */}
         </div>
         : null
       }

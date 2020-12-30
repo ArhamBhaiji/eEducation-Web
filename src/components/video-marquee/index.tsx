@@ -2,12 +2,12 @@ import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import {VideoPlayer} from '@/components/video-player';
 import './video-marquee.scss';
 
-const showScrollbar = () => {
-  const $marquee = document.querySelector(".video-marquee .agora-video-view");
+const showScrollbar = (domId: string) => {
+  const $marquee = document.querySelector(`#${domId} .video-marquee .agora-video-view`);
   if ($marquee) {
     const clientWidth = $marquee.clientWidth;
-    const marqueeLength: number = document.querySelectorAll(".video-marquee .agora-video-view").length;
-    const videoMarqueeMark = document.querySelector('.video-marquee-mask')
+    const marqueeLength: number = document.querySelectorAll(`#${domId} .video-marquee .agora-video-view`).length;
+    const videoMarqueeMark = document.querySelector(`#${domId} .video-marquee-mask`)
     if (clientWidth && videoMarqueeMark) {
       const videoMarqueeWidth = videoMarqueeMark.clientWidth;
       const width: number = clientWidth * marqueeLength;
@@ -25,6 +25,7 @@ type VideoMarqueePropsType = {
   className?: string
   showMain?: boolean
   canHover?: boolean
+  id?: string
 }
 
 export const VideoMarquee = (props: VideoMarqueePropsType) => {
@@ -54,14 +55,16 @@ export const VideoMarquee = (props: VideoMarqueePropsType) => {
 
   const [scrollBar, setScrollBar] = useState<boolean>(false);
 
+  const domId = props.id ? props.id : 'video-marquee'
+
   useLayoutEffect(() => {
     if (!othersStreams.length) return;
-    !ref.current && setScrollBar(showScrollbar());
+    !ref.current && setScrollBar(showScrollbar(domId));
   }, [othersStreams]);
 
   useEffect(() => {
     window.addEventListener('resize', (evt: any) => {
-      !ref.current && setScrollBar(showScrollbar());
+      !ref.current && setScrollBar(showScrollbar(domId));
     });
     return () => {
       window.removeEventListener('resize', () => {});
@@ -69,7 +72,7 @@ export const VideoMarquee = (props: VideoMarqueePropsType) => {
   }, []);
 
   return (
-    <div className={`video-marquee-container ${props.className ? props.className : ''}`}>
+    <div id={domId} className={`video-marquee-container ${props.className ? props.className : ''}`}>
       {mainStream ? <div className="main">
         <VideoPlayer
           showHover={props.canHover}

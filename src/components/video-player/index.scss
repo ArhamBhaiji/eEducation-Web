@@ -1,8 +1,6 @@
 .media-btn {
   display: flex;
   justify-content: space-between;
-  width: 58px;
-  margin-right: 10px;
 }
 
 .middle-class {
@@ -12,7 +10,6 @@
 }
 
 .stars-effect {
-  // background-image: url('../../assets/stars.gif');
   position: absolute;
   margin: auto;
   animation: infinite;
@@ -83,6 +80,9 @@
     line-height: 14px;
     font-size: 12px;
     color: #fff;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
