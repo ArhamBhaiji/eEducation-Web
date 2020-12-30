@@ -28,6 +28,7 @@ export const ExtensionCard: React.FC<any> = observer(() => {
       return
     }
     extensionStore.showGrouping()
+    extensionStore.showInsideGroup()
     boardStore.hideExtension()
   }
 

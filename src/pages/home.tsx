@@ -30,13 +30,11 @@ type SessionInfo = {
   role: string
 }
 
-let userName1 = 'qaz' + Math.ceil(Math.random()*10) + 'io' + Math.ceil(Math.random()*10) + Math.ceil(Math.random()*10)
-
 const defaultState: SessionInfo = {
-  roomName: 'qwe3',
-  roomType: 4,
+  roomName: '',
+  roomType: 0,
   role: '',
-  userName: userName1,
+  userName: '',
 }
 
 const roomTypes = UIStore.roomTypes

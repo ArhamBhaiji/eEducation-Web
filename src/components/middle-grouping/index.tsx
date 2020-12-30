@@ -57,13 +57,18 @@ const getListStyle = (isDraggingOver:boolean) => ({
   width: 250
 })
 
+interface User {
+  userUuid: string,
+  userName: string,
+}
+
 interface MiddleGroupProps {
-  groups: any[][]
+  groups: User[][]
 }
 
 function GroupingBoard(props: MiddleGroupProps) {
 
-  const [groupItems, updateGroupItems] = useState<any[]>(props.groups)
+  const [groupItems, updateGroupItems] = useState<User[][]>(props.groups)
 
   const getList = useCallback((index: number) => {
     return groupItems[index]
@@ -162,8 +167,13 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
 
   const [isClose, setIsClose] = useState<boolean>(false)
 
+  const forbiddenGroupMic = !onTheStage? 'microphone-forbidden' : ''
+
   // 0 表示麦克风处于关闭状态 1 开启
    const controlClose = async ()=> {
+    if (!onTheStage) {
+      return
+    }
     await controlMicrophone(0)
     setIsClose(true)
   }
@@ -174,10 +184,6 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
   }
   const middleRoomStore = useMiddleRoomStore()
 
-  const isOffline = ()=> {
-
-  }
-  
   return (
     <div className="middle-group-card">
       <div className="head">
@@ -197,7 +203,7 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
               isClose?
               <div className="close-microphone" onClick={controlOpen}></div>
               :
-              <div className="microphone" onClick={controlClose}></div>
+              <div className={`microphone ${forbiddenGroupMic}`} onClick={controlClose}></div>
             }
             <div className="platform" onClick={platform}></div>
             <div className="add-star" onClick={addStar}></div>
@@ -227,12 +233,13 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
 
 interface MiddleGroupingProps {
   onSave: EventHandler<any>
-  onRemove: EventHandler<any>
+  onRemove: () => void
   dataList: any[]
   studentTotal: number
+  historyBoardGroups: User[][]
 }
 
-export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList, onRemove, studentTotal}) => {
+export const MiddleGrouping: React.FC<MiddleGroupingProps> = observer(({onSave, dataList, onRemove, studentTotal, historyBoardGroups}) => {
   const useStyles = makeStyles((theme: Theme) =>
     createStyles({
       formControl: {
@@ -250,11 +257,9 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
 
   const [itemList, setItemList] = useState<any[]>(dataList);
   const [visibleAddNewGroup, setVisibleAddNewGroup] = useState<boolean>(false)
-  const [dragGrouping, setDragGrouping] = useState<boolean>(false)
-  const [controlSpread, setControlSpread] = useState<number>(2)
-  const [addition, setAddition] = useState<boolean>(true)
+  const [dragGrouping, setDragGrouping] = useState<boolean>(historyBoardGroups && historyBoardGroups.length > 0)
+  const [controlSpread, setControlSpread] = useState<boolean>(false)
 
-  // ***
   const [maximum, setMaximum] = React.useState<number>(2)
   
   const [groupType, setGroupType] = React.useState<number>(0)
@@ -282,18 +287,14 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
     return itemList
   }, [maximum, groupType, itemList])
 
-  console.log("groupItems middle-grouping", groupItems)
-
-  const [groups, setGroups] = useState<Array<any>>([])
+  const [groups, setGroups] = useState<User[][]>(historyBoardGroups)
     
   const reduceGroup = () => {
-    setAddition(false)
-    setControlSpread(1)
+    setControlSpread(true)
   }
 
   const reduceGroupSmall = () => {
-    setAddition(true)
-    setControlSpread(2)
+    setControlSpread(false)
   }
   
   const closeGroup = () => {
@@ -324,42 +325,46 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
   const handleConfirm = useCallback(() => {
     setVisibleAddNewGroup(false)
     setDragGrouping(true)
-  }, [groupType, setGroups])
+    setGroups(groupItems)
+  }, [groupItems])
   
   const handleCancel = () => {
     setVisibleAddNewGroup(false)
   }
 
+  const handleOnRemove = async function() {
+    await onRemove()
+    setDragGrouping(false)
+  }
+
   const handleSave = useCallback(function () {
-    onSave(groupItems)
-  },[onSave, groupItems])
+    onSave(groups)
+  },[onSave, groups])
 
   const groupText = t('middle_room.groupText')
   
   return (
     <div className="grouping">
-      {
-        controlSpread === 1 && !addition?
+      { 
+        controlSpread ?
         <div className="group-card-packup">
           <div className="text">{t('middle_room.grouping')}</div>
           <span className="stu-num">{t('middle_room.students_total') + ' ' + studentTotal}</span>
           <div className="spread-group-card" onClick={reduceGroupSmall}></div>
           <div className="close-group-card" onClick={closeGroup}></div>
         </div> 
-        : null 
-      }
-      { 
-        controlSpread === 2 && addition?
+        :
         <div className="group-card">
           <div className="group-top">
             <span className="text-group">{t('middle_room.grouping')}</span>
             <span className="text-num">{t('middle_room.students_total') + ' ' + studentTotal}</span>
             <div className="btn-operation">
               {
-                dragGrouping? <Button variant="contained" className="btn-reset" onClick={handleResetGroup}>{t('middle_room.regroup')}</Button>
+                dragGrouping? 
+                <Button variant="contained" className="btn-reset" onClick={handleResetGroup}>{t('middle_room.regroup')}</Button>
                 : <Button variant="contained" className="btn-create" onClick={handleAddNewGroup}>{t('middle_room.create_group')}</Button>
               }
-              <Button variant="contained" className="btn-delete" disabled={!dragGrouping} onClick={onRemove}>{t('middle_room.delete_group')}</Button>
+              <Button variant="contained" className="btn-delete" disabled={!dragGrouping} onClick={handleOnRemove}>{t('middle_room.delete_group')}</Button>
             </div>
             <div className="icon-reduce" onClick={reduceGroup}></div>
             <div className="icon-close" onClick={closeGroup}></div>
@@ -378,12 +383,9 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
                   value={maximum}
                   onChange={handleChangeMaximum}
                 >
-                  <MenuItem value={1}>1</MenuItem>
-                  <MenuItem value={2}>2</MenuItem>
-                  <MenuItem value={3}>3</MenuItem>
-                  <MenuItem value={4}>4</MenuItem>
-                  <MenuItem value={5}>5</MenuItem>
-                  <MenuItem value={6}>6</MenuItem>
+                  {[1, 2, 3, 4, 5, 6].map(v => (
+                    <MenuItem key={v} value={v}>{v}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl className={classes.formControl}>
@@ -409,14 +411,14 @@ export const MiddleGrouping: React.FC<MiddleGroupingProps> = ({onSave, dataList,
             dragGrouping ? 
             <div>
               <div className="drag-card">
-                <GroupingBoard groups={groupItems} />
+                <GroupingBoard groups={groups} />
               </div> 
               <Button variant="contained"  className="btn-save" onClick={handleSave}>{t('middle_room.save_changes')}</Button>
             </div>
-          : null
+            : null
           }
-        </div> : null
+        </div>
       }
     </div>
   )
-}
+})

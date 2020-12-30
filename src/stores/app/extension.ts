@@ -140,6 +140,17 @@ export class ExtensionStore {
   @observable
   visibleCard: boolean = false
 
+  @observable
+  insideGroupControl: boolean = false
+
+  showInsideGroup() {
+    this.insideGroupControl = true
+  }
+
+  hiddenInsideGroup() {
+    this.insideGroupControl = false
+  }
+
   @action
   toggleCard() {
     this.visibleCard = !this.visibleCard

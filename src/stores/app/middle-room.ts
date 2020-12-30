@@ -949,6 +949,11 @@ export class MiddleRoomStore extends SimpleInterval {
   }
 
   @computed
+  get historyBoardGroups() {
+    return this.userGroups.map(group => group.members.map(user => ({userUuid: user.userUuid, userName: user.userName})))
+  }
+
+  @computed
   get g1PlatformStreams() {
     return [...this.platformState.g1Members, ...this.handsUpStreams]
   }
@@ -1143,7 +1148,7 @@ export class MiddleRoomStore extends SimpleInterval {
     }
     let cause = {cmd:"102"}
     await this.updateRoomBatchProperties({ properties, cause })
-    this.appStore.extensionStore.controlGrouping = false
+    this.appStore.extensionStore.hiddenGrouping()
   }
 
   @computed

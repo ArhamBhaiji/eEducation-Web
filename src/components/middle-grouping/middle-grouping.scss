@@ -285,6 +285,10 @@
         margin-top: 10px;
         background-image: url('./assets/icon-micr.png');
       }
+      .microphone-forbidden{
+        // pointer-events: none;
+        cursor: not-allowed !important; 
+      }
       .close-microphone {
         width: 28px;
         height: 28px;

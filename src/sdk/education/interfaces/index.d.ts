@@ -586,8 +586,8 @@ export interface UserGroup {
   groupUuid: string;
   groupName: string;
   members: Array<{
-    userUuid?: string;
-    userName?: string;
+    userUuid: string;
+    userName: string;
     reward?: number;
     streamUuid?: any;
   }>;

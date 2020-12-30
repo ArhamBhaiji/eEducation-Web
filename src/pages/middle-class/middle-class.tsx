@@ -123,8 +123,10 @@ export const MiddleClass = observer(() => {
         <div className="platform-room">
           {
             middleRoomStore.g1PlatformStreams.length > 0?
-              <GroupVideoMarquee mainStream={null} 
-              othersStreams={middleRoomStore.g1PlatformStreams}/>
+              <GroupVideoMarquee 
+                mainStream={null} 
+                othersStreams={middleRoomStore.g1PlatformStreams}
+              />
             : null
           }
         </div>
@@ -133,10 +135,13 @@ export const MiddleClass = observer(() => {
           <ScreenSharing />
           {
             extensionStore.controlGrouping ?
-            <MiddleGrouping dataList={onLineStudentsList} 
-            studentTotal={middleRoomStore.studentTotal}
-            onSave={ async (groups) => { await middleRoomStore.groupOnSave(groups)}} 
-            onRemove={ async () => await middleRoomStore.removeGroup()} />
+            <MiddleGrouping 
+              dataList={onLineStudentsList} 
+              studentTotal={middleRoomStore.studentTotal}
+              onSave={ async (groups) => { await middleRoomStore.groupOnSave(groups)}} 
+              onRemove={ async () => await middleRoomStore.removeGroup()} 
+              historyBoardGroups={middleRoomStore.historyBoardGroups}
+            />
             : null
           }
           {
