@@ -18,19 +18,19 @@ import { EduBoardService } from '@/sdk/board/edu-board-service';
 import { EduRecordService } from '@/sdk/record/edu-record-service';
 import { CustomPeerApply, UnmuteMediaEnum } from './scene';
 
-const genStudentStreams = (num: number) => {
-  const items = Array.from({length: num}, (v, i) => i)
-  return items.map(item => ({
-    video: false,
-    audio: false,
-    name: `${item}name`,
-    id: item + +Date.now() % 2000,
-    showReward: true,
-    reward: +Date.now() % 2000,
-    account: `${item}-account`,
-    showStar: true
-  }))
-}
+// const genStudentStreams = (num: number) => {
+//   const items = Array.from({length: num}, (v, i) => i)
+//   return items.map(item => ({
+//     video: false,
+//     audio: false,
+//     name: `${item}name`,
+//     id: item + +Date.now() % 2000,
+//     showReward: true,
+//     reward: +Date.now() % 2000,
+//     account: `${item}-account`,
+//     showStar: true
+//   }))
+// }
 
 type VideoMarqueeItem = {
   mainStream: EduMediaStream | null
@@ -170,8 +170,14 @@ export class MiddleRoomStore extends SimpleInterval {
     this.appStore.resetRoomInfo()
   }
 
+  // @action
+  // releaseStarTimer() {
+  //   this.incomingStars = []
+  // }
+
   @action
   reset() {
+    // this.releaseStarTimer()
     this.didHandsUp = false
     this.appStore.mediaStore.resetRoomState()
     this.appStore.resetTime()
@@ -183,8 +189,11 @@ export class MiddleRoomStore extends SimpleInterval {
     this.notice = undefined
     this.groupingSolution = 0
     this.quit = false
+    this.activated = false
   }
 
+  @observable
+  activated: boolean = false
 
   @observable
   roomChatMessages: ChatMessage[] = []
@@ -954,6 +963,9 @@ export class MiddleRoomStore extends SimpleInterval {
     return this.userGroups.map(group => group.members.map(user => ({userUuid: user.userUuid, userName: user.userName})))
   }
 
+  // @observable
+  // incomingStars: any[] = []
+
   @computed
   get g1PlatformStreams() {
     return [...this.platformState.g1Members, ...this.handsUpStreams]
@@ -962,7 +974,8 @@ export class MiddleRoomStore extends SimpleInterval {
   @computed
   get handsUpStreams() {
     let oldPlatformStreamIds = [...this.platformState.g1Members, ...this.platformState.g2Members].map(e => e.streamUuid)
-    return this.allStudentStreams.studentStreams.filter(e => !oldPlatformStreamIds.includes(e.streamUuid)).map((stream: any) => ({...stream, showMediaBtn: true}))
+    return this.allStudentStreams.studentStreams.filter(e => !oldPlatformStreamIds.includes(e.streamUuid))
+      .map((stream: any) => ({...stream, showMediaBtn: true}))
   }
 
   @computed
@@ -1027,70 +1040,95 @@ export class MiddleRoomStore extends SimpleInterval {
   @action
   // 整组上台 / 下台
   async clickPlatform (group:any) {
-    let id = group.groupUuid
-    let cause = {cmd:"104"} // 开关 pk
-    
-    // 该组在台上 下台
-    if (this.platformState.g1 === id || this.platformState.g2 === id) {
-      // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
+
+    try {
+      this.activated = true
+      let id = group.groupUuid
+      let cause = {cmd:"104"} // 开关 pk
+      
+      // 该组在台上 下台
+      if (this.platformState.g1 === id || this.platformState.g2 === id) {
+        // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
+        let streams:any = []
+        group.members.forEach((item:any) => {
+          let stu = {
+            userUuid: item.userUuid,
+            streamUuid: item.streamUuid,
+          }
+          streams.push(stu)
+        })
+        await this.batchDeleteStream(streams)
+        let properties: any = {}
+        console.log('该组在台上 下台')
+        let t = this.platformState.g1 === id? 'g1' : 'g2'
+        // 当前下台的组是最后一组 关闭 pk 状态
+        if((t === 'g1' && !this.platformState.g2) || (t === 'g2' && !this.platformState.g1)) {
+          properties = {
+            'groupStates.interactOutGroup': 0, // 组外讨论 包括分组，pk
+            [`interactOutGroups.${t}`]: '',
+          }
+        } else {
+          properties = {
+            [`interactOutGroups.${t}`]: '',
+          }
+        }
+        await this.updateRoomBatchProperties({properties, cause})
+        this.activated = false
+        return 
+      }
+      // 台上两组满
+      if (this.platformState.g1 && this.platformState.g2) {
+        console.log('两组在台上 下台')
+        this.activated = false
+        return
+      }
+      console.log('该组不在台上 上台')
+  
+      // 以上条件都不满足，台上有空位 上台
+      // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
+      let t = !this.platformState.g1 ? 'g1' : 'g2'
+      let properties: any = {
+        'groupStates.state':1,
+        'groupStates.interactInGroup': 0, // 组内
+        'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
+        [`interactOutGroups.${t}`]: id,
+      }
+      await this.updateRoomBatchProperties({ properties, cause })
       let streams:any = []
       group.members.forEach((item:any) => {
         let stu = {
           userUuid: item.userUuid,
           streamUuid: item.streamUuid,
+          streamName: item.userUuid + 'stream',
+          videoSourceType: 1,
+          audioSourceType: 1,
+          videoState: 1,
+          audioState: 1,
         }
-        streams.push(stu)
+        streams.push(stu)        
       })
-      await this.batchDeleteStream(streams)
-      let properties: any = {}
-      console.log('该组在台上 下台')
-      let t = this.platformState.g1 === id? 'g1' : 'g2'
-      // 当前下台的组是最后一组 关闭 pk 状态
-      if((t === 'g1' && !this.platformState.g2) || (t === 'g2' && !this.platformState.g1)) {
-        properties = {
-          'groupStates.interactOutGroup': 0, // 组外讨论 包括分组，pk
-          [`interactOutGroups.${t}`]: '',
-        }
-      } else {
-        properties = {
-          [`interactOutGroups.${t}`]: '',
-        }
-      }
-      await this.updateRoomBatchProperties({properties, cause})
-      return 
+      // 增流
+      await this.batchUpsertStream(streams)
+      this.activated = false
+    } catch (err) {
+      this.activated = false
     }
-    // 台上两组满
-    if (this.platformState.g1 && this.platformState.g2) {
-      console.log('两组在台上 下台')
-      return
-    }
-    console.log('该组不在台上 上台')
+  }
 
-    // 以上条件都不满足，台上有空位 上台
-    // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
-    let t = !this.platformState.g1 ? 'g1' : 'g2'
-    let properties: any = {
-      'groupStates.state':1,
-      'groupStates.interactInGroup': 0, // 组内
-      'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
-      [`interactOutGroups.${t}`]: id,
-    }
-    await this.updateRoomBatchProperties({ properties, cause })
-    let streams:any = []
-    group.members.forEach((item:any) => {
-      let stu = {
-        userUuid: item.userUuid,
-        streamUuid: item.streamUuid,
-        streamName: item.userUuid + 'stream',
-        videoSourceType: 1,
-        audioSourceType: 1,
-        videoState: 1,
-        audioState: 1,
+  @computed
+  get onStage(): boolean {
+    if (this.platformState.outGroups === 1) {
+      const g1Exists = this.userGroups.find((group: UserGroup) => group.groupUuid === this.platformState.g1)
+      if (g1Exists) {
+        return true
       }
-      streams.push(stu)        
-    })
-    // 增流
-    await this.batchUpsertStream(streams)
+
+      const g2Exists = this.userGroups.find((group: UserGroup) => group.groupUuid === this.platformState.g2)
+      if (g2Exists) {
+        return true
+      }
+    }
+    return false
   }
 
   // 整组加星

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import {VideoPlayer} from '@/components/video-player';
 import './video-marquee.scss';
+import { observer } from 'mobx-react';
 
 const showScrollbar = (domId: string) => {
   const $marquee = document.querySelector(`#${domId} .video-marquee .agora-video-view`);
@@ -28,7 +29,7 @@ type VideoMarqueePropsType = {
   id?: string
 }
 
-export const VideoMarquee = (props: VideoMarqueePropsType) => {
+export const VideoMarquee = observer((props: VideoMarqueePropsType) => {
   const {mainStream, othersStreams} = props
 
   const marqueeEl = useRef(null);
@@ -102,4 +103,4 @@ export const VideoMarquee = (props: VideoMarqueePropsType) => {
       </div>
     </div>
   )
-}
+})

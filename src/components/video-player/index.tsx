@@ -23,6 +23,7 @@ type VideoPlayerProps = {
   showControls: boolean
   showStar?: boolean
   showHover?: boolean
+  // showReward?: boolean
   showMediaBtn?: boolean
   rewardNum?: number
   handleClickVideo?: (userUuid: string, isLocal: boolean) => void
@@ -97,6 +98,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   showMediaBtn,
   share = false,
   showStar,
+  // showReward,
   handleClickVideo,
   handleClickAudio,
   rewardNum,
@@ -148,7 +150,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
 
   const rewardNumber: number = rewardNum as number
 
-  const [prevNumber, setPrevNumber] = useState<number>(rewardNumber)
+  const prevNumber = useRef<number>(rewardNumber)
+
+  const stopped = useRef<boolean>(false)
+
+  const mounted = useRef<boolean>(false)
+
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      prevNumber.current = 0
+      stopped.current = true
+    }
+  }, [])
 
   const [rewardVisible, showReward] = useState<boolean>(false)
 
@@ -157,13 +177,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   }, [showReward])
 
   useEffect(() => {
-    console.log(" prevNumber.current : ", prevNumber, rewardNumber, userUuid, middleRoomStore.getUserReward(userUuid))
-    if (prevNumber < rewardNumber) {
-      showReward(true)
-      console.log(" prevNumber.current changed: ", userUuid)
-      setPrevNumber(rewardNumber)
+    if (stopped.current) {
+      return   
     }
-  }, [prevNumber, rewardNumber, setPrevNumber, showReward, middleRoomStore])
+    console.log(`[video-player] prevNumber.current, rewardNumber : ${prevNumber.current}, ${rewardNumber} ${userUuid}`)
+    if (prevNumber.current < rewardNumber) {
+      console.log(`[video-player] prevNumber.current < rewardNumber : ${prevNumber.current} < ${rewardNumber} ${userUuid}`)
+      showReward(true)
+      prevNumber.current = rewardNumber
+    }
+  }, [rewardNumber, prevNumber.current, showReward])
 
   return (
     <div className={`${className ? className : 'agora-video-view'}`}>
@@ -200,7 +223,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
           {/* {shake && <div className={`active_hands_up ${shake ? "infinity-shake": ""}`} style={{width: "24px"}} />} */}
           {showStar ? 
             // <CustomIcon onClick={() => {}} className={audio ? "icon-hollow-white-star" : "icon-inactive-star"} data={"active-star"} />
-            <CustomIcon onClick={() => {}} className={"icon-hollow-white-star"} data={"active-star"} />
+            <div className="star-container">
+              <CustomIcon onClick={() => {}} className={"icon-gray-star"} data={"active-star"} />
+              <div className="reward-class">{rewardNum}</div>
+            </div>
           : null}
           {showControls ?
             <span className="media-btn">
