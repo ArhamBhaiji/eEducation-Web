@@ -37,6 +37,15 @@ type RewardMenuPropsType = {
   audio: boolean
 }
 
+function usePrevious<T>(value: T): T {
+  const ref = useRef<T>(value)
+  useEffect(() => {
+    ref.current = value
+  })
+
+  return ref.current
+}
+
 export const MediaMenu = observer((props: RewardMenuPropsType) => {
   const {video, audio, userUuid, rewardNum} = props
   const sceneStore = useSceneStore()
@@ -83,31 +92,30 @@ export const MediaMenu = observer((props: RewardMenuPropsType) => {
   )
 })
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
-  className,
-  showClose,
-  streamUuid,
-  userUuid,
-  account,
-  renderer,
-  local = false,
-  role,
-  audio,
-  video,
-  showControls,
-  showMediaBtn,
-  share = false,
-  showStar,
-  // showReward,
-  handleClickVideo,
-  handleClickAudio,
-  rewardNum,
-  showHover
-}) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo((props: any) => {
+  const {
+    className,
+    showClose,
+    streamUuid,
+    userUuid,
+    account,
+    renderer,
+    local = false,
+    role,
+    audio,
+    video,
+    showControls,
+    showMediaBtn,
+    share = false,
+    showStar,
+    // showReward,
+    handleClickVideo,
+    handleClickAudio,
+    rewardNum,
+    showHover
+  } = props
 
   const sceneStore = useSceneStore()
-
-  const middleRoomStore = useMiddleRoomStore()
 
   const handleClose = async () => {
     await sceneStore.closeStream(userUuid, local)
@@ -148,27 +156,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
     )
   }
 
+  const previousValue = usePrevious<VideoPlayerProps>(props)
+
   const rewardNumber: number = rewardNum as number
-
-  const prevNumber = useRef<number>(rewardNumber)
-
-  const stopped = useRef<boolean>(false)
-
-  const mounted = useRef<boolean>(false)
-
-  useEffect(() => {
-    mounted.current = true
-    return () => {
-      mounted.current = false
-    }
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      prevNumber.current = 0
-      stopped.current = true
-    }
-  }, [])
 
   const [rewardVisible, showReward] = useState<boolean>(false)
 
@@ -177,16 +167,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   }, [showReward])
 
   useEffect(() => {
-    if (stopped.current) {
-      return   
-    }
-    console.log(`[video-player] prevNumber.current, rewardNumber : ${prevNumber.current}, ${rewardNumber} ${userUuid}`)
-    if (prevNumber.current < rewardNumber) {
-      console.log(`[video-player] prevNumber.current < rewardNumber : ${prevNumber.current} < ${rewardNumber} ${userUuid}`)
+    if (userUuid !== previousValue.userUuid) return
+    if ((previousValue.rewardNum as number) < rewardNumber) {
+      console.log(`[video-player] prevNumber.current < rewardNumber : ${previousValue.rewardNum} < ${rewardNumber} ${userUuid}`)
       showReward(true)
-      prevNumber.current = rewardNumber
+      // previousValue.rewardNum = rewardNumber
     }
-  }, [rewardNumber, prevNumber.current, showReward])
+  }, [rewardNumber, previousValue.rewardNum, showReward])
 
   return (
     <div className={`${className ? className : 'agora-video-view'}`}>
