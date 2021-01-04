@@ -1093,7 +1093,7 @@ export class MiddleRoomStore extends SimpleInterval {
 
   // 整组加星
   @action
-  async addGroupStar (group: UserGroup) {
+  async addGroupStar (group: any) {
     let properties: any = {}
     group.members.forEach(async (stu: any) => {
       properties[`students.${stu.userUuid}.reward`] = stu.reward + 1

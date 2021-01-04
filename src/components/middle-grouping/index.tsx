@@ -155,31 +155,39 @@ interface MiddleGroupCardProps {
     groupName: string
     members: any[]
   }
-  platform: EventHandler<any>
-  addStar: EventHandler<any>
-  controlMicrophone: EventHandler<any>
+  // platform: EventHandler<any>
+  // addStar: EventHandler<any>
+  // controlMicrophone: EventHandler<any>
   isTeacher: boolean
   onTheStage: boolean
 }
 
 export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
-  ({group, platform, addStar, controlMicrophone, isTeacher, onTheStage}) => {
+  ({group, isTeacher, onTheStage}) => {
 
   const [isClose, setIsClose] = useState<boolean>(false)
 
   const forbiddenGroupMic = !onTheStage? 'microphone-forbidden' : ''
 
-  // 0 表示麦克风处于关闭状态 1 开启
+   const platform = async () => {
+    await middleRoomStore.clickPlatform(group)
+   }
+
+   const addStar = async () => {
+    await middleRoomStore.addGroupStar(group)
+   }
+
+   // 0 表示麦克风处于关闭状态 1 开启
    const controlClose = async ()=> {
     if (!onTheStage) {
       return
     }
-    await controlMicrophone(0)
+    await middleRoomStore.groupControlMicrophone(group, 0)
     setIsClose(true)
   }
 
   const controlOpen = async ()=> {
-    await controlMicrophone(1)
+    await middleRoomStore.groupControlMicrophone(group, 1)
     setIsClose(false)
   }
   const middleRoomStore = useMiddleRoomStore()

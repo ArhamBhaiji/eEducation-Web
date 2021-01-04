@@ -216,11 +216,7 @@ export const MiddleClass = observer(() => {
                       (middleRoomStore.platformState.g1 === group.groupUuid || 
                         middleRoomStore.platformState.g2 === group.groupUuid)
                       }
-                    isTeacher={middleRoomStore.roomInfo.userRole === 'teacher'}
-                    platform={async () => await middleRoomStore.clickPlatform(group)} 
-                    addStar={async () => await middleRoomStore.addGroupStar(group)}
-                    controlMicrophone={async (control) => {
-                      await middleRoomStore.groupControlMicrophone(group, control)}}>
+                    isTeacher={middleRoomStore.roomInfo.userRole === 'teacher'}>
                   </MiddleGroupCard>
                 ))
               }
