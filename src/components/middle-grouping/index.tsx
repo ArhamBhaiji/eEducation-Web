@@ -178,6 +178,11 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
    }
 
    // 0 表示麦克风处于关闭状态 1 开启
+  const middleRoomStore = useMiddleRoomStore()
+
+  const activateClass = ''
+
+  // 0 表示麦克风处于关闭状态 1 开启
    const controlClose = async ()=> {
     if (!onTheStage) {
       return
@@ -190,7 +195,6 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
     await middleRoomStore.groupControlMicrophone(group, 1)
     setIsClose(false)
   }
-  const middleRoomStore = useMiddleRoomStore()
 
   return (
     <div className="middle-group-card">
@@ -213,8 +217,8 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
               :
               <div className={`microphone ${forbiddenGroupMic}`} onClick={controlClose}></div>
             }
-            <div className="platform" onClick={platform}></div>
-            <div className="add-star" onClick={addStar}></div>
+            <div className={`platform ${activateClass}`} onClick={platform}></div>
+            <div className={`add-star`} onClick={addStar}></div>
           </div> : null
         }
       </div>

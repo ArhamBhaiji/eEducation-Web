@@ -17,11 +17,13 @@ import {StudentList} from '@/components/student-list';
 interface StreamsProps {
   othersStreams: any[]
   mainStream: any
+  id: string
 }
 
 const GroupVideoMarquee: React.FC<StreamsProps> = observer(
-  ({othersStreams, mainStream}) => { 
+  ({othersStreams, mainStream, id}) => { 
   return <VideoMarquee
+    id={id}
     canHover={true}
     mainStream={mainStream}
     othersStreams={othersStreams}
@@ -124,6 +126,7 @@ export const MiddleClass = observer(() => {
           {
             middleRoomStore.g1PlatformStreams.length > 0?
               <GroupVideoMarquee 
+                id={"first_group"}
                 mainStream={null} 
                 othersStreams={middleRoomStore.g1PlatformStreams}
               />
@@ -160,7 +163,10 @@ export const MiddleClass = observer(() => {
         <div className="platform-room-second">
         {
           middleRoomStore.platformState.g2 ?
-            <GroupVideoMarquee mainStream={null} othersStreams={middleRoomStore.platformState.g2Members}/>
+            <GroupVideoMarquee
+              id={"second_group"}
+              mainStream={null}
+              othersStreams={middleRoomStore.platformState.g2Members}/>
           : null
         }
         </div>

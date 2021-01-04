@@ -23,6 +23,7 @@ type VideoPlayerProps = {
   showControls: boolean
   showStar?: boolean
   showHover?: boolean
+  // showReward?: boolean
   showMediaBtn?: boolean
   rewardNum?: number
   handleClickVideo?: (userUuid: string, isLocal: boolean) => void
@@ -34,6 +35,15 @@ type RewardMenuPropsType = {
   rewardNum: number
   video: boolean
   audio: boolean
+}
+
+function usePrevious<T>(value: T): T {
+  const ref = useRef<T>(value)
+  useEffect(() => {
+    ref.current = value
+  })
+
+  return ref.current
 }
 
 export const MediaMenu = observer((props: RewardMenuPropsType) => {
@@ -82,26 +92,28 @@ export const MediaMenu = observer((props: RewardMenuPropsType) => {
   )
 })
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
-  className,
-  showClose,
-  streamUuid,
-  userUuid,
-  account,
-  renderer,
-  local = false,
-  role,
-  audio,
-  video,
-  showControls,
-  showMediaBtn,
-  share = false,
-  showStar,
-  handleClickVideo,
-  handleClickAudio,
-  rewardNum,
-  showHover
-}) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo((props: any) => {
+  const {
+    className,
+    showClose,
+    streamUuid,
+    userUuid,
+    account,
+    renderer,
+    local = false,
+    role,
+    audio,
+    video,
+    showControls,
+    showMediaBtn,
+    share = false,
+    showStar,
+    // showReward,
+    handleClickVideo,
+    handleClickAudio,
+    rewardNum,
+    showHover
+  } = props
 
   const sceneStore = useSceneStore()
 
@@ -131,13 +143,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
     }
   }
 
-  // const extensionStore = useExtensionStore()
-
-  // const shake = useMemo(() => {
-  //   return extensionStore.coVideoStudentsList.find((it) => it.userUuid === userUuid) ? true : false
-  // }, [extensionStore.coVideoStudentsList])
-
-
   const StartEffect = (props: any) => {
     useTimeout(() => {
       console.log("show effect")
@@ -146,15 +151,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
 
     return (
       <div className="stars-effect">
-        {/* <!-- work around use timestamp solve gif only play once --> */}
         <img src={`${starsUrl}?${Date.now()}`}></img>
       </div>
     )
   }
 
-  const rewardNumber: number = rewardNum as number
+  const previousValue = usePrevious<VideoPlayerProps>(props)
 
-  const prevNumber = useRef<number>(rewardNumber)
+  const rewardNumber: number = rewardNum as number
 
   const [rewardVisible, showReward] = useState<boolean>(false)
 
@@ -163,13 +167,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
   }, [showReward])
 
   useEffect(() => {
-    // console.log(" prevNumber.current : ", prevNumber.current, rewardNumber, userUuid)
-    if (prevNumber.current !== rewardNumber) {
+    if (userUuid !== previousValue.userUuid) return
+    if ((previousValue.rewardNum as number) < rewardNumber) {
+      console.log(`[video-player] prevNumber.current < rewardNumber : ${previousValue.rewardNum} < ${rewardNumber} ${userUuid}`)
       showReward(true)
-      // console.log(" prevNumber.current changed: ", userUuid)
-      prevNumber.current = rewardNumber
+      // previousValue.rewardNum = rewardNumber
     }
-  }, [prevNumber.current, rewardNumber, showReward])
+  }, [rewardNumber, previousValue.rewardNum, showReward])
 
   return (
     <div className={`${className ? className : 'agora-video-view'}`}>
@@ -198,21 +202,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo(({
         account ? 
         <div className="video-profile">
           <span className="account">{account}</span>
+          {showMediaBtn ?
+          <span className="media-btn no-hover">
+            <CustomIcon onClick={() => {}} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
+            {/* <CustomIcon onClick={() => {}} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} /> */}
+          </span> : null}
           {/* {shake && <div className={`active_hands_up ${shake ? "infinity-shake": ""}`} style={{width: "24px"}} />} */}
           {showStar ? 
             // <CustomIcon onClick={() => {}} className={audio ? "icon-hollow-white-star" : "icon-inactive-star"} data={"active-star"} />
-            <CustomIcon onClick={() => {}} className={"icon-hollow-white-star"} data={"active-star"} />
+            <div className="star-container">
+              <CustomIcon onClick={() => {}} className={"icon-gray-star"} data={"active-star"} />
+              <div className="reward-class">{rewardNum}</div>
+            </div>
           : null}
           {showControls ?
             <span className="media-btn">
               <CustomIcon onClick={handleAudioClick} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
               <CustomIcon onClick={handleVideoClick} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} />
             </span> : null}
-          {/* {showMediaBtn ?
-          <span className="media-btn no-hover">
-            <CustomIcon onClick={() => {}} className={audio ? "icon-speaker-on" : "icon-speaker-off"} data={"audio"} />
-            <CustomIcon onClick={() => {}} className={video ? "icons-camera-unmute-s" : "icons-camera-mute-s"} data={"video"} />
-          </span> : null} */}
         </div>
         : null
       }
