@@ -167,11 +167,21 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
 
   const [isClose, setIsClose] = useState<boolean>(false)
 
+  const [lock, setLock] = useState(false)
+
   const forbiddenGroupMic = !onTheStage? 'microphone-forbidden' : ''
 
-   const platform = async () => {
-    await middleRoomStore.clickPlatform(group)
-   }
+  const platform = async () => {
+    if (lock) {
+      return
+    }   
+    setLock(true)
+    try {
+      await middleRoomStore.groupPlatform(group)
+    } finally {
+      setLock(false)
+    }
+  }
 
    const addStar = async () => {
     await middleRoomStore.addGroupStar(group)

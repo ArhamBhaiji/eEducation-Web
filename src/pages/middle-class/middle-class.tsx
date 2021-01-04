@@ -162,7 +162,7 @@ export const MiddleClass = observer(() => {
         </div>
         <div className="platform-room-second">
         {
-          middleRoomStore.platformState.g2 ?
+          middleRoomStore.platformState.g2Members.length > 0 ?
             <GroupVideoMarquee
               id={"second_group"}
               mainStream={null}
@@ -170,7 +170,6 @@ export const MiddleClass = observer(() => {
           : null
         }
         </div>
-        {/* <SecondGroupVideoMarquee /> */}
       </div>
       <div className="live-board">
         <div className="video-board">

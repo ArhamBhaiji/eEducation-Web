@@ -189,11 +189,7 @@ export class MiddleRoomStore extends SimpleInterval {
     this.notice = undefined
     this.groupingSolution = 0
     this.quit = false
-    this.activated = false
   }
-
-  @observable
-  activated: boolean = false
 
   @observable
   roomChatMessages: ChatMessage[] = []
@@ -220,6 +216,9 @@ export class MiddleRoomStore extends SimpleInterval {
 
   @observable
   pkList: any[] = []
+
+  @observable
+  prepareGroups: any[] = []
 
   @observable
   notice?: any = undefined
@@ -1037,89 +1036,83 @@ export class MiddleRoomStore extends SimpleInterval {
     await this.updateRoomBatchProperties({ properties, cause })
   }
 
-  @action
-  // 整组上台 / 下台
-  async clickPlatform (group:any) {
+async groupPlatform (group:any) {
+  try {
+    let id = group.groupUuid
+    let cause = {cmd:"104"} // 开关 pk
 
-    try {
-      this.activated = true
-      let id = group.groupUuid
-      let cause = {cmd:"104"} // 开关 pk
-      
-      // 该组在台上 下台
-      if (this.platformState.g1 === id || this.platformState.g2 === id) {
-        // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
-        let streams:any = []
-        group.members.forEach((item:any) => {
-          let stu = {
-            userUuid: item.userUuid,
-            streamUuid: item.streamUuid,
-          }
-          streams.push(stu)
-        })
-        await this.batchDeleteStream(streams)
-        let properties: any = {}
-        console.log('该组在台上 下台')
-        let t = this.platformState.g1 === id? 'g1' : 'g2'
-        // 当前下台的组是最后一组 关闭 pk 状态
-        console.log('1 ***** group', group, group.groupUuid)
-        console.log('1 ***** platformState.g1', this.platformState.g1)
-        console.log('1 ***** platformState.g2', this.platformState.g2)
-        if((t === 'g1' && !this.platformState.g2) || (t === 'g2' && !this.platformState.g1)) {
-          properties = {
-            'groupStates.interactOutGroup': 0, // 组外讨论 包括分组，pk
-            [`interactOutGroups.${t}`]: '',
-          }
-        } else {
-          properties = {
-            [`interactOutGroups.${t}`]: '',
-          }
-        }
-        await this.updateRoomBatchProperties({properties, cause})
-        this.activated = false
-        return 
-      }
-      // 台上两组满
-      if (this.platformState.g1 && this.platformState.g2) {
-        console.log('两组在台上 下台')
-        this.activated = false
-        return
-      }
-      console.log('该组不在台上 上台')
-  
-      // 以上条件都不满足，台上有空位 上台
-      // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
-      let t = !this.platformState.g1 ? 'g1' : 'g2'
-      console.log('***** group', group, group.groupUuid)
-      console.log('***** platformState.g1', this.platformState.g1)
-      console.log('***** platformState.g2', this.platformState.g2)
-      let properties: any = {
-        'groupStates.state':1,
-        'groupStates.interactInGroup': 0, // 组内
-        'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
-        [`interactOutGroups.${t}`]: id,
-      }
-      await this.updateRoomBatchProperties({ properties, cause })
+    // 该组在台上 下台
+    if (this.platformState.g1 === id || this.platformState.g2 === id) {
+      // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
       let streams:any = []
       group.members.forEach((item:any) => {
         let stu = {
           userUuid: item.userUuid,
           streamUuid: item.streamUuid,
-          streamName: item.userUuid + 'stream',
-          videoSourceType: 1,
-          audioSourceType: 1,
-          videoState: 1,
-          audioState: 1,
         }
-        streams.push(stu)        
+        streams.push(stu)
       })
-      // 增流
-      await this.batchUpsertStream(streams)
-      this.activated = false
-    } catch (err) {
-      this.activated = false
+      await this.batchDeleteStream(streams)
+      let properties: any = {}
+      console.log('该组在台上 下台')
+      let t = this.platformState.g1 === id? 'g1' : 'g2'
+      // 当前下台的组是最后一组 关闭 pk 状态
+      if((t === 'g1' && !this.platformState.g2) || (t === 'g2' && !this.platformState.g1)) {
+        properties = {
+          'groupStates.interactOutGroup': 0, // 组外讨论 包括分组，pk
+          [`interactOutGroups.${t}`]: '',
+        }
+      } else {
+        properties = {
+          [`interactOutGroups.${t}`]: '',
+        }
+      }
+      await this.updateRoomBatchProperties({properties, cause})
+      return
     }
+    // 台上两组满
+    if (this.platformState.g1 && this.platformState.g2) {
+      console.log('两组在台上 下台')
+      return
+    }
+    console.log('该组不在台上 上台')
+
+    // 以上条件都不满足，台上有空位 上台
+    // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
+    let t = !this.platformState.g1 ? 'g1' : 'g2'
+    let properties: any = {
+      'groupStates.state':1,
+      'groupStates.interactInGroup': 0, // 组内
+      'groupStates.interactOutGroup': 1, // 组外讨论 包括分组，pk
+      [`interactOutGroups.${t}`]: id,
+    }
+    let oldValue = this.platformState[t]
+    this.platformState[t] = id
+    try {
+      await this.updateRoomBatchProperties({ properties, cause })
+    } catch(err) {
+      this.platformState[t] = oldValue
+    }
+
+    let streams:any = []
+    group.members.forEach((item:any) => {
+      let stu = {
+        userUuid: item.userUuid,
+        streamUuid: item.streamUuid,
+        streamName: item.userUuid + 'stream',
+        videoSourceType: 1,
+        audioSourceType: 1,
+        videoState: 1,
+        audioState: 1,
+      }
+      streams.push(stu)
+    })
+    // 增流
+    await this.batchUpsertStream(streams)
+  } catch (err) {
+
   }
+}
 
   @computed
   get onStage(): boolean {
