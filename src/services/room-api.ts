@@ -168,6 +168,18 @@ export class RoomApi {
             limit: 100
           },
         }
+        roomConfig.roomProperties = {
+          "processes":{},
+          "handUpStates":{
+              "state":1,
+              "autoCoVideo":0
+          }
+        }
+        roomConfig.roomProperties.processes[roomConfig.roomUuid] = {
+          "maxWait":4,
+          "maxAccept":1,
+          "timeout":30
+        }
         // roomConfig.roomProperties = {
         //   processUuid: roomConfig.roomUuid
         // }

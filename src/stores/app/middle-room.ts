@@ -795,9 +795,9 @@ export class MiddleRoomStore extends SimpleInterval {
       }
       // this.sceneStore.isMuted = !roomInfo.roomStatus.isStudentChatAllowed
 
-      if (this.roomInfo.userRole === 'teacher') {
-        await this.appStore.extensionStore.updateHandUpState(true, false)
-      }
+      // if (this.roomInfo.userRole === 'teacher') {
+      //   await this.appStore.extensionStore.updateHandUpState(true, false)
+      // }
 
       await this.sceneStore.joinRTC({
         uid: +mainStream.streamUuid,
