@@ -171,6 +171,10 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
 
   const forbiddenGroupMic = !onTheStage? 'microphone-forbidden' : ''
 
+  const activateClass = lock? 'platform-forbidden' : ''
+
+  const micActivateClass = isClose? 'close-microphone' : 'microphone'
+  
   const platform = async () => {
     if (lock) {
       return
@@ -178,32 +182,31 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
     setLock(true)
     try {
       await middleRoomStore.groupPlatform(group)
-    } finally {
+      setIsClose(false)
+      setLock(false)
+    } catch (err) {
       setLock(false)
     }
   }
 
-   const addStar = async () => {
+  const addStar = async () => {
     await middleRoomStore.addGroupStar(group)
-   }
+  }
 
-   // 0 表示麦克风处于关闭状态 1 开启
   const middleRoomStore = useMiddleRoomStore()
 
-  const activateClass = ''
-
-  // 0 表示麦克风处于关闭状态 1 开启
-   const controlClose = async ()=> {
+  // 0 关闭 1 开启
+  const controlMic = async () => {
     if (!onTheStage) {
       return
     }
-    await middleRoomStore.groupControlMicrophone(group, 0)
-    setIsClose(true)
-  }
-
-  const controlOpen = async ()=> {
-    await middleRoomStore.groupControlMicrophone(group, 1)
-    setIsClose(false)
+    if(isClose) {
+      await middleRoomStore.groupControlMicrophone(group, 1)
+      setIsClose(false)
+    } else {
+      await middleRoomStore.groupControlMicrophone(group, 0)
+      setIsClose(true)
+    }
   }
 
   return (
@@ -221,12 +224,7 @@ export const MiddleGroupCard: React.FC<MiddleGroupCardProps> = observer(
         {
           isTeacher?
           <div className="icon">
-            {
-              isClose?
-              <div className="close-microphone" onClick={controlOpen}></div>
-              :
-              <div className={`microphone ${forbiddenGroupMic}`} onClick={controlClose}></div>
-            }
+            <div className={`${micActivateClass} ${forbiddenGroupMic}`} onClick={controlMic}></div>
             <div className={`platform ${activateClass}`} onClick={platform}></div>
             <div className={`add-star`} onClick={addStar}></div>
           </div> : null

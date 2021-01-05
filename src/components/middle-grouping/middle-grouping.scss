@@ -307,6 +307,9 @@
         margin-top: 10px;
         background-image: url('./assets/icon-platform.png');
       }
+      .platform-forbidden {
+        cursor: not-allowed !important; 
+      }
       .add-star {
         width: 28px;
         height: 28px;
