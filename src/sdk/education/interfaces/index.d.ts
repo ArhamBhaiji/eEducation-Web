@@ -415,6 +415,7 @@ export interface EduUserAttrs extends EduUser {
   rtcToken?: string
   screenRtcToken?: string
   rtmToken?: string
+  type?: string
 }
 
 export class EduUserData {
@@ -432,8 +433,14 @@ export class EduUserData {
 
   public _rtmToken?: string
 
+  private _type?: number
+
   get rtmToken(): string{
     return this._rtmToken as string
+  }
+
+  get type(): string {
+    return this._type as string;
   }
 
   constructor(data: EduUserAttrs) {
@@ -446,6 +453,9 @@ export class EduUserData {
     }
     if (data.hasOwnProperty('rtmToken')) {
       this._rtmToken = data.rtmToken as any
+    }
+    if (data.hasOwnProperty('type')) {
+      this._type = data.type as string
     }
   }
 
@@ -529,7 +539,8 @@ export class EduUserData {
         role: item.role,
         userProperties: item.userProperties,
         isChatAllowed: item.isChatAllowed,
-        streamUuid: item.streamUuid
+        streamUuid: item.streamUuid,
+        type: item.type,
       }))
       return acc;
     }, []);

@@ -808,7 +808,7 @@ export class EduClassroomDataController {
 
           if (this.isLocalUser(target.user.userUuid)) {
             this.localUser.updateState(0)
-            this.fire('local-user-removed', {user: newTargetItem.user})
+            this.fire('local-user-removed', {user: newTargetItem.user, type: newTargetItem.type})
           } else {
             this.fire('remote-user-removed', {user: newTargetItem.user})
           }
@@ -880,7 +880,7 @@ export class EduClassroomDataController {
         EduLogger.info(`[EDU-STATE] [${this._id}] seqId: [${seqId}] after removeUserList in target: `, '  targetItem ', targetItem, ' userList ', this._userList)
         if (this.isLocalUser(targetItem.user.userUuid)) {
           this.localUser.updateState(0)
-          this.fire('local-user-removed', {user: targetItem.user})
+          this.fire('local-user-removed', {user: targetItem.user, type: targetItem.type})
         } else {
           // if (!this.roomManager.syncingData) {
             this.fire('remote-user-removed', {user: targetItem.user})
@@ -949,7 +949,8 @@ export class EduClassroomDataController {
           EduLogger.info(`isLocalUser, EDU-STATE: [${this._id}] updateUser, ${[seqId]}, local-user-remove`, targetItem)
           this.localUser.updateState(0)
           this.fire('local-user-removed', {
-            user: targetItem.user
+            user: targetItem.user,
+            type: targetItem.type
           })
         } else {
           // if (!this.roomManager.syncingData) {
@@ -1197,6 +1198,9 @@ export class EduClassroomDataController {
   }
 
   fire(evtName: string, ...args: any[]) {
+    if (evtName === 'local-user-removed') {
+      console.log("fire # local-user-removed ", JSON.stringify([...args]))
+    }
     this.roomManager.emit(evtName, ...args)
   }
 
@@ -1388,7 +1392,21 @@ export class EduClassroomDataController {
 
   setRawUsers(rawUsers: any[]) {
     const localUuid = this.localUserUuid
-    const users = EduUserData.fromArray(rawUsers.map((user: any) => user))
+    // const users = EduUserData.fromArray(rawUsers.map((user: any) => user))
+    const users = EduUserData
+      .fromArray(
+        rawUsers.map((user: any) => user)
+      )
+      .concat(new EduUserData({
+        state: 1,
+        updateTime: 0,
+        userUuid: localUuid,
+        userName: get(this.localUser, 'user.userName'),
+        role: get(this.localUser, 'user.role'),
+        userProperties: {},
+        isChatAllowed: false,
+        streamUuid: '0',
+      }))
     const streams = EduStreamData.fromArray(rawUsers
       .filter((u: any) => u.streams)
       .reduce((acc: any, u: any) => {
