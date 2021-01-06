@@ -1,4 +1,4 @@
-const BUILD_VERSION = process.env.REACT_APP_BUILD_VERSION as string;
+const BUILD_VERSION = REACT_APP_BUILD_VERSION;
 const build_version = BUILD_VERSION ? BUILD_VERSION : '0.0.1';
 
 const en = {

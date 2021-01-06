@@ -23,12 +23,12 @@ export const resolveFileInfo = (file: any) => {
 }
 
 export const ossConfig: OSSConfig = {
-  "accessKeyId": get(process.env, 'REACT_APP_YOUR_OWN_OSS_BUCKET_KEY', 'empty-placeholder'),
-  "accessKeySecret": get(process.env, 'REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET', 'empty-placeholder'),
-  "bucket": get(process.env, 'REACT_APP_YOUR_OWN_OSS_BUCKET_NAME', 'empty-placeholder'),
+  "accessKeyId": `${REACT_APP_YOUR_OWN_OSS_BUCKET_KEY}`,
+  "accessKeySecret": `${REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET}`,
+  "bucket": `${REACT_APP_YOUR_OWN_OSS_BUCKET_NAME}`,
   // "region": process.env.REACT_APP_YOUR_OWN_OSS_BUCKET_REGION as string,
-  "endpoint": get(process.env, 'REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE', 'empty-placeholder'),
-  "folder": get(process.env, 'REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER', 'empty-placeholder'),
+  "endpoint": `${REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE}`,
+  "folder": `${REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER}`,
 }
 
 const pathName = (path: string): string => {

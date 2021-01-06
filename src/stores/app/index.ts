@@ -28,10 +28,10 @@ import { BizLogger } from '@/utils/biz-logger';
 import { platform } from '@/utils/platform';
 import { SceneStore } from './scene';
 
-const APP_ID: string = process.env.REACT_APP_AGORA_APP_ID as string;
+const APP_ID: string = `${REACT_APP_AGORA_APP_ID}`;
 BizLogger.info("APP_ID ", APP_ID)
-const CUSTOMER_ID: string = process.env.REACT_APP_AGORA_CUSTOMER_ID as string;
-const CUSTOMER_CERTIFICATE: string = process.env.REACT_APP_AGORA_CUSTOMER_CERTIFICATE as string;
+const CUSTOMER_ID: string = `${REACT_APP_AGORA_CUSTOMER_ID}`;
+const CUSTOMER_CERTIFICATE: string = `${REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`;
 export class AppStore {
 
   uiStore!: UIStore;

@@ -1,8 +1,8 @@
-export const APP_TOKEN = process.env.REACT_APP_AGORA_APP_TOKEN as string;
-export const ENABLE_LOG = process.env.REACT_APP_AGORA_LOG as string;
-export const APP_ID: string = process.env.REACT_APP_AGORA_APP_ID as string;
+export const APP_TOKEN = `${REACT_APP_AGORA_APP_TOKEN}` as string;
+export const ENABLE_LOG = `${REACT_APP_AGORA_LOG}` as string;
+export const APP_ID: string = `${REACT_APP_AGORA_APP_ID}` as string;
 const genToken = (): string => {
-  return window.btoa(`${process.env.REACT_APP_AGORA_CUSTOMER_ID}:${process.env.REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`)
+  return window.btoa(`${REACT_APP_AGORA_CUSTOMER_ID}:${REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`)
 }
 export const AUTHORIZATION: string = genToken();
 export const RoomKeyIdentifier = 'agora_meeting_room';

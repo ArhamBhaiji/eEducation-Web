@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, HashRouter, Switch, Prompt } from 'react-router-dom';
+import { Route, HashRouter, Switch } from 'react-router-dom';
 import ThemeContainer from '../containers/theme-container';
 import Home from './home';
 import {DeviceDetectPage} from './device-detect/index';
@@ -18,15 +18,39 @@ import { ReplayPage } from './replay';
 import {Provider} from 'mobx-react';
 import { AppStore } from '@/stores/app';
 import {AssistantCoursesPage} from './breakout-class/assistant-courses-page';
+import Eruda from 'eruda';
+import { UAParser } from 'ua-parser-js';
 
 const defaultStore = new AppStore()
 window.store = defaultStore
 
-export default function () {
+export interface AppProps {
+  basename: string
+}
+
+const parser = new UAParser();
+
+const userAgentInfo = parser.getResult();
+
+const isMobile = () => {
+  return userAgentInfo.device.type === 'mobile';
+};
+
+if (isMobile() && document) {
+  const el = document.createElement('div');
+  document.body.appendChild(el);
+  
+  Eruda.init({
+    container: el,
+    tool: ['console', 'elements']
+  });
+}
+
+export function App (props: AppProps) {
   return (
     <Provider store={defaultStore}>
       <ThemeContainer>
-        <HashRouter>
+        <HashRouter basename={props.basename}>
           <Loading />
           <Toast />
           <ConfirmDialog />

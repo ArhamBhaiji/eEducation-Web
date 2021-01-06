@@ -5,7 +5,8 @@ import { audioPlugin } from '@netless/white-audio-plugin';
 import { get } from 'lodash';
 import { BizLogger } from '@/utils/biz-logger';
 
-const appIdentifier = process.env.REACT_APP_NETLESS_APP_ID as string
+const appIdentifier = `${REACT_APP_NETLESS_APP_ID}`
+console.log("appid: ", appIdentifier)
 
 export class BoardClient extends EventEmitter {
   client!: WhiteWebSdk;

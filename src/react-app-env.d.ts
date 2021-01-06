@@ -2,7 +2,20 @@
 
 declare const REACT_APP_AGORA_APP_SDK_DOMAIN: string;
 declare const REACT_APP_AGORA_APP_SDK_LOG_SECRET: string;
-
+declare const REACT_APP_AGORA_RECORDING_OSS_URL: string;
+declare const REACT_APP_BUILD_VERSION: string;
+declare const REACT_APP_AGORA_GTM_ID: string;
+declare const REACT_APP_AGORA_APP_ID: string;
+declare const REACT_APP_NETLESS_APP_ID: string;
+declare const REACT_APP_AGORA_CUSTOMER_ID: string;
+declare const REACT_APP_AGORA_CUSTOMER_CERTIFICATE: string;
+declare const REACT_APP_AGORA_APP_TOKEN: string;
+declare const REACT_APP_AGORA_LOG: string;
+declare const REACT_APP_YOUR_OWN_OSS_BUCKET_KEY: string;
+declare const REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET: string;
+declare const REACT_APP_YOUR_OWN_OSS_BUCKET_NAME: string;
+declare const REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE: string;
+declare const REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER: string;
 interface CustomGlobalUtils {
   platform: string
   isElectron: boolean
