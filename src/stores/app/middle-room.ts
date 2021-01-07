@@ -638,67 +638,6 @@ export class MiddleRoomStore extends SimpleInterval {
           }
         })
       })
-      // this.eduManager.on('user-message', async (evt: any) => {
-      //   await this.sceneStore.mutex.dispatch<Promise<void>>(async () => {
-      //     if (!this.sceneStore.joiningRTC) {
-      //       return 
-      //     }
-      //     try {
-      //       BizLogger.info('[rtm] user-message', evt)
-      //       const fromUserUuid = evt.message.fromUser.userUuid
-      //       const fromUserName = evt.message.fromUser.userName
-      //       const msg = decodeMsg(evt.message.message)
-      //       BizLogger.info("user-message", msg)
-      //       if (msg) {
-      //         const {cmd, payload} = msg
-      //         const {action} = payload
-      //         // const payload = msg.payload
-      //         const {name, role, uuid} = payload.fromUser
-      //         await this.showNotice(cmd, action, uuid, name)
-      //         if (action === InvitationEnum.Apply) {
-      //           const userExists = this.extensionStore.applyUsers.find((user) => user.userUuid === uuid)
-      //           const user = this.roomManager?.data.userList.find((it: any) => it.user.userUuid === uuid)
-      //           if (!userExists && user && !this.extensionStore.enableAutoHandUpCoVideo) {
-      //             this.extensionStore.applyUsers.push({
-      //               userName: name,
-      //               userUuid: uuid,
-      //               streamUuid: user.streamUuid,
-      //               state: true
-      //             })
-      //           }
-      //           this.uiStore.showShakeHands()
-      //         }
-      //         if (action === InvitationEnum.Cancel) {
-      //           const applyUsers = this.extensionStore.applyUsers.filter((it) => it.userUuid !== uuid)
-      //           this.extensionStore.applyUsers = applyUsers
-      //         }
-      //         if (action === PeerInviteEnum.teacherAccept 
-      //           && this.isStudent()) {
-      //           try {
-      //             await this.sceneStore.prepareCamera()
-      //             await this.sceneStore.prepareMicrophone()
-      //             BizLogger.info("propertys ", this.sceneStore._hasCamera, this.sceneStore._hasMicrophone)
-      //             if (this.sceneStore._hasCamera) {
-      //               await this.sceneStore.openCamera()
-      //             }
-      
-      //             if (this.sceneStore._hasMicrophone) {
-      //               BizLogger.info('open microphone')
-      //               await this.sceneStore.openMicrophone()
-      //             }
-      //           } catch (err) {
-      //             BizLogger.warn('published failed', err) 
-      //             throw err
-      //           }
-      //           this.appStore.uiStore.addToast(t('toast.publish_rtc_success'))
-      //         }
-      //       }
-      //     } catch (error) {
-      //       BizLogger.error(`[demo] user-message async handler failed`)
-      //       BizLogger.error(error)
-      //     }
-      //   })
-      // })
 
       // 教室更新
       roomManager.on('classroom-property-updated', (classroom: any) => {
@@ -820,7 +759,7 @@ export class MiddleRoomStore extends SimpleInterval {
             avatar: "",
             streamUuid: streamUuid,
           }
-          let cause = { cmd: "401" }
+          let cause = { cmd: `${MiddleRoomPropertiesChangeCause.studentListChanged}`}
           await this.updateRoomBatchProperties({ properties, cause })
         }
       }
@@ -982,7 +921,6 @@ export class MiddleRoomStore extends SimpleInterval {
     let outGroups = get(this.roomProperties, 'groupStates.interactOutGroup', '')
     let g1 = get(this.roomProperties, 'interactOutGroups.g1', '')
     let g2 = get(this.roomProperties, 'interactOutGroups.g2', '')
-    // let g1 = this.roomProperties?.interactOutGroups?.
     let g1MemberIds = g1? get(this.roomProperties, `groups.${g1}.members`, []) : []
     let g2MemberIds = g2? get(this.roomProperties, `groups.${g2}.members`, []) : []
 
@@ -1032,18 +970,18 @@ export class MiddleRoomStore extends SimpleInterval {
     let properties = {
 
     }
-    let cause = {cmd:"201"} // 整组开关麦
+    let cause = {cmd: `${MiddleRoomPropertiesChangeCause.groupAudioStateChanged}`}
     await this.updateRoomBatchProperties({ properties, cause })
   }
 
 async groupPlatform (group:any) {
   try {
     let id = group.groupUuid
-    let cause = {cmd:"104"} // 开关 pk
+    let cause = {cmd: `${MiddleRoomPropertiesChangeCause.groupingPKStateChanged}`} // 开关 pk
 
     // 该组在台上 下台
     if (this.platformState.g1 === id || this.platformState.g2 === id) {
-      // 先删流后更新数据 ---司大佬要求的，否则会造成其他端频闪问题
+      // 先删流后更新数据
       let streams:any = []
       group.members.forEach((item:any) => {
         let stu = {
@@ -1078,7 +1016,7 @@ async groupPlatform (group:any) {
     console.log('该组不在台上 上台')
 
     // 以上条件都不满足，台上有空位 上台
-    // 先更新再增流 ---司大佬要求的，否则会造成其他端频闪问题
+    // 先更新再增流
     let t = !this.platformState.g1 ? 'g1' : 'g2'
     let properties: any = {
       'groupStates.state':1,
@@ -1139,7 +1077,7 @@ async groupPlatform (group:any) {
     })
     let cause: any = {
       groupUuid: group.groupUuid,
-      cmd:"202"
+      cmd: `${MiddleRoomPropertiesChangeCause.groupRewardNoticeStateChanged}`
     } // 整组奖励
     await this.updateRoomBatchProperties({ properties, cause })
   }
@@ -1147,7 +1085,7 @@ async groupPlatform (group:any) {
   // 删除
   @action
   async removeGroup () {
-    let cause = {cmd:"101"}
+    let cause = {cmd: `${MiddleRoomPropertiesChangeCause.groupingStateChanged}`}
     let properties: any = {
       groupStates: {
         state: 0,
@@ -1186,52 +1124,10 @@ async groupPlatform (group:any) {
       },
       groups: backendGroups
     }
-    let cause = {cmd:"102"}
+    let cause = {cmd: `${MiddleRoomPropertiesChangeCause.updateGroupStateChanged}`}
     await this.updateRoomBatchProperties({ properties, cause })
     this.appStore.extensionStore.hiddenGrouping()
   }
-
-  @computed
-  get groups() {
-    const firstGroup: VideoMarqueeItem = {
-      mainStream: null,
-      studentStreams: [],
-    }
-
-    // TODO: only need in PRD PK mode. Still not implemented
-    const secondGroup: VideoMarqueeItem = {
-      mainStream: null,
-      studentStreams: [],
-    }
-
-    const userIds = this.sceneStore.userList.map((u: any) => u.userUuid)
-
-    const streams = this.sceneStore.studentStreams.filter((stream: any) => userIds.includes(stream.userUuid))
-    firstGroup.studentStreams = firstGroup.studentStreams.concat(streams)
-    firstGroup.studentStreams = firstGroup.studentStreams.map((stream) => ({
-      ...stream,
-      // showStar: true,
-      showControls: false,
-      showHover: this.roomInfo.userRole === 'teacher',
-      showMediaBtn: true
-    }))
-
-    return [firstGroup, secondGroup]
-  }
-
-  // @observable
-  // groups: any[] = [
-  //   {
-  //     mainStream: null,
-  //     studentStreams: [],
-  //     // studentStreams: genStudentStreams(20),
-  //   },
-  //   {
-  //     mainStream: null,
-  //     studentStreams: [],
-  //     // studentStreams: genStudentStreams(20),
-  //   }
-  // ]
 
   getUserReward(userUuid: string) {
     const user = this.roomStudentUserList.find((it) => it.userUuid === userUuid)
