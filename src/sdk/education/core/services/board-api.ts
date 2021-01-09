@@ -1,28 +1,29 @@
 import { AgoraFetchParams } from "../../interfaces";
 import { get } from "lodash";
 import { BoardInfoResponse } from "./interface";
-import { APP_ID, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "../utils/http-client";
 import { GenericErrorWrapper } from "../utils/generic-error";
 
 export class AgoraBoardApi {
 
-  private _board_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/board/apps/%app_id`.replace('%app_id', APP_ID)
-  // private _board_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scenario/board/apps/%app_id`
+  private board_prefix: string
 
   private userToken: string
   private roomUuid: string
+  private restToken: string
 
   constructor(
-    userToken: string,
-    roomUuid: string
+    params: {
+      prefix: string
+      restToken: string
+      userToken: string
+      roomUuid: string
+    }
   ) {
-    this.userToken = userToken
-    this.roomUuid = roomUuid
-  }
-
-  get board_prefix() {
-    return this._board_prefix
+    this.board_prefix = params.prefix
+    this.restToken = params.restToken
+    this.userToken = params.userToken
+    this.roomUuid = params.roomUuid
   }
 
   async fetch (params: AgoraFetchParams) {
@@ -38,7 +39,7 @@ export class AgoraBoardApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${AUTHORIZATION!.replace(/basic\s+|basic/i, '')}`
+        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
       }
     }
 

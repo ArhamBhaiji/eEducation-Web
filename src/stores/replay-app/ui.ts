@@ -1,7 +1,6 @@
 import { EduRoomType } from '@/sdk/education/core/services/interface.d';
 import { GlobalStorage } from '../../utils/custom-storage';
 import { observable, action, computed } from 'mobx';
-import { AppStore } from '.';
 import { DialogMessage, DialogType } from '@/components/dialog';
 import { platform } from '@/utils/platform';
 
@@ -11,7 +10,7 @@ interface NoticeMessage {
 }
 
 
-export class UIStore {
+export class ReplayUIStore {
 
   static roomTypes: any[] = [
     {
@@ -50,6 +49,7 @@ export class UIStore {
     }
   ]
 
+
   @observable
   loading?: boolean = false;
 
@@ -63,10 +63,10 @@ export class UIStore {
   converting?: boolean = false;
 
   @observable
-  notice?: NoticeMessage = undefined
+  notice?: NoticeMessage
 
   @observable
-  dialog?: DialogMessage = undefined
+  dialog?: DialogMessage
 
   @observable
   settingDialog: boolean = false
@@ -76,61 +76,6 @@ export class UIStore {
 
   @observable
   autoplayToast: boolean = false
-
-  @observable
-  lastSeqId: number = 0
-
-  @observable
-  curSeqId: number = 0
-
-  @observable
-  _language: string = GlobalStorage.getLanguage();
-
-  @observable
-  dialogs: DialogType[] = []
-
-  @observable
-  activeTab: string = 'chatroom'
-
-  @observable
-  cancel?: CallableFunction
-
-  @observable
-  menuVisible: boolean = false
-
-  @observable
-  nextLocation: any;
-  
-  @observable
-  action: string = '';
-
-  @action
-  reset () {
-    this.loading = false;
-    this.boardLoading = false;
-    this.uploading = false;
-    this.converting = false;
-    this.notice = undefined
-    this.dialog = undefined
-    this.settingDialog = false
-    this.toastQueue  = []
-    this.autoplayToast = false
-    this.lastSeqId = 0
-    this.curSeqId = 0
-    this._language = GlobalStorage.getLanguage();
-    this.dialogs = []
-    this.activeTab = 'chatroom'
-    this.cancel = undefined
-    this.menuVisible = false
-    this.action = ''
-    this.nextLocation = null
-  }
-
-  appStore!: AppStore
-
-  constructor(appStore: AppStore) {
-    this.appStore = appStore
-  }
 
   @action
   addToast(message: string) {
@@ -155,6 +100,9 @@ export class UIStore {
     this.autoplayToast = false
   }
 
+  constructor() {
+  }
+
   get platform(): string {
     return platform;
   }
@@ -165,6 +113,22 @@ export class UIStore {
 
   get isWeb(): boolean {
     return this.platform === 'web'
+  }
+
+  @action
+  reset () {
+    this.settingDialog = false
+    this.loading = false;
+    this.uploading = false;
+    this.boardLoading = false;
+    this.converting = false;
+    this.notice = undefined;
+    this.dialog = undefined;
+    this.toastQueue = []
+    this.autoplayToast = false
+    this.dialogs = []
+    this.menuVisible = false
+    this.activeTab = 'chatroom'
   }
 
   @action
@@ -256,7 +220,6 @@ export class UIStore {
       this.ipc.send('close')
     }
   }
-
   @computed
   get language(): string {
     return this._language;
@@ -272,6 +235,36 @@ export class UIStore {
     return this.dialogs.find(it => it.dialog.type === type)
   }
 
+  @observable
+  dialogs: DialogType[] = []
+  
+  @observable
+  _language: string = GlobalStorage.getLanguage();
+
+  @observable
+  curSeqId: number = 0
+
+  @observable
+  visibleShake: boolean = false
+
+  @observable
+  lastSeqId: number = 0
+
+  @observable
+  activeTab: string = 'chatroom'
+
+  @observable
+  menuVisible: boolean = false
+
+  @observable
+  cancel?: CallableFunction
+
+  @observable
+  action: any
+
+  @observable
+  nextLocation: any
+
   @action
   updateCurSeqId(v: number) {
     this.curSeqId = v
@@ -280,63 +273,6 @@ export class UIStore {
   updateLastSeqId(v: number) {
     this.lastSeqId = v
   }
-
-  @computed
-  get showPagination (): boolean {
-    if (this.appStore.roomStore.roomInfo.userRole === 'teacher') {
-      return true
-    }
-    return false
-  }
-
-  @computed
-  get showStudentApply(): boolean {
-    return false
-  }
-  
-  @computed
-  get showScaler(): boolean {
-    const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
-      return true
-    }
-    return false
-  }
-
-  @computed
-  get showFooterMenu(): boolean {
-    const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
-      return true
-    }
-    const roomType = this.appStore.roomStore.roomInfo.roomType
-    if (userRole === 'student' && `${roomType}` === `${EduRoomType.SceneTypeMiddleClass}`) {
-      return true
-    }
-    return false
-  }
-
-  @computed
-  get showApplyUserList(): boolean {
-    const userRole = this.appStore.roomStore.roomInfo.userRole
-    const roomType = this.appStore.roomStore.roomInfo.roomType
-    if (`${roomType}` === `${EduRoomType.SceneTypeMiddleClass}`) {
-      return true
-    }
-    return false
-  }
-
-  @computed
-  get showTools(): boolean {
-    const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
-      return true
-    }
-    return false
-  }
-
-  @observable
-  visibleShake: boolean = false
   
   @action
   showShakeHands() {

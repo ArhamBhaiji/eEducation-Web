@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {NavController} from '@/components/nav';
 import NativeSharedWindow from '@/components/native-shared-window';
@@ -9,6 +9,7 @@ import { Loading } from '@/components/loading';
 import { observer } from 'mobx-react';
 import { t } from '@/i18n';
 import { BizLogger } from '@/utils/biz-logger';
+import { MiddleClass } from './middle-class';
 
 export const roomTypes = [
   {value: 0, path: 'one-to-one'},
@@ -93,11 +94,9 @@ const RoomController = observer(({children}: any) => {
   );
 })
 
-export function MiddleRoomPage({ children }: any) {
-  return (
-    <RoomController>
-      {children}
-    </RoomController>
-  )
-}
+export const MiddleRoomPage = () => (
+  <RoomController>
+    <MiddleClass />
+  </RoomController>
+)
 

@@ -4,7 +4,6 @@ import { InvitationEnum, MiddleRoomApi } from '../../services/middle-room-api';
 import uuidv4 from 'uuid/v4';
 import { EduAudioSourceType, EduTextMessage, EduSceneType } from './../../sdk/education/interfaces/index.d';
 import { RoomApi } from './../../services/room-api';
-import { PeerInviteEnum } from '@/sdk/education/user/edu-user-service';
 import { UserRenderer } from '../../sdk/education/core/media-service/renderer/index';
 import { AppStore } from '@/stores/app/index';
 import { observable, computed, action, runInAction } from 'mobx';
@@ -17,20 +16,6 @@ import { BizLogger } from '@/utils/biz-logger';
 import { EduBoardService } from '@/sdk/board/edu-board-service';
 import { EduRecordService } from '@/sdk/record/edu-record-service';
 import { CustomPeerApply, UnmuteMediaEnum } from './scene';
-
-// const genStudentStreams = (num: number) => {
-//   const items = Array.from({length: num}, (v, i) => i)
-//   return items.map(item => ({
-//     video: false,
-//     audio: false,
-//     name: `${item}name`,
-//     id: item + +Date.now() % 2000,
-//     showReward: true,
-//     reward: +Date.now() % 2000,
-//     account: `${item}-account`,
-//     showStar: true
-//   }))
-// }
 
 type VideoMarqueeItem = {
   mainStream: EduMediaStream | null
@@ -59,8 +44,6 @@ type MiddleRoomProperties = {
 }
 
 type MiddleRoomSchema = Partial<MiddleRoomProperties>
-
-const delay = 2000
 
 const ms = 500
 
@@ -383,8 +366,16 @@ export class MiddleRoomStore extends SimpleInterval {
   async join() {
     try {
       this.appStore.uiStore.startLoading()
-      this.roomApi = new RoomApi()
-      this.middleRoomApi = new MiddleRoomApi()
+      this.roomApi = new RoomApi({
+        appId: this.eduManager.config.appId,
+        sdkDomain: this.eduManager.config.sdkDomain as string,
+        restToken: this.eduManager.config.agoraRestToken
+      })
+      this.middleRoomApi = new MiddleRoomApi({
+        appId: this.eduManager.config.appId,
+        sdkDomain: this.eduManager.config.sdkDomain as string,
+        restToken: this.eduManager.config.agoraRestToken
+      })
       let {roomUuid} = await this.roomApi.fetchRoom({
         roomName: `${this.roomInfo.roomName}`,
         roomType: +this.roomInfo.roomType as number,
@@ -799,8 +790,17 @@ export class MiddleRoomStore extends SimpleInterval {
         })
       }
       this.sceneStore._roomManager = roomManager;
-      this.appStore._boardService = new EduBoardService(roomManager.userToken, roomManager.roomUuid)
-      this.appStore._recordService = new EduRecordService(roomManager.userToken)
+      this.appStore._boardService = new EduBoardService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: roomManager.userToken,
+        roomUuid: roomManager.roomUuid,
+        prefix: this.eduManager.prefix["board"],
+      })
+      this.appStore._recordService = new EduRecordService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: roomManager.userToken,
+        prefix: this.eduManager.prefix["record"],
+      })
   
       const roomInfo = roomManager.getClassroomInfo()
       this.roomProperties = roomInfo.roomProperties as any

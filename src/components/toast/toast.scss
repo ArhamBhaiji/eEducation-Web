@@ -6,6 +6,21 @@
   visibility: hidden;
 }
 
+.notice-message-container-comp {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
+  top: 4rem;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 10000;
+  user-select: none;
+  pointer-events: none;
+}
+
 .notice-message-container {
   display: flex;
   justify-content: flex-start;

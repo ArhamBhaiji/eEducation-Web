@@ -4,7 +4,6 @@ import OSS from "ali-oss";
 import md5 from "js-md5";
 import { t } from "@/i18n";
 import { get } from "lodash";
-import { APP_ID } from "@/utils/config";
 import { UAParser } from 'ua-parser-js';
 import { GenericErrorWrapper } from "../utils/generic-error";
 
@@ -47,10 +46,19 @@ const AgoraFetchJson = async ({url, method, data, token, outHeaders}:{url?: stri
 }
 
 
-export class logUpload {
+export class LogUpload {
 
-  appID: string = APP_ID;
+  appID: string;
   roomId: string = '';
+  sdkDomain: string;
+
+  constructor(params: {
+    appId: string,
+    sdkDomain: string
+  }) {
+    this.sdkDomain = params.sdkDomain
+    this.appID = params.appId
+  }
   
   async fetchStsToken(roomId: string, fileExt: string) {
 
@@ -150,10 +158,8 @@ export class logUpload {
       });
       return get(res, 'data.data', -1)
     } catch(err) {
-      new GenericErrorWrapper(err)
+      throw new GenericErrorWrapper(err)
     }
   }
 
 }
-
-export const logApi = new logUpload();

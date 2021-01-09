@@ -1,7 +1,5 @@
-import { MiddleClass } from './../pages/middle-class/middle-class';
 import { AgoraFetchParams } from "@/sdk/education/interfaces/index.d";
 import { EduRoomType } from "@/sdk/education/core/services/interface.d";
-import { APP_ID, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
 import { BizLogger } from "@/utils/biz-logger";
 
@@ -31,12 +29,23 @@ export interface EduClassroomConfig {
 }
 
 export class RoomApi {
-  constructor() {
 
+  private sdkDomain: string
+  private appId: string
+  private restToken: string
+
+  constructor(params: {
+    restToken: string
+    sdkDomain: string
+    appId: string
+  }) {
+    this.restToken = params.restToken
+    this.appId = params.appId
+    this.sdkDomain = params.sdkDomain
   }
 
   get prefix(): string {
-    return `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scene/apps/%app_id`.replace("%app_id", APP_ID)
+    return `${this.sdkDomain}/scene/apps/%app_id`.replace("%app_id", this.appId)
   }
 
   async fetch (params: AgoraFetchParams) {
@@ -52,7 +61,7 @@ export class RoomApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${AUTHORIZATION!.replace(/basic\s+|basic/i, '')}`
+        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
       }
     }
     
@@ -184,7 +193,7 @@ export class RoomApi {
 
   async createGroup(roomUuid: string, memberLimit: number, userToken: string) {
     let res = await this.fetch({
-      full_url: `${REACT_APP_AGORA_APP_SDK_DOMAIN}/grouping/apps/${APP_ID}/v1/rooms/${roomUuid}/groups`,
+      full_url: `${this.sdkDomain}/grouping/apps/${this.appId}/v1/rooms/${roomUuid}/groups`,
       method: 'POST',
       data: {
         roleConfig: {

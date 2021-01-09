@@ -5,7 +5,7 @@ import {Dialog, DialogContent, DialogContentText} from '@material-ui/core';
 import './dialog.scss';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react';
-import { useRoomStore, useUIStore, useBreakoutRoomStore, useMiddleRoomStore, useSceneStore, useExtensionStore } from '@/hooks';
+import { useRoomStore, useUIStore, useBreakoutRoomStore, useMiddleRoomStore, useSceneStore, useExtensionStore, useAppStore } from '@/hooks';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export interface DialogMessage {
@@ -79,6 +79,7 @@ function RoomDialog(
 // })
 
 export const RoomNavigationDialog = observer((props: any) => {
+  const appStore = useAppStore()
   const middleRoomStore = useMiddleRoomStore()
   const roomStore = useRoomStore()
   const breakoutRoomStore = useBreakoutRoomStore()
@@ -97,7 +98,7 @@ export const RoomNavigationDialog = observer((props: any) => {
       uiStore.unblock()
       history.push('/')
     }
-  }, [roomStore.teacherRejectApply, ])
+  }, [roomStore.teacherRejectApply, appStore])
 
   const onConfirm = useCallback(async ({type, option}: DialogMessage) => {
     if (type === 'exitRoom') {
@@ -111,6 +112,8 @@ export const RoomNavigationDialog = observer((props: any) => {
       }
       uiStore.unblock()
       history.replace('/')
+      // appStore
+      // appStore.middleRoomStore
     }
     else if (type === 'apply') {
       // p2p message accept coVideo
@@ -133,7 +136,7 @@ export const RoomNavigationDialog = observer((props: any) => {
     }
 
     return;
-  }, [props.handleLocationConfirm, location.pathname, breakoutRoomStore, roomStore, uiStore, history, extensionStore])
+  }, [props.handleLocationConfirm, location.pathname, breakoutRoomStore, roomStore, uiStore, history, extensionStore, appStore])
 
   return <>
     {

@@ -1,9 +1,9 @@
-import { logApi } from "../services/log-upload";
 import {db} from "./db";
 import Dexie from "dexie";
 // eslint-disable
 import LogWorker from 'worker-loader!./log.worker';
 import { EduLogLevel } from "./interfaces/index.d";
+import { LogUpload } from "../services/log-upload";
 
 const flat = (arr: any[]) => {
   return arr.reduce((arr, elem) => arr.concat(elem), []);
@@ -84,7 +84,13 @@ export class EduLogger {
 
   static thread: LogWorker | null = null;
 
-  static init() {
+  static logUploader: LogUpload
+
+  static init(appId: string, sdkDomain: string) {
+    this.logUploader = new LogUpload({
+      appId,
+      sdkDomain
+    })
     if (!this.thread) {
       this.thread = new LogWorker()
       this.debugLog();
@@ -117,7 +123,7 @@ export class EduLogger {
 
   static async uploadElectronLog(roomId: any) {
     let file = await window.doGzip();
-    const res = await logApi.uploadZipLogFile(
+    const res = await this.logUploader.uploadZipLogFile(
       roomId,
       file
     )
@@ -151,13 +157,9 @@ export class EduLogger {
 
     const now = this.ts
 
-    // window.logsStr = logsStr
-
     const file = await new File([logsStr], `${now}`)
-
-    // window.file = file
     
-    let res: any = await logApi.uploadLogFile(
+    let res: any = await this.logUploader.uploadLogFile(
       roomId,
       file,
     )

@@ -3,7 +3,7 @@ export class GenericErrorWrapper extends Error {
   stack?: string
 
   constructor(err: any) {
-    super()
+    super(err)
     if (err.hasOwnProperty('stack')) {
       this.stack = err.stack
     }

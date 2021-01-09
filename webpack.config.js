@@ -1,23 +1,21 @@
-// const paths = require("./paths");
 const threadLoader = require("thread-loader");
 const webpack = require("webpack");
-// const DotenvFlow = require("dotenv-flow-webpack");
-// const HtmlWebpackPlugin = require("html-webpack-plugin");
-// const ProgressBarPlugin = require("progress-bar-webpack-plugin");
-// const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const config = require('dotenv').config().parsed
 
-console.log("***", config.parsed)
-
 // const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("webpack").container
-  .ModuleFederationPlugin;
+// const ModuleFederationPlugin = require("webpack").container
+//   .ModuleFederationPlugin;
 const path = require("path");
 
 module.exports = {
-  entry: "./src/index.tsx",
+  entry: {
+    live_room: "./src/monolithic/live-room",
+    replay_room: "./src/monolithic/replay-room",
+  },
   mode: "production",
   // devServer: {
   //   contentBase: path.join(__dirname, "dist"),
@@ -25,7 +23,7 @@ module.exports = {
   // },
   output: {
     publicPath: '',
-    filename: 'index.bundle.js',
+    filename: '[name].bundle.js',
     libraryTarget: "umd",
     path: path.resolve(__dirname, 'dist'),
   },
@@ -79,13 +77,11 @@ module.exports = {
           },
           {
             loader: 'css-loader',
-            options: {}
+            // options: {}
           },
           {
             loader: 'sass-loader',
-            options: {
-
-            }
+            // options: {}
           },
           {
             loader: 'thread-loader',
@@ -103,16 +99,35 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg|mp4|webm|ogg|mp3|wav|flac|aac|woff|woff2|eot|ttf)$/,
         // exclude: /node_modules/,
         loader: "url-loader",
-        options: {
-          limit: 2*1024,
-          name: '[name].[hash:7].[ext]'
+        // options: {
+          // limit: 2*1024,
+          // name: '[name].[hash:7].[ext]'
           // name: 'agora',
           // name: argv.paths.image,
           // limit: 2 * 1024,
-        },
+        // },
       },
     ],
   },
+  optimization: {
+    minimizer: [
+        new TerserPlugin({
+            parallel: true,
+        }),
+        new OptimizeCssAssetsPlugin({
+            assetNameRegExp: /\.css$/g,
+            cssProcessorOptions: {
+                safe: true,
+                autoprefixer: { disable: true },
+                mergeLonghand: false,
+                discardComments: {
+                    removeAll: true
+                }
+            },
+            canPrint: true
+        })
+    ]
+},
   plugins: [
     new MiniCssExtractPlugin(),
     new webpack.DefinePlugin({

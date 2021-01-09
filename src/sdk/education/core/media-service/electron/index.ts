@@ -160,15 +160,17 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
   }
 
   releaseAllClient() {
+    EduLogger.info("call electron media service releaseAllClient")
     if (this.client) {
+      EduLogger.info("call electron media service main client removeAllListeners")
       this.client.removeAllListeners()
-      // this._client = undefined
     }
 
     if (this._subClient) {
       for (let key of Object.keys(this._subClient)) {
         if (this._subClient[key]) {
           this._subClient[key].client.removeAllListeners()
+          EduLogger.info(`call electron media service screenClient sub client ${key} removeAllListeners`)
           delete this._subClient[key]
         }
       }

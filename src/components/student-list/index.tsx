@@ -65,14 +65,14 @@ export const StudentList: React.FC<StudentListProps> = observer(({
         <div key={key} className={`item ${item.offline ? 'no-hover' : ''}`}>
           <div className="nickname">{item.account}</div>
             <div className={`attrs-group ${userRole !== 'teacher' ? 'no-hover' : ''}`}>
-              {/* {
+              {
                 userRole === 'teacher' ? 
                 <IconWrapper type="grantBoard" id={item.userUuid} value={grantUsers.includes(item.userUuid)} icon="connect" onClick={handleClick} /> : null
-              } */}
+              }
               {/* {roomStore.roomInfo.userRole === 'teacher' ? <IconWrapper type="grantBoard" id={item.userUuid} value={grantUsers.includes(item.userUuid)} icon="connect" onClick={handleClick} /> : null} */}
               {item.hasOwnProperty('audio') ? <IconWrapper type="audio" id={item.userUuid} value={Boolean(item.audio)} icon="audio" onClick={handleClick} /> : <div className="items"></div>}
               {item.hasOwnProperty('video') ? <IconWrapper type="video" id={item.userUuid} value={Boolean(item.video)} icon="video" onClick={handleClick} /> : <div className="items"></div>}
-              {userRole === 'teacher' && <IconWrapper type="kick" id={item.userUuid} value={Boolean(item.kick)} icon="kick" onClick={handleClick} />}
+              {/* {userRole === 'teacher' && <IconWrapper type="kick" id={item.userUuid} value={Boolean(item.kick)} icon="kick" onClick={handleClick} />} */}
             </div>
         </div>
       ))}

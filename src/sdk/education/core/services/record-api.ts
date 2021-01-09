@@ -1,16 +1,23 @@
 import { AgoraFetchParams } from "../../interfaces";
-import { APP_ID, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "../utils/http-client";
 
 export class AgoraRecordApi {
 
   private userToken: string;
+  private restToken: string;
+  private record_prefix: string
 
-  constructor(userToken: string) {
-    this.userToken = userToken
+  constructor(
+    params: {
+      prefix: string
+      restToken: string
+      userToken: string
+    }
+  ) {
+    this.record_prefix = params.prefix
+    this.restToken = params.restToken
+    this.userToken = params.userToken
   }
-
-  private record_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/recording/apps/%app_id`.replace('%app_id', APP_ID)
 
   async fetch (params: AgoraFetchParams) {
     const {
@@ -23,7 +30,7 @@ export class AgoraRecordApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${AUTHORIZATION!.replace(/basic\s+|basic/i, '')}`
+        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
       }
     }
 

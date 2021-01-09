@@ -1,3 +1,4 @@
+import { ReplayAppStore } from '@/stores/replay-app';
 import { SceneStore } from './../stores/app/scene';
 import { MediaStore } from './../stores/app/media';
 import { MobXProviderContext } from 'mobx-react';
@@ -14,6 +15,8 @@ import {
   ReplayStore,
   RecordingStore
  } from '@/stores/app';
+import { PlayerStore } from '@/stores/replay-app/player';
+import { ReplayUIStore } from '@/stores/replay-app/ui';
 
 export type appContext = Record<string, AppStore>
 
@@ -76,3 +79,15 @@ export const useSceneStore = (): SceneStore => {
   const context = useContext<appContext>(MobXProviderContext)
   return context.store.sceneStore
 }
+
+export type replayAppContext = Record<string, ReplayAppStore>
+
+export const useReplayPlayerStore = (): PlayerStore => {
+  const context = useContext<replayAppContext>(MobXProviderContext)
+  return context.store.playerStore
+}
+
+export const useReplayUIStore = (): ReplayUIStore => {
+  const context = useContext<replayAppContext>(MobXProviderContext)
+  return context.store.uiStore
+ }

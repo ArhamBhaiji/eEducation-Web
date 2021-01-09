@@ -1,13 +1,9 @@
 import { EventEmitter } from 'events';
-import { Room, WhiteWebSdk, DeviceType, createPlugins, Plugins, JoinRoomParams, Player, ReplayRoomParams, ViewMode, ScreenType } from 'white-web-sdk';
+import { Room, WhiteWebSdk, DeviceType, createPlugins, Plugins, JoinRoomParams, Player, ReplayRoomParams, ViewMode } from 'white-web-sdk';
 import { videoPlugin } from '@netless/white-video-plugin';
 import { audioPlugin } from '@netless/white-audio-plugin';
 import { get } from 'lodash';
 import { BizLogger } from '@/utils/biz-logger';
-
-const appIdentifier = `${REACT_APP_NETLESS_APP_ID}`
-console.log("appid: ", appIdentifier)
-
 export class BoardClient extends EventEmitter {
   client!: WhiteWebSdk;
   plugins?: Plugins<Object>;
@@ -18,8 +14,11 @@ export class BoardClient extends EventEmitter {
 
   disconnected?: boolean = true
 
-  constructor(config: {identity: string} = {identity: 'guest'}) {
+  private appIdentifier!: string
+
+  constructor(config: {identity: string, appIdentifier: string} = {identity: 'guest', appIdentifier: ''}) {
     super()
+    this.appIdentifier = config.appIdentifier
     this.initPlugins(config.identity)
     this.init()
   }
@@ -36,9 +35,11 @@ export class BoardClient extends EventEmitter {
     this.client = new WhiteWebSdk({
       deviceType: DeviceType.Surface,
       plugins: this.plugins,
-      appIdentifier: appIdentifier,
+      appIdentifier: this.appIdentifier,
       loggerOptions: {
-        disableReportLog: true,
+        // reportQualityMode: "alwaysReport",
+        // reportDebugLogMode: "alwaysReport",
+        // disableReportLog: true,
         reportLevelMask: "debug",
         printLevelMask: "debug",
       }

@@ -91,14 +91,6 @@ type DeleteStreamsParams = {
 
 export class AgoraEduApi {
   roomUuid: string = '';
-
-  // private _prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scenario/education/apps/%app_id`
-  private _prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scene/apps/%app_id`
-  private _board_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/board/apps/%app_id`
-  // private _board_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scenario/board/apps/%app_id`
-  private _record_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/recording/apps/%app_id`
-  // private _record_prefix: string = `${REACT_APP_AGORA_APP_SDK_DOMAIN}/scenario/recording/apps/%app_id`
-
   appId!: string;
   authorization!: string;
   _userToken: string = '';
@@ -111,42 +103,25 @@ export class AgoraEduApi {
 
   private lastUserListTime: number = 0;
   private lastStreamListTime: number = 0;
+  private _prefix: string;
 
   constructor(
     public readonly appID: string,
     public readonly AUTHORIZATION: string,
+    sdkDomain: string
   ) {
     this.appId = appID;
     this.authorization = AUTHORIZATION;
-    this.setApiPrefix(this.appId);
+    // this.setApiPrefix(this.appId);
     this.nextId = undefined;
     this.latestTime = 0;
     this.lastUserListTime = 0;
     this.lastStreamListTime = 0;
-  }
-
-  get prefix() {
-    return this._prefix
-  }
-
-  get board_prefix() {
-    return this._board_prefix
-  }
-
-  get record_prefix() {
-    return this._record_prefix;
-  }
-
-  public setApiPrefix(appId: string) {
-    this._prefix = this._prefix.replace('%app_id', appId)
-    // this._board_prefix = this._board_prefix.replace('%app_id', this.appId)
-    // this._record_prefix = this._record_prefix.replace('%app_id', this.appId)
+    this._prefix = `${sdkDomain}/scene/apps/%app_id`.replace('%app_id', this.appId)
   }
   
   public get userToken(): string {
     return this._userToken
-    // const userToken = window.sessionStorage.getItem("edu-userToken") as string || '';
-    // return userToken;
   }
 
   public updateLastTime(t: number) {
@@ -194,7 +169,7 @@ export class AgoraEduApi {
     if (full_url) {
       resp = await HttpClient(`${full_url}`, opts);
     } else {
-      const rawUrl = `${this.prefix}${url}`
+      const rawUrl = `${this._prefix}${url}`
       resp = await HttpClient(`${rawUrl}`, opts);
     }  
     

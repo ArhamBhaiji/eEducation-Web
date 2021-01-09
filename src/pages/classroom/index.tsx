@@ -11,6 +11,9 @@ import { t } from '@/i18n';
 
 import './room.scss';
 import { BizLogger } from '@/utils/biz-logger';
+import { SmallClass } from './small-class';
+import { OneToOne } from './one-to-one';
+import { BigClass } from './big-class';
 
 export const roomTypes = [
   {value: 0, path: 'one-to-one'},
@@ -88,3 +91,20 @@ export function RoomPage({ children }: any) {
   )
 }
 
+export const OneToOneRoomPage = () => (
+  <RoomPage>
+    <OneToOne />
+  </RoomPage>
+)
+
+export const SmallClassPage = () => (
+  <RoomPage>
+    <SmallClass />
+  </RoomPage>
+)
+
+export const BigClassPage = () => (
+  <RoomPage>
+    <BigClass />
+  </RoomPage>
+)

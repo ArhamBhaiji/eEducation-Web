@@ -30,14 +30,3 @@ export const Loading: React.FC<{}> = () => {
     </div>
   );
 }
-
-export default function LoadContainer () {
-
-  // const state = useGlobalState();
-
-  const loading = false;
-
-  return (
-    loading ? <Loading /> : null
-  )
-}

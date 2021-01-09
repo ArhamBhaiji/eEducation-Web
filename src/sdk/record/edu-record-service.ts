@@ -4,8 +4,12 @@ export class EduRecordService {
 
   apiService: AgoraRecordApi;
 
-  constructor(userToken: string) {
-    this.apiService = new AgoraRecordApi(userToken)
+  constructor(params: {
+    userToken: string
+    restToken: string
+    prefix: string
+  }) {
+    this.apiService = new AgoraRecordApi(params)
   }
 
   async getCourseRecordBy(roomUuid: string) {

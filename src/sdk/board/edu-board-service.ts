@@ -4,8 +4,13 @@ import { EduLogger } from '../education/core/logger';
 export class EduBoardService {
   apiService: AgoraBoardApi;
 
-  constructor(userToken: string, roomUuid: string) {
-    this.apiService = new AgoraBoardApi(userToken, roomUuid)
+  constructor(params: {
+    prefix: string
+    userToken: string
+    restToken: string
+    roomUuid: string
+  }) {
+    this.apiService = new AgoraBoardApi(params)
   }
 
   async getBoardInfo() {

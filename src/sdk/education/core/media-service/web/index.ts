@@ -67,13 +67,16 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
   }
 
   releaseAllClient() {
+    EduLogger.info("call web media service releaseAllClient")
     if (this.client) {
       this.client.removeAllListeners()
+      EduLogger.info("call web media service main client removeAllListeners")
       this._client = undefined
     }
 
     if (this.screenClient) {
       this.screenClient.removeAllListeners()
+      EduLogger.info("call web media service screenClient client removeAllListeners")
       this._screenClient = undefined
     }
 
@@ -81,6 +84,8 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
       for (let key of Object.keys(this._subClient)) {
         if (this._subClient[key]) {
           this._subClient[key].removeAllListeners()
+          this.screenClient.removeAllListeners()
+          EduLogger.info(`call web media service screenClient sub client ${key} removeAllListeners`)
           delete this._subClient[key]
         }
       }

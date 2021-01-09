@@ -17,6 +17,16 @@ export type ClassroomInitParams = {
 
 export type ClassRoomAuthorization = string
 
+// const symbolConfig = Symbol.for("config")
+
+
+const internalEduManagerConfig: {
+  appId: string,
+  sdkDomain: string
+} = {
+  appId: "",
+  sdkDomain: ""
+}
 export class EduManager extends EventEmitter {
   // recommend use enable true
   private static enable: boolean = true
@@ -53,7 +63,18 @@ export class EduManager extends EventEmitter {
       }
     }
     this._mediaService = new MediaService(buildOption)
-    this.apiService = new AgoraEduApi(this.config.appId, this.authorization)
+    this.apiService = new AgoraEduApi(
+      this.config.appId,
+      this.authorization,
+      this.config.sdkDomain as string
+    )
+    Object.assign(
+      internalEduManagerConfig,
+      {
+        appId: this.config.appId,
+        sdkDomain: this.config.sdkDomain
+      }
+    )
   }
 
   private get rtmWrapper(): RTMWrapper {
@@ -71,7 +92,7 @@ export class EduManager extends EventEmitter {
   static enableDebugLog(enable: boolean) {
     this.enable = enable
     if (this.enable) {
-      EduLogger.init()
+      EduLogger.init(internalEduManagerConfig.appId, internalEduManagerConfig.sdkDomain)
     }
   }
 
@@ -86,7 +107,20 @@ export class EduManager extends EventEmitter {
   }
 
   get authorization(): string {
-    return window.btoa(`${this.config.customerId}:${this.config.customerCertificate}`)
+    return this.config.agoraRestToken
+  }
+
+  get prefix() {
+    if (this.config.sdkDomain) {
+      return {
+        "board": `${this.config.sdkDomain}/board/apps/%app_id`.replace('%app_id', this.config.appId),
+        "record": `${this.config.sdkDomain}/recording/apps/%app_id`.replace('%app_id', this.config.appId)
+      }
+    }
+    return {
+      "board": "",
+      "record": ""
+    }
   }
 
   private async prepareLogin(userUuid: string) {
@@ -167,7 +201,7 @@ export class EduManager extends EventEmitter {
       EduLogger.debug(`login userUuid: ${userUuid} success`)
       this._rtmWrapper = rtmWrapper
     } catch (err) {
-      new GenericErrorWrapper(err)
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -188,7 +222,11 @@ export class EduManager extends EventEmitter {
       roomUuid: roomUuid,
       roomName: params.roomName,
       eduManager: this,
-      apiService: new AgoraEduApi(this.config.appId, this.authorization),
+      apiService: new AgoraEduApi(
+        this.config.appId,
+        this.authorization,
+        this.config.sdkDomain as string
+      ),
     })
     this._classroomMap[params.roomUuid] = classroomManager
     this._dataBuffer[params.roomUuid] = new EduClassroomDataController(this._classroomMap[params.roomUuid])

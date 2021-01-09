@@ -1591,7 +1591,11 @@ export class BreakoutRoomStore extends SimpleInterval {
 
   @action
   async prepareClassroom(role: string) {
-    this.roomApi = new RoomApi()
+    this.roomApi = new RoomApi({
+      appId: this.eduManager.config.appId,
+      sdkDomain: this.eduManager.config.sdkDomain as string,
+      restToken: this.eduManager.config.agoraRestToken
+    })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
       roomType: +this.roomInfo.roomType as number,
@@ -1622,11 +1626,20 @@ export class BreakoutRoomStore extends SimpleInterval {
       const groupManager = this.groupClassroomManager
       const largeRoomManager = this.largeClassroomManager
       BizLogger.info('[breakout] groupManager', groupManager)
-      this.appStore._boardService = new EduBoardService(largeRoomManager.userToken, largeRoomManager.roomUuid)
+      this.appStore._boardService = new EduBoardService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: largeRoomManager.userToken,
+        roomUuid: largeRoomManager.roomUuid,
+        prefix: this.eduManager.prefix["board"],
+      })
+      this.appStore._recordService = new EduRecordService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: largeRoomManager.userToken,
+        prefix: this.eduManager.prefix["record"],
+      })
       BizLogger.info('[breakout whiteboard] invoke init')
       await this.appStore.boardStore.init()
       BizLogger.info('[breakout whiteboard] after invoke init')
-      this.appStore._recordService = new EduRecordService(largeRoomManager.userToken)
       const mainStream = groupManager.data.streamMap['main']
       const largeRoomMainStream = largeRoomManager.data.streamMap['main']
       const roomInfo = this.largeClassroomManager.getClassroomInfo()
@@ -1709,11 +1722,20 @@ export class BreakoutRoomStore extends SimpleInterval {
     await this.prepareClassroom(this.roomInfo.userRole)
     BizLogger.info('[breakout] classroom as teacher')
     const roomManager = this.largeClassroomManager
-    this.appStore._boardService = new EduBoardService(roomManager.userToken, roomManager.roomUuid)
+    this.appStore._boardService = new EduBoardService({
+      restToken: this.eduManager.config.agoraRestToken,
+      userToken: roomManager.userToken,
+      roomUuid: roomManager.roomUuid,
+      prefix: this.eduManager.prefix["board"],
+    })
+    this.appStore._recordService = new EduRecordService({
+      restToken: this.eduManager.config.agoraRestToken,
+      userToken: roomManager.userToken,
+      prefix: this.eduManager.prefix["record"],
+    })
     BizLogger.info('[breakout whiteboard] invoke init')
     await this.appStore.boardStore.init()
     BizLogger.info('[breakout whiteboard] after invoke init')
-    this.appStore._recordService = new EduRecordService(roomManager.userToken)
     const mainStream = roomManager.data.streamMap['main']
     const roomInfo = this.largeClassroomManager.getClassroomInfo()
     BizLogger.info("[breakout] joinAsTeacher ", JSON.stringify({mainStream, roomInfo}))
@@ -1777,7 +1799,11 @@ export class BreakoutRoomStore extends SimpleInterval {
   startTime: number = 0
   @action
   async assistantJoinLargeClassroom() {
-    this.roomApi = new RoomApi()
+    this.roomApi = new RoomApi({
+      appId: this.eduManager.config.appId,
+      sdkDomain: this.eduManager.config.sdkDomain as string,
+      restToken: this.eduManager.config.agoraRestToken
+    })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
       roomType: +this.roomInfo.roomType as number,
@@ -1926,11 +1952,20 @@ export class BreakoutRoomStore extends SimpleInterval {
       await this.assistantJoinGroupClassroomByCourse(courseName, groupName)
       const groupManager = this.groupClassroomManager
       const largeRoomManager = this.largeClassroomManager
-      this.appStore._boardService = new EduBoardService(largeRoomManager.userToken, largeRoomManager.roomUuid)
+      this.appStore._boardService = new EduBoardService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: largeRoomManager.userToken,
+        roomUuid: largeRoomManager.roomUuid,
+        prefix: this.eduManager.prefix["board"],
+      })
+      this.appStore._recordService = new EduRecordService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: largeRoomManager.userToken,
+        prefix: this.eduManager.prefix["record"],
+      })
       BizLogger.info('[breakout whiteboard] invoke init')
       await this.appStore.boardStore.init()
       BizLogger.info('[breakout whiteboard] after invoke init')
-      this.appStore._recordService = new EduRecordService(largeRoomManager.userToken)
       const mainStream = groupManager.data.streamMap['main']
       const largeRoomMainStream = largeRoomManager.data.streamMap['main']
       const roomInfo = this.largeClassroomManager.getClassroomInfo()

@@ -13,6 +13,7 @@ const {
   addWebpackAlias,
   // addWebpackTarget,
 } = require('customize-cra')
+const dotenv = require('dotenv')
 const {DefinePlugin} = require('webpack')
 const addWebpackTarget = target => config => {
   config.target = target
@@ -82,6 +83,10 @@ const useOptimizeBabelConfig = () => config => {
   return config;
 }
 
+const config = process.env
+
+console.log(" config ", config.REACT_APP_BUILD_VERSION)
+
 module.exports = override(
   // useBabelRc(),
   // isElectron && addWebpackTarget('electron-renderer'),
@@ -105,6 +110,26 @@ module.exports = override(
       camel2DashComponentName: false
     }
   ]),
+  addWebpackPlugin(new DefinePlugin({
+    // 'REACT_APP_AGORA_APP_SDK_DOMAIN': JSON.stringify(process.env.REACT_APP_AGORA_APP_SDK_DOMAIN),
+    // 'REACT_APP_AGORA_APP_SDK_LOG_SECRET': JSON.stringify(process.env.REACT_APP_AGORA_APP_SDK_DOMAIN)
+    REACT_APP_AGORA_RECORDING_OSS_URL: JSON.stringify(config.REACT_APP_AGORA_RECORDING_OSS_URL),
+    REACT_APP_AGORA_GTM_ID: JSON.stringify(config.REACT_APP_AGORA_GTM_ID),
+    REACT_APP_BUILD_VERSION: JSON.stringify(config.REACT_APP_BUILD_VERSION),
+    REACT_APP_NETLESS_APP_ID: JSON.stringify(config.REACT_APP_NETLESS_APP_ID),
+    REACT_APP_AGORA_APP_ID: JSON.stringify(config.REACT_APP_AGORA_APP_ID),
+    REACT_APP_AGORA_CUSTOMER_ID: JSON.stringify(config.REACT_APP_AGORA_CUSTOMER_ID),
+    REACT_APP_AGORA_CUSTOMER_CERTIFICATE: JSON.stringify(config.REACT_APP_AGORA_CUSTOMER_CERTIFICATE),
+    REACT_APP_AGORA_APP_TOKEN: JSON.stringify(config.REACT_APP_AGORA_APP_TOKEN),
+    REACT_APP_AGORA_LOG: JSON.stringify(config.REACT_APP_AGORA_LOG),
+
+    REACT_APP_AGORA_APP_SDK_DOMAIN: JSON.stringify(config.REACT_APP_AGORA_APP_SDK_DOMAIN),
+    REACT_APP_YOUR_OWN_OSS_BUCKET_KEY: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_KEY),
+    REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET),
+    REACT_APP_YOUR_OWN_OSS_BUCKET_NAME: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_NAME),
+    REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE),
+    REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER),
+  })),
   addWebpackPlugin(
     new SimpleProgressWebpackPlugin()
   ),
@@ -133,8 +158,4 @@ module.exports = override(
   addWebpackAlias({
     ['@']: path.resolve(__dirname, 'src')
   }),
-  addWebpackPlugin(new DefinePlugin({
-    'REACT_APP_AGORA_APP_SDK_DOMAIN': JSON.stringify(process.env.REACT_APP_AGORA_APP_SDK_DOMAIN),
-    'REACT_APP_AGORA_APP_SDK_LOG_SECRET': JSON.stringify(process.env.REACT_APP_AGORA_APP_SDK_DOMAIN)
-  }))
 )

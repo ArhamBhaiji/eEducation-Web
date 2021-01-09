@@ -1,3 +1,4 @@
+import { GenericErrorWrapper } from './../../sdk/education/core/utils/generic-error';
 import { EduRecordService } from './../../sdk/record/edu-record-service';
 import { EduBoardService } from './../../sdk/board/edu-board-service';
 import { DeviceStore } from './device';
@@ -13,7 +14,7 @@ import { ReplayStore } from './replay';
 import { BreakoutRoomStore } from './breakout-room';
 import { MiddleRoomStore } from './middle-room';
 import { ExtensionStore } from './extension'
-import { get } from 'lodash';
+// import { get, isEmpty } from 'lodash';
 import { GlobalStorage } from '@/utils/custom-storage';
 import { autorun, toJS, observable, action, computed, runInAction } from 'mobx';
 import { MediaStore } from './media';
@@ -27,13 +28,44 @@ import { AgoraElectronRTCWrapper } from '@/sdk/education/core/media-service/elec
 import { BizLogger } from '@/utils/biz-logger';
 import { platform } from '@/utils/platform';
 import { SceneStore } from './scene';
+import { ListenerCallback } from '@/modular/declare';
 
-const APP_ID: string = `${REACT_APP_AGORA_APP_ID}`;
-BizLogger.info("APP_ID ", APP_ID)
-const CUSTOMER_ID: string = `${REACT_APP_AGORA_CUSTOMER_ID}`;
-const CUSTOMER_CERTIFICATE: string = `${REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`;
+export type AppStoreConfigParams = {
+  agoraAppId: string
+  agoraNetlessAppId: string
+  agoraRestFullToken: string
+  enableLog: boolean
+  sdkDomain: string
+  oss?: {
+    region: string
+    bucketName: string
+    folder: string
+    accessKey: string
+    secretKey: string
+    endpoint: string
+  }
+}
+
+export type AppStoreInitParams = {
+  roomInfoParams?: RoomInfo
+  config: AppStoreConfigParams
+  listener?: ListenerCallback
+}
+
+export type RoomInfo = {
+  roomName: string
+  roomType: number
+  userName: string
+  userRole: string
+  userUuid: string
+  roomUuid: string
+  groupName?: string
+  groupUuid?: string
+}
+
 export class AppStore {
 
+  // stores
   uiStore!: UIStore;
   boardStore!: BoardStore;
   roomStore!: RoomStore;
@@ -45,10 +77,11 @@ export class AppStore {
   replayStore!: ReplayStore;
   mediaStore!: MediaStore;
   sceneStore!: SceneStore;
+  // stores
 
   eduManager!: EduManager;
 
-  userService?: EduUserService;
+  // userService?: EduUserService;
 
   _boardService?: EduBoardService;
   _recordService?: EduRecordService;
@@ -73,48 +106,110 @@ export class AppStore {
     return this.mediaService.sdkWrapper instanceof AgoraElectronRTCWrapper
   }
 
-  @observable
-  roomInfo: Record<string, string> = {}
-
   private load() {
-    EduManager.enableDebugLog(true);
     const storage = GlobalStorage.read("room")
     if (storage) {
       this.roomInfo = storage.roomInfo
     }
   }
 
-  constructor() {
-    this.load()
-    autorun(() => {
-      const data = toJS(this)
-      GlobalStorage.save("room", {
-        roomInfo: data.roomInfo,
+  @observable
+  roomInfo!: RoomInfo
+  
+  @observable
+  params!: AppStoreInitParams
+
+  roomManager?: EduClassroomManager = undefined
+
+  groupClassroomManager?: EduClassroomManager = undefined
+
+  @observable
+  delay: number = 0
+
+  @observable
+  time: number = 0
+
+  @observable
+  cpuRate: number = 0
+
+  @observable
+  waitingShare: boolean = false
+
+  @observable
+  _screenVideoRenderer?: LocalUserRenderer = undefined;
+
+  @observable
+  _screenEduStream?: EduStream = undefined
+
+  @observable
+  sharing: boolean = false
+
+  @observable
+  customScreenShareWindowVisible: boolean = false
+  
+  @observable
+  customScreenShareItems: any[] = []
+
+  @action
+  resetStates() {
+    this.mediaStore.resetRoomState()
+    this.resetRoomInfo()    
+    this.resetParams()
+    this.roomManager = undefined
+    this.groupClassroomManager = undefined
+    this.delay = 0
+    this.time = 0
+    this.cpuRate = 0
+    this.waitingShare = false
+    this._screenVideoRenderer = undefined;
+    this._screenEduStream = undefined
+    this.sharing = false
+    this.customScreenShareWindowVisible = false
+    this.customScreenShareItems = []
+  }
+
+  constructor(params: AppStoreInitParams) {
+    this.params = params
+    console.log(" config >>> params: ", this.params)
+    const {config, roomInfoParams} = params
+
+    if (config.enableLog) {
+      EduManager.enableDebugLog(true);
+    }
+
+    if (!roomInfoParams) {
+      this.load()
+      autorun(() => {
+        const data = toJS(this)
+        GlobalStorage.save("room", {
+          roomInfo: data.roomInfo,
+        })
       })
-    })
+    }
+
     if (platform === 'electron') {
       this.eduManager = new EduManager({
-        appId: APP_ID,
-        customerId: CUSTOMER_ID,
+        appId: config.agoraAppId,
+        agoraRestToken: config.agoraRestFullToken,
         platform: 'electron',
-        customerCertificate: CUSTOMER_CERTIFICATE,
         logLevel: '' as any,
         logDirectoryPath: '',
         // @ts-ignore
         agoraRtc: window.rtcEngine,
         agoraRtm: AgoraRTM,
+        sdkDomain: config.sdkDomain,
       })
     } else {
       this.eduManager = new EduManager({
-        appId: APP_ID,
-        customerId: CUSTOMER_ID,
+        appId: config.agoraAppId,
+        agoraRestToken: config.agoraRestFullToken,
         platform: 'web',
-        customerCertificate: CUSTOMER_CERTIFICATE,
         logLevel: '' as any,
         logDirectoryPath: '',
         agoraRtc: AgoraRTC,
         agoraRtm: AgoraRTM,
-        codec: 'vp8'
+        codec: 'vp8',
+        sdkDomain: config.sdkDomain,
       })
     }
 
@@ -132,35 +227,54 @@ export class AppStore {
     this._screenVideoRenderer = undefined
   }
 
+  @computed
   get userRole (): string {
-    return get(this, 'roomInfo.userRole')
+    return this.roomInfo.userRole
   }
 
+  @computed
   get roomType (): number {
-    return +get(this, 'roomInfo.roomType', -1)
+    return this.roomInfo.roomType
+  }
+
+  @action
+  resetParams() {
+    this.params = {
+      roomInfoParams: {
+        roomName: '',
+        roomType: 0,
+        userName: '',
+        userRole: '',
+        userUuid: '',
+        roomUuid: '',
+        groupName: '',
+        groupUuid: '',
+      },
+      config: {
+        agoraAppId: '',
+        agoraNetlessAppId: '',
+        agoraRestFullToken: '',
+        enableLog: true,
+        sdkDomain: ''
+      }
+    }
   }
 
   @action
   resetRoomInfo() {
-    this.roomInfo = {}
+    this.roomInfo = {
+      roomName: "",
+      roomUuid: "",
+      roomType: 0,
+      userName: "",
+      userRole: "",
+      userUuid: "",
+    }
   }
 
   get userUuid(): string {
-    return `${this.roomInfo.userName}${this.roomInfo.userRole}`
+    return this.roomInfo.userUuid
   }
-
-  roomManager?: EduClassroomManager = undefined
-
-  groupClassroomManager?: EduClassroomManager = undefined
-
-  @observable
-  delay: number = 0
-
-  @observable
-  time: number = 0
-
-  @observable
-  cpuRate: number = 0
 
   @action
   updateCpuRate(rate: number) {
@@ -181,32 +295,16 @@ export class AppStore {
 
   @action
   setRoomInfo(payload: any) {
-    this.roomInfo = ({
+    this.roomInfo = {
       roomName: payload.roomName,
       roomType: payload.roomType,
+      roomUuid: payload.roomUuid,
       userName: payload.userName,
       userRole: payload.role,
-      userUuid: `${payload.userName}${payload.role}`
-    })
+      userUuid: payload.userUuid,
+      // userUuid: `${payload.userName}${payload.role}`
+    }
   }
-
-  @observable
-  waitingShare: boolean = false
-
-  @observable
-  _screenVideoRenderer?: LocalUserRenderer = undefined;
-
-  @observable
-  _screenEduStream?: EduStream = undefined
-
-  @observable
-  sharing: boolean = false
-
-  @observable
-  customScreenShareWindowVisible: boolean = false
-  
-  @observable
-  customScreenShareItems: any[] = []
 
   @action
   async stopWebSharing() {
@@ -389,6 +487,21 @@ export class AppStore {
     // this.roomInfo = {}
     this.resetWebPrepareScreen()
     this.removeScreenShareWindow()
+  }
+
+  @action
+  async releaseRoom() {
+    try {
+      await this.roomStore.leave()
+      this.resetStates()
+    } catch (err) {
+      this.resetStates()
+      throw new GenericErrorWrapper(err)
+    }
+  }
+
+  async destroy() {
+    await this.releaseRoom()
   }
 }
 

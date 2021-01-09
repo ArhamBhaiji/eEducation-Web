@@ -1,15 +1,12 @@
-import { EduRecordService } from './../../sdk/record/edu-record-service';
+import { ReplayAppStore } from '@/stores/replay-app';
+import { EduRecordService } from '../../sdk/record/edu-record-service';
 import { BoardClient } from '@/components/netless-board/board-client';
-import { AppStore } from '@/stores/app';
 import { observable, action, computed } from "mobx";
 import CombinePlayerFactory from '@netless/combine-player';
 import { t } from '@/i18n';
 import { AnimationMode, PlayerPhase, Room } from 'white-web-sdk';
 import { BizLogger } from '@/utils/biz-logger';
-
-const cdnPrefix = 'https://agora-adc-artifacts.oss-accelerate.aliyuncs.com'
-
-export class ReplayStore {
+export class PlayerStore {
 
   @observable
   combinePlayer: any
@@ -32,33 +29,84 @@ export class ReplayStore {
   @observable
   endTime: number = 0
 
-  appStore: AppStore
-  boardClient: BoardClient
-  recordService: EduRecordService
+  _boardClient?: BoardClient
+  _recordService?: EduRecordService
 
-  constructor(appStore: AppStore) {
-    this.appStore = appStore
-    this.boardClient = new BoardClient({identity: 'host', appIdentifier: this.appStore.params.config.agoraNetlessAppId})
-    this.recordService = new EduRecordService({
-      restToken: this.appStore.eduManager.config.agoraRestToken,
-      userToken: '',
-      prefix: this.appStore.eduManager.prefix["record"],
-    })
+  appStore: ReplayAppStore
+
+  @computed
+  get uiStore() {
+    return this.appStore.uiStore;
   }
 
-  @observable
-  ready: boolean = true;
+  async destroy() {
+    try {
+      await this.boardClient.destroy()
+      this.boardClient.removeAllListeners()
+      this.reset()
+    } catch (err) {
+      this.boardClient.removeAllListeners()
+      this.reset()
+    }
+  }
 
-  @observable
-  online: boolean = false;
+  @action
+  reset() {
+    this.combinePlayer = undefined
+    this.roomUuid = ''
+    this.boardUuid = ''
+    this.boardPreparing = false
+    this.statusText = ''
+    this.startTime = 0
+    this.endTime = 0
+    this._boardClient = undefined
+    this._recordService = undefined
+    this.ready = true
+    this.online = false
+    this.scale = 1
+    this.player = undefined
+    this.currentTime = 0
+    this.playFailed = false
+    this.phase = ''
+    this.firstFrame = false
+    this.recordStatus = 0
+    this.mediaUrl = ''
+    this.boardId = ''
+    this.boardToken = ''
+    this.progress = 0
+  }
+
+  get boardClient() {
+    return this._boardClient as BoardClient
+  }
+
+  get recordService() {
+    return this._recordService as EduRecordService
+  }
+
+  constructor(appStore: ReplayAppStore) {
+    const {
+      config,
+      replayConfig
+    } = appStore.params
+    this.appStore = appStore
+    this._boardClient = new BoardClient({identity: "host", appIdentifier: config.agoraNetlessAppId})
+    this._recordService = new EduRecordService({
+      restToken: config.agoraRestFullToken,
+      userToken: '',
+      prefix: `${config.sdkDomain}/recording/apps/%app_id`.replace('%app_id', config.agoraAppId),
+    })
+    this.mediaUrl = replayConfig.videoUrl
+    this.boardId = replayConfig.whiteboardId
+    this.boardToken = replayConfig.whiteboardToken
+    this.startTime = replayConfig.startTime
+    this.endTime = replayConfig.endTime
+  }
 
   @computed
   get duration(): number {
     return Math.abs(this.startTime - this.endTime)
   }
-
-  @observable
-  scale: number = 1
 
   pptAutoFullScreen() {
     if (this.room && this.online) {
@@ -81,6 +129,15 @@ export class ReplayStore {
     }
   }
 
+  @observable
+  ready: boolean = true;
+
+  @observable
+  online: boolean = false;
+
+  @observable
+  scale: number = 1
+
   get room(): Room {
     return this.boardClient?.room
   }
@@ -91,29 +148,50 @@ export class ReplayStore {
   @observable
   currentTime: number = 0
 
+  @observable
+  playFailed: boolean = false
+
+  @observable
+  phase: any = ''
+
+  @observable
+  firstFrame: boolean = false
+
+
+  @observable
+  recordStatus: number = 0
+
+  @observable
+  mediaUrl: string = ''
+
+  @observable
+  boardId: string = ''
+
+  @observable
+  boardToken: string = ''
+
+  @observable
+  progress: number = 0
+
+  @computed
+  get totalTime(): number {
+    return Math.abs(this.startTime - this.endTime)
+  }
+
   @action
   setCurrentTime(t: number) {
     this.currentTime = t
   }
-
-  @observable
-  playFailed: boolean = false
 
   @action
   setReplayFail(v: boolean) {
     this.playFailed = v
   }
 
-  @observable
-  phase: any = ''
-
   @action
   updatePhaseState(v: any) {
     this.phase = v
   }
-
-  @observable
-  firstFrame: boolean = false
 
   @action
   loadFirstFrame() {
@@ -146,7 +224,7 @@ export class ReplayStore {
       BizLogger.info('onPlayerStateChanged', state)
     })
     this.boardClient.on('onStoppedWithError', error => {
-      this.appStore.uiStore.addToast(t('toast.replay_failed'))
+      this.uiStore.addToast(t('toast.replay_failed'))
       this.setReplayFail(true)
       BizLogger.warn('onStoppedWithError', JSON.stringify(error))
     })
@@ -164,14 +242,14 @@ export class ReplayStore {
       this.player = this.boardClient.player
       this.player.seekToProgressTime(0);
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.replay_failed'))
+      this.uiStore.addToast(t('toast.replay_failed'))
       throw err
     }
 
     this.player.bindHtmlElement($board)
 
     const combinePlayerFactory = new CombinePlayerFactory(this.player, {
-      url: `${cdnPrefix}/${this.mediaUrl}`,
+      url: `${this.mediaUrl}`,
       videoDOM: $el
     }, true)
 
@@ -182,7 +260,7 @@ export class ReplayStore {
     
     this.combinePlayer = combinePlayer
     this.online = true
-    window.addEventListener('keydown', (evt: any) => {
+    const keydown = (evt: any) => {
       if (evt.code === 'Space') {
         const player = this.player
         if (this.online && player) {
@@ -203,29 +281,7 @@ export class ReplayStore {
           }
         }
       }
-    })
-    window.addEventListener('resize', () => {
-      if (this.online && this.player) {
-        this.player.refreshViewSize();
-      }
-    })
-  }
-
-  @observable
-  recordStatus: number = 0
-
-  @observable
-  mediaUrl: string = ''
-
-  @observable
-  boardId: string = ''
-
-  @observable
-  boardToken: string = ''
-
-  @computed
-  get totalTime(): number {
-    return Math.abs(this.startTime - this.endTime)
+    }
   }
 
   pauseCurrentTime() {
@@ -241,9 +297,6 @@ export class ReplayStore {
       player.play();
     }
   }
-
-  @observable
-  progress: number = 0
 
   @action
   updateProgress(v: number) {
@@ -269,58 +322,5 @@ export class ReplayStore {
         return;
       }
     }
-  }
-
-  @action
-  async getCourseRecordBy(roomUuid: string) {
-    if (this.recordStatus === 2 && this.mediaUrl) {
-      // BizLogger.info("recordStatus changed", roomUuid)
-      return
-    }
-    try {
-      let res = await this.recordService.getCourseRecordBy(roomUuid)
-      const recordList = res.list
-      recordList.sort((prev: any, cur: any) => {
-        return prev.startTime - cur.startTime
-      })
-      const lastRecord = recordList.slice(-1)[0]
-      const record = lastRecord
-      if (record) {
-        this.recordStatus = record.status
-        this.boardId = record.boardId
-        this.boardToken = record.boardToken
-        this.statusText = record.statusText
-        this.startTime = record.startTime
-        this.endTime = record.endTime
-        this.mediaUrl = record.url
-        this.currentTime = 0
-        BizLogger.info("record", record)
-      }
-    } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_query_playback_list') + `${err.msg}`)
-      throw err
-    }
-  }
-
-  @action
-  reset () {
-    this.scale = 1
-    if (this.combinePlayer) {
-      this.combinePlayer = undefined
-    }
-    this.roomUuid = ''
-    this.boardUuid = ''
-    this.boardPreparing = false
-    this.recordStatus = 0
-    this.startTime = 0
-    this.endTime = 0
-    this.mediaUrl = ''
-    this.boardId = ''
-    this.boardToken = ''
-    this.statusText = ''
-    this.currentTime = 0
-    this.player = undefined
-    window.removeEventListener('resize', () => {})
-    window.removeEventListener('keydown', () => {})
   }
 }

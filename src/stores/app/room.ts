@@ -63,7 +63,31 @@ export class RoomStore extends SimpleInterval {
       value: '1080p_1'
     }
   ]
-  appStore: AppStore;
+
+  @observable
+  roomChatMessages: ChatMessage[] = []
+
+  @observable
+  unreadMessageCount: number = 0
+
+  @observable
+  messages: any[] = []
+
+  @observable
+  joined: boolean = false
+
+  @observable
+  roomJoined: boolean = false
+
+  @observable
+  time: number = 0
+  
+  @observable
+  notice?: any = undefined
+
+  roomApi!: RoomApi;
+
+  appStore!: AppStore;
 
   get sceneStore() {
     return this.appStore.sceneStore
@@ -76,26 +100,24 @@ export class RoomStore extends SimpleInterval {
 
   @action
   reset() {
-    this.appStore.mediaStore.resetRoomState()
-    this.appStore.resetTime()
+    // this.appStore.mediaStore.resetRoomState()
+    // this.appStore.resetTime()
+    // this.appStore.resetRoomInfo()
+    this.appStore.resetStates()
     this.sceneStore.reset()
     this.roomChatMessages = []
+    this.unreadMessageCount = 0
+    this.messages = []
+    this.joined = false
+    this.roomJoined = false
+    this.time = 0
+    this.notice = undefined
   }
-
-
-  @observable
-  roomChatMessages: ChatMessage[] = []
 
   @action
   addChatMessage(args: any) {
     this.roomChatMessages.push(args)
   }
-  
-  @observable
-  unreadMessageCount: number = 0
-
-  @observable
-  messages: any[] = []
 
   get roomManager() {
     return this.sceneStore.roomManager
@@ -123,29 +145,15 @@ export class RoomStore extends SimpleInterval {
     }
   }
 
-  @observable
-  joined: boolean = false
-
-
   @computed
   get roomInfo() {
     return this.appStore.roomInfo
-  }
-
-  roomApi!: RoomApi;
-  
-  @action
-  resetRoomInfo() {
-    this.appStore.resetRoomInfo()
   }
 
   @computed
   get delay(): string {
     return `${this.appStore.mediaStore.delay}`
   }
-
-  @observable
-  time: number = 0
 
   isBigClassStudent(): boolean {
     const userRole = this.roomInfo.userRole
@@ -174,7 +182,11 @@ export class RoomStore extends SimpleInterval {
   async join() {
     try {
       this.appStore.uiStore.startLoading()
-      this.roomApi = new RoomApi()
+      this.roomApi = new RoomApi({
+        appId: this.eduManager.config.appId,
+        sdkDomain: this.eduManager.config.sdkDomain as string,
+        restToken: this.eduManager.config.agoraRestToken
+      })
       let {roomUuid} = await this.roomApi.fetchRoom({
         roomName: `${this.roomInfo.roomName}`,
         roomType: +this.roomInfo.roomType as number,
@@ -484,8 +496,17 @@ export class RoomStore extends SimpleInterval {
         })
       }
       this.sceneStore._roomManager = roomManager;
-      this.appStore._boardService = new EduBoardService(roomManager.userToken, roomManager.roomUuid)
-      this.appStore._recordService = new EduRecordService(roomManager.userToken)
+      this.appStore._boardService = new EduBoardService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: roomManager.userToken,
+        roomUuid: roomManager.roomUuid,
+        prefix: this.eduManager.prefix["board"],
+      })
+      this.appStore._recordService = new EduRecordService({
+        restToken: this.eduManager.config.agoraRestToken,
+        userToken: roomManager.userToken,
+        prefix: this.eduManager.prefix["record"],
+      })
   
       const roomInfo = roomManager.getClassroomInfo()
       this.sceneStore.startTime = +get(roomInfo, 'roomStatus.startTime', 0)
@@ -572,14 +593,12 @@ export class RoomStore extends SimpleInterval {
       }
       this.appStore.uiStore.stopLoading()
       this.joined = true
+      this.roomJoined = true
     } catch (err) {
       this.appStore.uiStore.stopLoading()
       throw err
     }
   }
-
-  @observable
-  notice?: any = undefined
 
   @action
   showNotice(type: PeerInviteEnum, userUuid: string) {
@@ -687,7 +706,7 @@ export class RoomStore extends SimpleInterval {
   @action
   async leave() {
     try {
-      this.sceneStore.joiningRTC = true
+      this.sceneStore.joiningRTC = false
       await this.sceneStore.leaveRtc()
       await this.appStore.boardStore.leave()
       await this.eduManager.logout()
@@ -695,7 +714,6 @@ export class RoomStore extends SimpleInterval {
       this.appStore.uiStore.addToast(t('toast.successfully_left_the_business_channel'))
       this.delInterval('timer')
       this.reset()
-      this.resetRoomInfo()
       this.appStore.uiStore.updateCurSeqId(0)
       this.appStore.uiStore.updateLastSeqId(0)
     } catch (err) {

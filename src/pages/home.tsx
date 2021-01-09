@@ -41,7 +41,7 @@ const defaultState: SessionInfo = {
 
 const roomTypes = UIStore.roomTypes
 
-function HomePage() {
+export const HomePage = React.memo(() => {
   document.title = t(`home.short_title.title`)
 
   const classes = useStyles();
@@ -245,5 +245,4 @@ function HomePage() {
       </div>
     </div>
   )
-}
-export default React.memo(HomePage);
+})

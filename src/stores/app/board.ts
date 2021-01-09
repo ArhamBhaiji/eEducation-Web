@@ -22,7 +22,7 @@ export const resolveFileInfo = (file: any) => {
   }
 }
 
-export const ossConfig: OSSConfig = {
+export const demoOssConfig: OSSConfig = {
   "accessKeyId": `${REACT_APP_YOUR_OWN_OSS_BUCKET_KEY}`,
   "accessKeySecret": `${REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET}`,
   "bucket": `${REACT_APP_YOUR_OWN_OSS_BUCKET_NAME}`,
@@ -130,6 +130,8 @@ export class BoardStore {
   @observable
   showFolder: boolean = false;
 
+  resizeCallback!: () => void;
+
   @action
   closeFolder() {
     this.showFolder = false
@@ -164,6 +166,20 @@ export class BoardStore {
   @observable
   activeScenePath: string = '/init'
 
+  @observable
+  ready: boolean = false
+
+  @observable
+  follow: number = 0
+
+  @observable
+  grantUsers: any[] = []
+
+  @observable
+  permission: number = 0
+
+  menuTitle: string = '课件目录'
+
   @action
   changeScenePath(path: string) {
     this.activeScenePath = path
@@ -171,8 +187,6 @@ export class BoardStore {
       this.room.setScenePath(this.activeScenePath)
     }
   }
-
-  menuTitle: string = '课件目录'
 
   appStore!: AppStore
 
@@ -187,16 +201,26 @@ export class BoardStore {
   ossClient: OSS
 
   @observable
-  ready: boolean = false
+  folder: string = ''
 
   constructor(appStore: AppStore) {
     this.appStore = appStore
     this._boardClient = undefined
-    this.ossClient = new OSS(ossConfig)
+    const ossConfig = this.appStore?.params?.config?.oss
+    if (ossConfig) {
+      this.ossClient = new OSS({
+        "accessKeyId": `${ossConfig.accessKey}`,
+        "accessKeySecret": `${ossConfig.secretKey}`,
+        "bucket": `${ossConfig.bucketName}`,
+        "endpoint": `${ossConfig.endpoint}`,
+        "folder": `${ossConfig.folder}`,
+      } as OSSConfig)
+      this.folder = ossConfig.folder
+    } else {
+      this.ossClient = new OSS(demoOssConfig)
+      this.folder = demoOssConfig.folder
+    }
   }
-
-  @observable
-  online: boolean = false;
 
   get room(): Room {
     return this.boardClient.room
@@ -205,16 +229,6 @@ export class BoardStore {
   get localUser(): EduUser {
     return this.appStore.roomStore.roomManager.localUser.user
   }
-
-  @observable
-  follow: number = 0
-
-
-  @observable
-  grantUsers: any[] = []
-
-  @observable
-  permission: number = 0
 
   get localUserUuid() {
     return this.appStore.userUuid
@@ -328,7 +342,7 @@ export class BoardStore {
   async join(params: any) {
     const {role, ...data} = params
     const identity = role === 'teacher' ? 'host' : 'guest'
-    this._boardClient = new BoardClient({identity})
+    this._boardClient = new BoardClient({identity, appIdentifier: this.appStore.params.config.agoraNetlessAppId})
     this.boardClient.on('onPhaseChanged', (state: any) => {
       if (state === 'disconnected') {
         this.online = false
@@ -353,22 +367,24 @@ export class BoardStore {
     this.online = true
     // this.updateSceneItems()
     this.room.bindHtmlElement(null)
-    window.addEventListener('resize', () => {
+    const resizeCallback = () => {
       if (this.online && this.room && this.room.isWritable) {
         this.room.moveCamera({centerX: 0, centerY: 0});
         this.room.refreshViewSize();
       }
-    })
+    }
+    this.resizeCallback = resizeCallback
+    window.addEventListener('resize', this.resizeCallback)
     this.updateSceneItems()
   }
 
   @action
   async leave() {
     if (this.boardClient && this.room) {
+      window.removeEventListener('resize', this.resizeCallback)
       await this.boardClient.destroy()
       this.room.bindHtmlElement(null)
       this.reset()
-      // window.removeEventListener('resize', () => {})
     }
   }
 
@@ -395,16 +411,6 @@ export class BoardStore {
         return
       }
     }
-  }
-
-  @observable
-  showColorPicker: boolean = false
-
-  @observable
-  strokeColor: any = {
-    r: 0,
-    g: 0,
-    b: 0
   }
 
   @action
@@ -483,9 +489,6 @@ export class BoardStore {
     }
   }
 
-  @observable
-  scale: number = 1
-
   @action
   changeColor(color: any) {
     const {rgb} = color;
@@ -528,11 +531,6 @@ export class BoardStore {
       }
     }
   }
-
-  @observable
-  uploadingPhase: string = '';
-  @observable
-  convertingPhase: string = '';
 
   handleProgress (phase: PPTProgressPhase, percent: number) { 
     if (phase === PPTProgressPhase.Uploading) {
@@ -591,9 +589,6 @@ export class BoardStore {
     if (this.loading) return 'loading';
     return '';
   }
-
-  @observable
-  sceneType: string = ''
 
   changePage(idx: number, force?: boolean) {
     const room = this.room
@@ -756,9 +751,6 @@ export class BoardStore {
     }
   }
 
-  @observable
-  convertPhase: string = ''
-
   @action
   updateConvertPhase(v: string) {
     this.convertPhase = v
@@ -804,9 +796,6 @@ export class BoardStore {
       })
     }
   }
-
-  @observable
-  uploadPhase: string = ''
   
   @action
   async uploadDynamicPPT(file: any) {
@@ -836,7 +825,7 @@ export class BoardStore {
           file,
           pptConverter,
           PPTKind.Dynamic,
-          ossConfig.folder,
+          this.folder,
           room.uuid,
           onProgress);
       } catch (err) {
@@ -879,7 +868,7 @@ export class BoardStore {
           file,
           pptConverter,
           PPTKind.Static,
-          ossConfig.folder,
+          this.folder,
           room.uuid,
           onProgress);
       }
@@ -901,7 +890,7 @@ export class BoardStore {
       const uploadManager = new UploadManager(this.ossClient, room);
       try {
         const {fileName, fileType} = resolveFileInfo(file);
-        const path = `/${ossConfig.folder}`
+        const path = `/${this.folder}`
         const uuid = uuidv4();
         const onProgress: PPTProgressListener = (phase: PPTProgressPhase, percent: number) => {
           if (phase === PPTProgressPhase.Uploading) {
@@ -997,11 +986,11 @@ export class BoardStore {
         const uploadManager = new UploadManager(this.ossClient, room);
         if (dom) {
           const { clientWidth, clientHeight } = dom;
-          await uploadManager.uploadImageFiles(ossConfig.folder, uploadFileArray, clientWidth / 2, clientHeight / 2, onProgress);
+          await uploadManager.uploadImageFiles(this.folder, uploadFileArray, clientWidth / 2, clientHeight / 2, onProgress);
         } else {
           const clientWidth = window.innerWidth;
           const clientHeight = window.innerHeight;
-          await uploadManager.uploadImageFiles(ossConfig.folder, uploadFileArray, clientWidth / 2, clientHeight / 2, onProgress);
+          await uploadManager.uploadImageFiles(this.folder, uploadFileArray, clientWidth / 2, clientHeight / 2, onProgress);
         }
       } catch (err) {
         if (this.uploadPhase === 'uploading') {
@@ -1014,9 +1003,6 @@ export class BoardStore {
       }
     }
   }
-
-  @observable
-  notices: any[] = []
 
   @action
   addNotice(it: any) {
@@ -1034,15 +1020,46 @@ export class BoardStore {
     }
   }
 
+  @observable
+  notices: any[] = []
+  @observable
+  uploadPhase: string = ''
+  @observable
+  convertPhase: string = ''
+  @observable
+  sceneType: string = ''
+  @observable
+  uploadingPhase: string = '';
+  @observable
+  convertingPhase: string = '';
+  @observable
+  scale: number = 1
+
+  @observable
+  online: boolean = false;
+
+  @observable
+  showColorPicker: boolean = false
+
+  @observable
+  strokeColor: any = {
+    r: 0,
+    g: 0,
+    b: 0
+  }
+
+  @observable
+  _grantPermission?: boolean = false
+
   @action
   reset () {
+    this.folder = ''
     this.scenes = []
     this.currentPage = 0
     this.totalPage = 0
     this.currentScene = '/init'
     this.hasBoardPermission = 0
     this.selector = ''
-    this.notices = []
     this.converting = false
     this.loading = false
     this.uploadPhase = ''
@@ -1052,6 +1069,20 @@ export class BoardStore {
     this.grantUsers = []
     this._grantPermission = false
     this.ready = false
+
+    this.notices = []
+    this.uploadPhase = ''
+    this.convertPhase = ''
+    this.sceneType = ''
+    this.uploadingPhase = ''
+    this.scale = 1  
+    this.online = false;
+    this.showColorPicker = false
+    this.strokeColor = {
+      r: 0,
+      g: 0,
+      b: 0
+    }
   }
 
   roomIsWritable(room: Room): boolean {
@@ -1091,9 +1122,6 @@ export class BoardStore {
   get boardService() {
     return this.appStore.boardService
   }
-
-  @observable
-  _grantPermission?: boolean = false
 
   @computed
   get hasPermission(): boolean {
