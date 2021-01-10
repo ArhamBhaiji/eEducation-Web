@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { useUIStore, useDeviceStore } from '@/hooks'
+import { useUIStore, useDeviceStore, useAppStore } from '@/hooks'
 import { CustomButton } from '@/components/custom-button'
 import { useLocation, useHistory } from 'react-router-dom'
 import { t } from '@/i18n';
@@ -11,15 +11,20 @@ export const TestReportPage = observer(() => {
   const location = useLocation()
   const uiStore = useUIStore()
   const deviceStore = useDeviceStore()
+  const appStore = useAppStore()
   
-  const onExit = () => {
+  const onExit = useCallback(() => {
     deviceStore.setActiveItem('video')
+    if (appStore.params?.roomPath) {
+      history.push(`${appStore.params.roomPath}`)
+      return
+    }
     if (location.pathname === '/setting') {
       history.push('/')
     } else {
       deviceStore.hideSetting()
     }
-  }
+  }, [appStore.params])
 
   const onTestAgain = () => {
     deviceStore.setActiveItem('video')

@@ -3,6 +3,7 @@ import './student-list.scss';
 import {CustomIcon} from '@/components/icon';
 import { observer } from 'mobx-react';
 import { BizLogger } from '@/utils/biz-logger';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 interface CustomIconProps {
   value: boolean
@@ -44,7 +45,7 @@ interface UserProps {
 }
 
 interface StudentListProps {
-  userRole: string,
+  userRole: EduRoleTypeEnum,
   students: any[],
   grantUsers: any[],
   isMiddleClassRoom?: boolean,
@@ -64,15 +65,15 @@ export const StudentList: React.FC<StudentListProps> = observer(({
       {students.map((item: any, key: number) => (
         <div key={key} className={`item ${item.offline ? 'no-hover' : ''}`}>
           <div className="nickname">{item.account}</div>
-            <div className={`attrs-group ${userRole !== 'teacher' ? 'no-hover' : ''}`}>
+            <div className={`attrs-group ${userRole !== EduRoleTypeEnum.teacher ? 'no-hover' : ''}`}>
               {
-                userRole === 'teacher' ? 
+                userRole === EduRoleTypeEnum.teacher ? 
                 <IconWrapper type="grantBoard" id={item.userUuid} value={grantUsers.includes(item.userUuid)} icon="connect" onClick={handleClick} /> : null
               }
-              {/* {roomStore.roomInfo.userRole === 'teacher' ? <IconWrapper type="grantBoard" id={item.userUuid} value={grantUsers.includes(item.userUuid)} icon="connect" onClick={handleClick} /> : null} */}
+              {/* {roomStore.roomInfo.userRole === EduRoleTypeEnum.teacher ? <IconWrapper type="grantBoard" id={item.userUuid} value={grantUsers.includes(item.userUuid)} icon="connect" onClick={handleClick} /> : null} */}
               {item.hasOwnProperty('audio') ? <IconWrapper type="audio" id={item.userUuid} value={Boolean(item.audio)} icon="audio" onClick={handleClick} /> : <div className="items"></div>}
               {item.hasOwnProperty('video') ? <IconWrapper type="video" id={item.userUuid} value={Boolean(item.video)} icon="video" onClick={handleClick} /> : <div className="items"></div>}
-              {/* {userRole === 'teacher' && <IconWrapper type="kick" id={item.userUuid} value={Boolean(item.kick)} icon="kick" onClick={handleClick} />} */}
+              {/* {userRole === EduRoleTypeEnum.teacher && <IconWrapper type="kick" id={item.userUuid} value={Boolean(item.kick)} icon="kick" onClick={handleClick} />} */}
             </div>
         </div>
       ))}

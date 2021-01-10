@@ -1,8 +1,9 @@
+import { eduModularApi } from '@/services/edu-modular-api';
 import uuidv4 from 'uuid/v4';
 import { SimpleInterval } from './../mixin/simple-interval';
 import { EduBoardService } from './../../sdk/board/edu-board-service';
 import { EduRecordService } from './../../sdk/record/edu-record-service';
-import { EduAudioSourceType, EduTextMessage, EduSceneType } from './../../sdk/education/interfaces/index.d';
+import { EduAudioSourceType, EduTextMessage, EduSceneType, RoomProperties } from './../../sdk/education/interfaces/index.d';
 import { RemoteUserRenderer } from './../../sdk/education/core/media-service/renderer/index';
 import { RoomApi } from './../../services/room-api';
 import { EduClassroomManager } from '@/sdk/education/room/edu-classroom-manager';
@@ -21,6 +22,8 @@ import { t } from '@/i18n';
 import { DialogType } from '@/components/dialog';
 import { BizLogger } from '@/utils/biz-logger';
 import { SceneStore } from './scene';
+import { GenericErrorWrapper } from '@/sdk/education/core/utils/generic-error';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const delay = 2000
 
@@ -131,7 +134,15 @@ export class RoomStore extends SimpleInterval {
   @action
   async sendMessage(message: any) {
     try {
-      await this.roomManager?.userService.sendRoomChatMessage(message)
+      await eduModularApi.sendChat({
+        roomUuid: this.roomInfo.roomUuid,
+        userUuid: this.roomInfo.userUuid,
+        data: {
+          message,
+          type: 1,
+        }
+      })
+      // await this.roomManager?.userService.sendRoomChatMessage(message)
       this.addChatMessage({
         id: this.userUuid,
         ts: +Date.now(),
@@ -157,7 +168,7 @@ export class RoomStore extends SimpleInterval {
 
   isBigClassStudent(): boolean {
     const userRole = this.roomInfo.userRole
-    return +this.roomInfo.roomType === 2 && userRole === 'student'
+    return +this.roomInfo.roomType === 2 && userRole === EduRoleTypeEnum.student
   }
 
   get eduManager() {
@@ -187,10 +198,25 @@ export class RoomStore extends SimpleInterval {
         sdkDomain: this.eduManager.config.sdkDomain as string,
         restToken: this.eduManager.config.agoraRestToken
       })
-      let {roomUuid} = await this.roomApi.fetchRoom({
+      const roomUuid = this.roomInfo.roomUuid
+      let checkInResult = await eduModularApi.checkIn({
+        roomUuid,
         roomName: `${this.roomInfo.roomName}`,
         roomType: +this.roomInfo.roomType as number,
       })
+      console.log(" checkInResult ", checkInResult)
+      this.sceneStore.isMuted = checkInResult.muteChat
+      this.sceneStore.recordState = !!checkInResult.isRecording
+      this.sceneStore.classState = checkInResult.state
+      this.appStore.boardStore.init({
+        boardId: checkInResult.board.boardId,
+        boardToken: checkInResult.board.boardToken,
+      }).catch((err) => {
+        BizLogger.warn(err)
+        this.appStore.uiStore.addToast(t('toast.failed_to_join_board'))
+      })
+      this.appStore.uiStore.stopLoading()
+
       await this.eduManager.login(this.userUuid)
   
       const roomManager = this.eduManager.createClassroom({
@@ -280,7 +306,7 @@ export class RoomStore extends SimpleInterval {
           }
     
           if (evt.type === 'screen') {
-            if (this.roomInfo.userRole === 'teacher') {
+            if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
               const screenStream = roomManager.getLocalScreenData()
               BizLogger.info("local-stream-updated getLocalScreenData#screenStream ", JSON.stringify(screenStream))
               if (screenStream && screenStream.state !== 0) {
@@ -323,7 +349,7 @@ export class RoomStore extends SimpleInterval {
       roomManager.on('remote-stream-added', (evt: any) => {
         runInAction(() => {
           this.sceneStore.streamList = roomManager.getFullStreamList()
-          if (this.roomInfo.userRole !== 'teacher') {
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
             if (this.sceneStore.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
               this.sceneStore.sharing = true
             } else { 
@@ -337,7 +363,7 @@ export class RoomStore extends SimpleInterval {
       roomManager.on('remote-stream-removed', (evt: any) => {
         runInAction(() => {
           this.sceneStore.streamList = roomManager.getFullStreamList()
-          if (this.roomInfo.userRole !== 'teacher') {
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
             if (this.sceneStore.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
               this.sceneStore.sharing = true
             } else { 
@@ -351,7 +377,7 @@ export class RoomStore extends SimpleInterval {
       roomManager.on('remote-stream-updated', (evt: any) => {
         runInAction(() => {
           this.sceneStore.streamList = roomManager.getFullStreamList()
-          if (this.roomInfo.userRole !== 'teacher') {
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
             if (this.sceneStore.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
               this.sceneStore.sharing = true
             } else { 
@@ -376,13 +402,14 @@ export class RoomStore extends SimpleInterval {
           }
           try {
             BizLogger.info('[rtm] user-message', evt)
-            const fromUserUuid = evt.message.fromUser.userUuid
-            const fromUserName = evt.message.fromUser.userName
+            // const fromUserUuid = evt.message.fromUser.userUuid
+            // const fromUserName = evt.message.fromUser.userName
             const msg = decodeMsg(evt.message.message)
+            // const messageData = JSON.parse(msg.message)
             BizLogger.info("user-message", msg)
             if (msg) {
               const {cmd, data} = msg
-              const {type, userName} = data
+              const {type, userName: fromUserName, userId: fromUserUuid} = data
               BizLogger.info("data", data)
               this.showNotice(type as PeerInviteEnum, fromUserUuid)
               if (type === PeerInviteEnum.studentApply) {
@@ -426,9 +453,19 @@ export class RoomStore extends SimpleInterval {
         })
       })
       // 教室更新
-      roomManager.on('classroom-property-updated', (classroom: any) => {
-        BizLogger.info("classroom-property-updated", classroom)
-        // if (evt.reason === EduClassroomStateType.EduClassroomStateTypeRoomAttrs) {
+      roomManager.on('classroom-property-updated', async (classroom: any) => {
+        await this.sceneStore.mutex.dispatch<Promise<void>>(async () => {
+          BizLogger.info("classroom-property-updated", classroom)
+          const classState = get(classroom, 'roomStatus.courseState')
+          if (classState === 2) {
+            await this.appStore.releaseRoom()
+            this.appStore.uiStore.showDialog({
+              type: 'classSessionEnded',
+              message: t('class_ended'),
+            })
+            return
+          }
+        
           const record = get(classroom, 'roomProperties.record')
           if (record) {
             const state = record.state
@@ -445,7 +482,7 @@ export class RoomStore extends SimpleInterval {
                   sender: false
                 })
                 this.sceneStore.recordState = false
-                this.sceneStore.recordId = ''
+                // this.sceneStore.recordId = ''
               }
             }
           }
@@ -464,6 +501,7 @@ export class RoomStore extends SimpleInterval {
             }
           }
           this.sceneStore.isMuted = !classroom.roomStatus.isStudentChatAllowed
+        })
       })
       roomManager.on('room-chat-message', (evt: any) => {
         const {textMessage} = evt;
@@ -478,7 +516,7 @@ export class RoomStore extends SimpleInterval {
         BizLogger.info('room-chat-message', evt)
       })
   
-      if (this.roomInfo.userRole === 'teacher') {
+      if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
         await roomManager.join({
           userRole: `host`,
           roomUuid,
@@ -513,14 +551,14 @@ export class RoomStore extends SimpleInterval {
 
       const mainStream = roomManager.data.streamMap['main']
   
-      this.sceneStore.classState = roomInfo.roomStatus.courseState
+      // this.sceneStore.classState = roomInfo.roomStatus.courseState
 
       if (this.sceneStore.classState === 1) {
         this.addInterval('timer', () => {
           this.appStore.updateTime(+get(roomInfo, 'roomStatus.startTime', 0))
         }, ms)
       }
-      this.sceneStore.isMuted = !roomInfo.roomStatus.isStudentChatAllowed
+      // this.sceneStore.isMuted = !roomInfo.roomStatus.isStudentChatAllowed
   
       await this.sceneStore.joinRTC({
         uid: +mainStream.streamUuid,
@@ -530,9 +568,9 @@ export class RoomStore extends SimpleInterval {
   
       const localStreamData = roomManager.data.localStreamData
   
-      let canPublish = this.roomInfo.userRole === 'teacher' ||
+      let canPublish = this.roomInfo.userRole === EduRoleTypeEnum.teacher ||
          localStreamData && !!(+localStreamData.state) ||
-         (this.roomInfo.userRole === 'student' && +this.roomInfo.roomType !== 2)
+         (this.roomInfo.userRole === EduRoleTypeEnum.student && +this.roomInfo.roomType !== 2)
   
       if (canPublish) {
   
@@ -568,35 +606,29 @@ export class RoomStore extends SimpleInterval {
             }
           }
         } catch (err) {
-          this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.msg}`)
+          this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.message}`)
           BizLogger.warn(err)
         }
       }
   
-      await this.appStore.boardStore.init()
-  
       const roomProperties = roomManager.getClassroomInfo().roomProperties
-      if (roomProperties) {
-        this.sceneStore.recordId = get(roomProperties, 'record.recordId', '')
-      } else {
-        this.sceneStore.recordId = ''
-      }
     
       this.sceneStore.userList = roomManager.getFullUserList()
       this.sceneStore.streamList = roomManager.getFullStreamList()
-      if (this.roomInfo.userRole !== 'teacher') {
+      if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
         if (this.sceneStore.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
           this.sceneStore.sharing = true
         } else { 
           this.sceneStore.sharing = false
         }
       }
-      this.appStore.uiStore.stopLoading()
+      // this.appStore.uiStore.stopLoading()
       this.joined = true
       this.roomJoined = true
     } catch (err) {
       this.appStore.uiStore.stopLoading()
-      throw err
+      // throw new GenericEerr
+      throw new GenericErrorWrapper(err)
     }
   }
 
@@ -638,10 +670,22 @@ export class RoomStore extends SimpleInterval {
     try {
       const teacher = this.roomManager?.getFullUserList().find((it: EduUser) => it.userUuid === this.sceneStore.teacherStream.userUuid)
       if (teacher) {
-        await this.roomManager?.userService.sendCoVideoApply(teacher)
+        const res = await eduModularApi.handsUp({
+          roomUuid: this.roomInfo.roomUuid,
+          toUserUuid: teacher.userUuid,
+          payload: {
+            userId: teacher.userUuid,
+            userName: teacher.userName,
+            type: PeerInviteEnum.studentApply,
+          }
+        })
+        if (res === 0) {
+          throw new GenericErrorWrapper('callApply failure')
+        }
+        // await this.roomManager?.userService.sendCoVideoApply(teacher)
       }
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_a_raise_of_hand_application') + ` ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_a_raise_of_hand_application') + ` ${err.message}`)
     }
   }
 
@@ -650,7 +694,7 @@ export class RoomStore extends SimpleInterval {
     try {
       await this.sceneStore.closeStream(this.roomInfo.userUuid, true)
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_the_call') + ` ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_the_call') + ` ${err.message}`)
     }
   }
 
@@ -686,7 +730,19 @@ export class RoomStore extends SimpleInterval {
     const userUuid = (this.notice as any).userUuid
     const user = this.roomManager?.getFullUserList().find(it => it.userUuid === userUuid)
     if (user) {
-      await this.roomManager?.userService.rejectCoVideoApply(user)
+      const res = await eduModularApi.handsUp({
+        roomUuid: this.roomInfo.roomUuid,
+        toUserUuid: user.userUuid,
+        payload: {
+          userId: user.userUuid,
+          userName: user.userName,
+          type: PeerInviteEnum.teacherReject,
+        }
+      })
+      if (res === 0) {
+        throw new GenericErrorWrapper('callApply failure')
+      }
+      // await this.roomManager?.userService.rejectCoVideoApply(user)
     }
   }
 
@@ -694,7 +750,18 @@ export class RoomStore extends SimpleInterval {
     const userUuid = (this.notice as any).userUuid
     const user = this.roomManager?.data.userList.find(it => it.user.userUuid === userUuid)
     if (user) {
-      await this.roomManager?.userService.acceptCoVideoApply(user.user)
+      const res = await eduModularApi.handsUp({
+        roomUuid: this.roomInfo.roomUuid,
+        toUserUuid: user.user.userUuid,
+        payload: {
+          userId: user.user.userUuid,
+          userName: user.user.userName,
+          type: PeerInviteEnum.teacherAccept,
+        }
+      })
+      if (res === 0) {
+        throw new GenericErrorWrapper('callApply failure')
+      }
       await this.roomManager?.userService.inviteStreamBy({
         roomUuid: this.sceneStore.roomUuid,
         streamUuid: user.streamUuid,
@@ -720,6 +787,18 @@ export class RoomStore extends SimpleInterval {
       this.reset()
       BizLogger.error(err)
     }
+  }
+
+  async endRoom() {
+    await eduModularApi.updateClassState({
+      roomUuid: this.roomInfo.roomUuid,
+      state: 2
+    })
+    this.appStore.releaseRoom()
+    this.appStore.uiStore.showDialog({
+      type: 'classSessionEnded',
+      message: t('class_ended'),
+    })
   }
 
 }

@@ -297,7 +297,7 @@ export class ReplayStore {
         BizLogger.info("record", record)
       }
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_query_playback_list') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_query_playback_list') + `${err.message}`)
       throw err
     }
   }

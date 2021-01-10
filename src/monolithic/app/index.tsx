@@ -19,13 +19,15 @@ const routes: string[] = [
 type AppType = {
   appConfig: AppStoreConfigParams
   roomConfig?: RoomParameters
+  basename?: string
 }
 
 export const App = (props: AppType) => {
   const AppContainer = GenAppContainer({
     appConfig: props.appConfig,
     roomConfig: props.roomConfig,
-    globalId: "demo"
+    globalId: "demo",
+    basename: props.basename
   })
   return (
     <AppContainer

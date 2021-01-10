@@ -13,6 +13,7 @@ import {ChatPanel} from '@/components/chat/panel';
 import { t } from '@/i18n';
 import { UserGroup } from '@/sdk/education/interfaces/index.d';
 import {StudentList} from '@/components/student-list';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 interface StreamsProps {
   othersStreams: any[]
@@ -65,7 +66,7 @@ export const MiddleClass = observer(() => {
 
   const handleClick = useCallback(async (evt: any, id: string, type: string) => {
     const isLocal = (userUuid: string) => sceneStore.roomInfo.userUuid === userUuid
-    if (sceneStore.roomInfo.userRole === 'teacher' 
+    if (sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher 
     // || isLocal(id)
     )  {
       const target = studentsList.find((it: any) => it.userUuid === id)
@@ -153,7 +154,7 @@ export const MiddleClass = observer(() => {
             : null
           }
           <div className={`interactive ${middleRoomStore.roomInfo.userRole}`}>
-            {middleRoomStore.roomInfo.userRole === 'teacher' && middleRoomStore.notice ?
+            {middleRoomStore.roomInfo.userRole === EduRoleTypeEnum.teacher && middleRoomStore.notice ?
               <ControlItem name={middleRoomStore.notice.reason}
                 onClick={handleNotice}
                 active={middleRoomStore.notice.reason ? true : false} />
@@ -221,7 +222,7 @@ export const MiddleClass = observer(() => {
                       (middleRoomStore.platformState.g1 === group.groupUuid || 
                         middleRoomStore.platformState.g2 === group.groupUuid)
                       }
-                    isTeacher={middleRoomStore.roomInfo.userRole === 'teacher'}>
+                    isTeacher={middleRoomStore.roomInfo.userRole === EduRoleTypeEnum.teacher}>
                   </MiddleGroupCard>
                 ))
               }

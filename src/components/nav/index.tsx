@@ -4,7 +4,6 @@ import './nav.scss';
 import { CustomButton } from '@/components/custom-button';
 import * as moment from 'moment';
 import { isElectron, platform } from '@/utils/platform';
-// import Log from '@/utils/LogUploader';
 import { Tooltip } from '@material-ui/core';
 import { useUIStore, useAppStore, useMediaStore, useBreakoutRoomStore, useSceneStore } from '@/hooks';
 import { t } from '@/i18n';
@@ -12,6 +11,7 @@ import { observer } from 'mobx-react';
 import { useLocation } from 'react-router-dom';
 import { networkQualities as networkQualityIcon } from '@/stores/app/room'
 import { EduManager } from '@/sdk/education/manager';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 interface NavProps {
   delay: string
@@ -42,6 +42,7 @@ const BreakoutStartClassButton = observer((props: any) => {
 
 const BasicStartClassButton = observer((props: any) => {
   const sceneStore = useSceneStore()
+  const uiStore = useUIStore()
 
   const classState = sceneStore.classState === 1
 
@@ -50,7 +51,12 @@ const BasicStartClassButton = observer((props: any) => {
       if (!classState) {
         await sceneStore.startClass()
       } else {
-        await sceneStore.stopClass()
+        uiStore.showDialog({
+          type: 'endClass',
+          // option?: any
+          message: t('end_class_confirm')
+        })
+        // await sceneStore.stopClass()
       }
     }} />
   )
@@ -164,7 +170,7 @@ export const Nav = observer((props: any) => {
       <div className={`nav-container ${isElectron ? 'draggable' : ''}`}>
         <div className="class-title">
           <span className="room-name">{roomName}</span>
-          {role === 'teacher' ?
+          {role === EduRoleTypeEnum.teacher ?
             <StartClassButton isBreakout={isBreakout} /> : null}
         </div>
         <div className="network-state">

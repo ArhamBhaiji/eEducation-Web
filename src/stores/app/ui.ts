@@ -4,16 +4,23 @@ import { observable, action, computed } from 'mobx';
 import { AppStore } from '.';
 import { DialogMessage, DialogType } from '@/components/dialog';
 import { platform } from '@/utils/platform';
-
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 interface NoticeMessage {
   type: string
   message: string
 }
 
 
+type RoomTypesList = {
+  path: string,
+  text: string,
+  value: number
+}
+
+
 export class UIStore {
 
-  static roomTypes: any[] = [
+  static roomTypes: RoomTypesList[] = [
     {
       path: 'one-to-one',
       text: 'home.1v1',
@@ -224,7 +231,10 @@ export class UIStore {
 
   @action
   addDialog (dialog: DialogMessage) {
-    this.dialogs.push({dialog, id: this.dialogs.length})
+    this.dialogs.push({
+      dialog,
+      id: this.dialogs.length,
+    })
   }
 
   @action
@@ -283,7 +293,7 @@ export class UIStore {
 
   @computed
   get showPagination (): boolean {
-    if (this.appStore.roomStore.roomInfo.userRole === 'teacher') {
+    if (this.appStore.roomStore.roomInfo.userRole === EduRoleTypeEnum.teacher) {
       return true
     }
     return false
@@ -297,7 +307,7 @@ export class UIStore {
   @computed
   get showScaler(): boolean {
     const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
+    if (userRole === EduRoleTypeEnum.teacher) {
       return true
     }
     return false
@@ -306,11 +316,11 @@ export class UIStore {
   @computed
   get showFooterMenu(): boolean {
     const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
+    if (userRole === EduRoleTypeEnum.teacher) {
       return true
     }
     const roomType = this.appStore.roomStore.roomInfo.roomType
-    if (userRole === 'student' && `${roomType}` === `${EduRoomType.SceneTypeMiddleClass}`) {
+    if (userRole === EduRoleTypeEnum.student && `${roomType}` === `${EduRoomType.SceneTypeMiddleClass}`) {
       return true
     }
     return false
@@ -329,7 +339,7 @@ export class UIStore {
   @computed
   get showTools(): boolean {
     const userRole = this.appStore.roomStore.roomInfo.userRole
-    if (userRole === 'teacher') {
+    if (userRole === EduRoleTypeEnum.teacher) {
       return true
     }
     return false

@@ -1,4 +1,4 @@
-import { EnumBoardState } from './../../sdk/education/core/services/interface.d';
+import { EnumBoardState } from '@/sdk/education/core/services/interface.d';
 import { UploadManager, PPTProgressListener } from '@/utils/upload-manager';
 import { AppStore } from '@/stores/app';
 import { observable, action, computed, runInAction } from 'mobx'
@@ -12,6 +12,7 @@ import OSS from 'ali-oss';
 import uuidv4 from 'uuid/v4';
 import { t } from '@/i18n';
 import { EduUser, EduRoleType } from '@/sdk/education/interfaces/index.d';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const resolveFileInfo = (file: any) => {
   const fileName = encodeURI(file.name);
@@ -235,16 +236,66 @@ export class BoardStore {
   }
 
   @action
-  async init() {
-      let {
-        info: {
-          boardId,
-          boardToken
-        },
-      } = await this.boardService.getBoardInfo()
+  async fetchInit() {
+    let {
+      info
+    } = await this.boardService.getBoardInfo()
+    await this.join({
+      uuid: info.boardId,
+      roomToken: info.boardToken,
+      // $el: dom,
+      role: this.userRole,
+      isWritable: true,
+      disableDeviceInputs: true,
+      disableCameraTransform: true,
+      disableAutoResize: false
+    })
+    const grantUsers = get(this.room.state.globalState, 'grantUsers', [])
+    const follow = get(this.room.state.globalState, 'follow', 0)
+    this.grantUsers = grantUsers
+    const boardUser = this.grantUsers.includes(this.localUserUuid)
+    if (boardUser) {
+      this._grantPermission = true
+    }
+    this.follow = follow
+    // 默认只有老师不用禁止跟随
+    if (this.userRole !== EduRoleTypeEnum.teacher) {
+      if (this.boardClient.room && this.boardClient.room.isWritable) {
+        if (this.follow === FollowState.Follow) {
+          // await this.setWritable(true)
+          this.room.setViewMode(ViewMode.Broadcaster)
+          this.room.disableCameraTransform = true
+          this.room.disableDeviceInputs = true
+          this.lock = true
+        }
+        if (this.follow === FollowState.Freedom) {
+          // await this.setWritable(true)
+          this.room.setViewMode(ViewMode.Freedom)
+          this.room.disableCameraTransform = false
+          this.room.disableDeviceInputs = false
+          this.lock = false
+        }
+      }
+    } else {
+      this.room.disableCameraTransform = false
+    }
+
+    if (this.hasPermission) {
+      await this.setWritable(true)
+    } else {
+      await this.setWritable(this._grantPermission as boolean)
+    }
+    this.ready = true
+  }
+
+  @action
+  async init(info: {
+    boardId: string,
+    boardToken: string
+  }) {
       await this.join({
-        uuid: boardId,
-        roomToken: boardToken,
+        uuid: info.boardId,
+        roomToken: info.boardToken,
         // $el: dom,
         role: this.userRole,
         isWritable: true,
@@ -261,7 +312,7 @@ export class BoardStore {
       }
       this.follow = follow
       // 默认只有老师不用禁止跟随
-      if (this.userRole !== 'teacher') {
+      if (this.userRole !== EduRoleTypeEnum.teacher) {
         if (this.boardClient.room && this.boardClient.room.isWritable) {
           if (this.follow === FollowState.Follow) {
             // await this.setWritable(true)
@@ -300,7 +351,7 @@ export class BoardStore {
       this.lock = false
     }
 
-    const isTeacher = this.userRole === 'teacher'
+    const isTeacher = this.userRole === EduRoleTypeEnum.teacher
 
     if (isTeacher) {
       if (this.online && this.room) {
@@ -341,7 +392,7 @@ export class BoardStore {
   @action
   async join(params: any) {
     const {role, ...data} = params
-    const identity = role === 'teacher' ? 'host' : 'guest'
+    const identity = role === EduRoleTypeEnum.teacher ? 'host' : 'guest'
     this._boardClient = new BoardClient({identity, appIdentifier: this.appStore.params.config.agoraNetlessAppId})
     this.boardClient.on('onPhaseChanged', (state: any) => {
       if (state === 'disconnected') {
@@ -653,7 +704,7 @@ export class BoardStore {
     if (follow !== this.follow) {
       this.setFollow(follow)
       // this.follow = follow
-      if (this.userRole === 'student') {
+      if (this.userRole === EduRoleTypeEnum.student) {
         if (this.follow) {
           this.appStore.uiStore.addToast(t('toast.whiteboard_lock'))
         } else {
@@ -666,12 +717,12 @@ export class BoardStore {
     const grantUsers = this.grantUsers
     if (grantUsers && Array.isArray(grantUsers)) {
       const hasPermission = grantUsers.includes(this.localUserUuid) || this.roomType === 0 ? true : false
-      if (this.userRole === 'student' && hasPermission !== this.hasPermission) {
+      if (this.userRole === EduRoleTypeEnum.student && hasPermission !== this.hasPermission) {
         const notice = hasPermission ? 'toast.teacher_accept_whiteboard' : 'toast.teacher_cancel_whiteboard'
         this.appStore.uiStore.addToast(t(notice))
       }
       this.setGrantUsers(grantUsers)
-      if (this.userRole === 'student') {
+      if (this.userRole === EduRoleTypeEnum.student) {
         this.setGrantPermission(hasPermission)
       }
     }
@@ -1125,7 +1176,7 @@ export class BoardStore {
 
   @computed
   get hasPermission(): boolean {
-    if (this.userRole === 'teacher' || this.roomType === 0) {
+    if (this.userRole === EduRoleTypeEnum.teacher || this.roomType === 0) {
       return true
     }
     return this._grantPermission as boolean
@@ -1141,7 +1192,7 @@ export class BoardStore {
       this.boardClient.grantPermission(userUuid)
       this.appStore.uiStore.addToast(`授权白板成功`)
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_authorize_whiteboard') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_authorize_whiteboard') + `${err.message}`)
     }
   }
 
@@ -1151,7 +1202,7 @@ export class BoardStore {
       this.boardClient.revokePermission(userUuid)
       this.appStore.uiStore.addToast(`取消授权白板成功`)
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_deauthorize_whiteboard') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_deauthorize_whiteboard') + `${err.message}`)
     }
   }
 

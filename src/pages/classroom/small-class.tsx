@@ -6,6 +6,7 @@ import { RoomBoard } from '@/components/room-board';
 import './small-class.scss';
 import { observer } from 'mobx-react';
 import { useSceneStore } from '@/hooks';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const LiveRoomVideoMarquee = observer(() => {
   const sceneStore = useSceneStore()

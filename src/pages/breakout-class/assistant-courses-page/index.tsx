@@ -10,6 +10,7 @@ import { AutoplayToast } from '@/components/autoplay-toast';
 import { makeStyles, Theme, createStyles, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
 import { useUIStore, useBreakoutRoomStore } from '@/hooks';
 import { BizLogger } from '@/utils/biz-logger';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -82,7 +83,7 @@ const CoursesPage = observer(() => {
     const handlePopState = (evt: any) => {
       BizLogger.info('[pop] course_name', course_name)
       window.history.pushState(null, document.title, null);
-      if (breakoutRoomStore.roomInfo.userRole === 'assistant') {
+      if (breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.assistant) {
         if (breakoutRoomStore.joined && !uiStore.hasDialog('exitRoom')) {
           uiStore.showDialog({
             type: 'exitRoom',

@@ -6,6 +6,7 @@ import { observable, computed, action, when } from 'mobx';
 import { get } from 'lodash';
 import { t } from '@/i18n';
 import { MiddleRoomPropertiesChangeCause } from './middle-room';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export type SetInterval = ReturnType<typeof setInterval>
 
@@ -172,13 +173,13 @@ export class ExtensionStore {
   }
 
   @computed
-  get userRole(): string {
+  get userRole() {
     return this.appStore.sceneStore.localUser.userRole
   }
 
   @computed
   get showStudentHandsTool(): boolean {
-    if (this.userRole === 'student' && this.enableCoVideo) {
+    if (this.userRole === EduRoleTypeEnum.student && this.enableCoVideo) {
       return true
     }
     return false
@@ -186,7 +187,7 @@ export class ExtensionStore {
 
   @computed
   get showTeacherHandsTool(): boolean {
-    if (this.userRole === 'teacher' && this.enableCoVideo) {
+    if (this.userRole === EduRoleTypeEnum.teacher && this.enableCoVideo) {
       return true
     }
     return false

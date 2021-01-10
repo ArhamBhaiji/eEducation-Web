@@ -15,6 +15,7 @@ import { UIStore } from '@/stores/app';
 import { GlobalStorage } from '@/utils/custom-storage';
 import { EduManager } from '@/sdk/education/manager';
 import {isElectron} from '@/utils/platform';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const useStyles = makeStyles ((theme: Theme) => ({
   formControl: {
@@ -75,6 +76,9 @@ export const HomePage = React.memo(() => {
 
   const [session, setSessionInfo] = useState<SessionInfo>(defaultState);
 
+  //@ts-ignore
+  window.session = session
+
   const [required, setRequired] = useState<any>({} as any);
 
   const handleSubmit = () => {
@@ -94,13 +98,28 @@ export const HomePage = React.memo(() => {
     }
     
     if (!roomTypes[session.roomType]) return;
+
+    const roomType = roomTypes[session.roomType].value
+
+    const roles = {
+      'teacher': EduRoleTypeEnum.teacher,
+      'student': EduRoleTypeEnum.student,
+      'assistant': EduRoleTypeEnum.assistant,
+    }
+
+    const userRole = roles[session.role]
+
     appStore.setRoomInfo({
-      ...session,
-      roomType: roomTypes[session.roomType].value
+      roomType: roomType,
+      roomName: session.roomName,
+      userName: session.userName,
+      userRole: userRole,
+      userUuid: `${session.userName}${userRole}`,
+      roomUuid: `${session.roomName}${roomType}`,
     })
     const path = roomTypes[session.roomType].path
 
-    if (session.role === 'assistant') {
+    if (userRole === EduRoleTypeEnum.assistant) {
       history.push(`/breakout-class/assistant/courses`)
     } else {
       history.push(`/classroom/${path}`)
@@ -232,7 +251,7 @@ export const HomePage = React.memo(() => {
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <RoleRadio value={session.role} type={session.roomType} onChange={(evt: any) => {
+              <RoleRadio role={session.role} type={session.roomType} onChange={(evt: any) => {
                  setSessionInfo({
                    ...session,
                    role: evt.target.value

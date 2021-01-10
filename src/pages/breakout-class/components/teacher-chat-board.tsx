@@ -6,6 +6,7 @@ import { t } from '@/i18n'
 import { ChatPanel } from '@/components/chat/panel'
 import { GroupList } from '@/components/group-list'
 import { BizLogger } from '@/utils/biz-logger'
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const TeacherChatBoard = observer(() => {
   const breakoutRoomStore = useBreakoutRoomStore()
@@ -45,7 +46,7 @@ export const TeacherChatBoard = observer(() => {
 
   const handleClick = async (evt: any, id: string, type: string) => {
     const isLocal = (userUuid: string) => sceneStore.roomInfo.userUuid === userUuid
-    if (sceneStore.roomInfo.userRole === 'teacher' || isLocal(id)) {
+    if (sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher || isLocal(id)) {
       const target = studentStreams.find((it: EduMediaStream) => it.userUuid === id)
       switch (type) {
         case 'grantBoard': {

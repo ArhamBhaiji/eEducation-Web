@@ -17,6 +17,7 @@ import { BreakoutRoomBoard } from './components/breakout-chat-board';
 
 import './breakout-class.scss';
 import { BizLogger } from '@/utils/biz-logger';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const BackButton = () => {
 
@@ -71,7 +72,7 @@ export const BreakoutClass = observer(() => {
       <div className="room-container">
         <div className="live-container">
           <div className="biz-container">
-            {breakoutRoomStore.roomInfo.userRole === 'assistant' && <BackButton />}
+            {breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.assistant && <BackButton />}
             <NetlessBoard />
             <ScreenSharing />
           </div>
@@ -111,16 +112,16 @@ export const BreakoutClass = observer(() => {
             {...teacher}
             handleClickAudio={async (userUuid: string, isLocal: boolean) => {
               if (teacher.audio) {
-                await breakoutRoomStore.muteAudio(userUuid, isLocal, 'teacher')
+                await breakoutRoomStore.muteAudio(userUuid, isLocal, EduRoleTypeEnum.teacher)
               } else {
-                await breakoutRoomStore.unmuteAudio(userUuid, isLocal, 'teacher')
+                await breakoutRoomStore.unmuteAudio(userUuid, isLocal, EduRoleTypeEnum.teacher)
               }
             }}
             handleClickVideo={async (userUuid: string, isLocal: boolean) => {
               if (teacher.video) {
-                await breakoutRoomStore.muteVideo(userUuid, isLocal, 'teacher')
+                await breakoutRoomStore.muteVideo(userUuid, isLocal, EduRoleTypeEnum.teacher)
               } else {
-                await breakoutRoomStore.unmuteVideo(userUuid, isLocal, 'teacher')
+                await breakoutRoomStore.unmuteVideo(userUuid, isLocal, EduRoleTypeEnum.teacher)
               }
             }}
           />
@@ -182,7 +183,7 @@ export const BreakoutRoomController = observer(({ children }: any) => {
     const handlePopState = (evt: any) => {
       BizLogger.info('popstate', evt)
       window.history.pushState(null, document.title, null);
-      if (breakoutRoomStore.roomInfo.userRole === 'assistant') {
+      if (breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.assistant) {
         if (breakoutRoomStore.joinedGroup && !uiStore.hasDialog('exitRoom')) {
           uiStore.showDialog({
             type: 'exitRoom',
@@ -204,16 +205,16 @@ export const BreakoutRoomController = observer(({ children }: any) => {
       breakoutRoomStore.join().then(() => {
         uiStore.addToast(t('toast.successfully_joined_the_room'))
       }).catch((err) => {
-        BizLogger.warn(err.msg)
-        uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.msg)}`)
+        BizLogger.warn(err.message)
+        uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.message)}`)
       })
     }
     if (course_name) {
       breakoutRoomStore.assistantJoinRoom(course_name).then(() => {
         uiStore.addToast(t('toast.successfully_joined_the_room'))
       }).catch((err) => {
-        BizLogger.warn(err.msg)
-        uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.msg)}`)
+        BizLogger.warn(err.message)
+        uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.message)}`)
       })
     }
 

@@ -170,7 +170,9 @@ const zhCN: any = {
     'the_teacher_refused': '老师拒绝了',
     'failed_to_initiate_a_raise_of_hand_application': '发起举手申请失败',
     'failed_to_end_the_call': '结束通话失败',
+    'failed_to_join_board': '加入白板失败',
   },
+  'end_class_confirm': '确定要结束教室吗？',
   'notice': {
     'student_interactive_apply': `"{reason}"想和你连麦`
   },
@@ -287,6 +289,7 @@ const zhCN: any = {
     'group_down_platform': '请先让台上小组下台',
     'groupText': '分组使用说明：选择每组人数上限进行分组。例如：教室内共5名学生，选择每组上限2人则分成3组（2 2 1），选择每组上限4人则分成两组（4 1），选择每组上限6人则分成1组（5）。',
   },
+  'class_ended': '课程已结束，请点击确定离开教室',
   'course_recording': '录制回放',
   'build_version': `构建版本: ${build_version}`,
   'cancel_confirm': '确定忽略吗？',

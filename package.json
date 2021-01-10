@@ -2,6 +2,7 @@
   "name": "Agora-Edu-Web",
   "version": "6.1.1",
   "private": true,
+  "homepage": ".",
   "main": "./src/index.tsx",
   "agora_electron": {
     "platform": "darwin",

@@ -7,6 +7,7 @@ import {useRoomStore, useBoardStore, useSceneStore, useUIStore} from '@/hooks';
 import { EduMediaStream } from '@/stores/app/room';
 import { MiddleGroupCard } from '@/components/middle-grouping';
 import { useLocation } from 'react-router-dom';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const RoomBoardController = observer((props: any) => {
 
@@ -53,7 +54,7 @@ const RoomBoardController = observer((props: any) => {
 
   const handleClick = async (evt: any, id: string, type: string) => {
     const isLocal = (userUuid: string) => sceneStore.roomInfo.userUuid === userUuid
-    if (sceneStore.roomInfo.userRole === 'teacher' || isLocal(id))  {
+    if (sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher || isLocal(id))  {
       const target = studentStreams.find((it: EduMediaStream) => it.userUuid === id)
       switch(type) {
         case 'grantBoard': {

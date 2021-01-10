@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CustomIcon } from "../icon"
 import './index.scss'
-import { useExtensionStore, useMiddleRoomStore, useSceneStore } from '@/hooks'
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
+import { useMiddleRoomStore, useSceneStore } from '@/hooks'
 import { RendererPlayer } from '../media-player'
 import { observer } from 'mobx-react'
 import { get } from 'lodash'
@@ -189,7 +190,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = React.memo((props: any) =
         <StartEffect destroy={onDestroy} /> : null}
       {
         share === true ? null : 
-        <div className={role === 'teacher' ? 'teacher-placeholder' : 'student-placeholder'}>
+        <div className={role === EduRoleTypeEnum.teacher ? 'teacher-placeholder' : 'student-placeholder'}>
         </div>
       }
       { share ? 

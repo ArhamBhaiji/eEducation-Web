@@ -5,13 +5,14 @@ import { AppStore } from "@/stores/app"
 import { ReplayAppStore } from "@/stores/replay-app"
 import { unmountComponentAtNode } from "react-dom"
 import { AgoraEduSDKConfigParams, ListenerCallback } from "./declare.d"
+import { eduModularApi } from '@/services/edu-modular-api'
+import { EduRoleTypeEnum } from "@/sdk/education/interfaces"
 
 export enum AgoraEduEvent {
   ready = 1,
   destroyed = 2
 }
 
-import { eduModularApi } from '@/services/edu-modular-api'
 export interface AliOSSBucket {
   key: string
   secret: string
@@ -44,7 +45,8 @@ const configParams: AgoraEduSDKConfigParams = {
   roleType: '',
   appId: '',
   whiteboardAppId: '',
-  token: ''
+  token: '',
+  restToken: ''
 }
 
 export type LaunchOption = {
@@ -52,10 +54,11 @@ export type LaunchOption = {
   userUuid: string
   userName: string
   roomUuid: string
-  roleType: string
+  roleType: EduRoleTypeEnum
   roomType: string
   roomName: string
   listener: ListenerCallback
+  pretest: boolean
 }
 
 export type ReplayOption = {
@@ -118,6 +121,21 @@ const getConfig = async () => {
 const instances: Record<string, any> = {
 
 }
+
+const roomTypes = [
+  {
+    path: '/classroom/one-to-one'
+  },
+  {
+    path: '/classroom/small-class'
+  },
+  {
+    path: '/classroom/big-class'
+  },
+]
+
+const devicePath = '/setting'
+
 export class AgoraEduSDK {
 
   static get version(): string {
@@ -127,7 +145,7 @@ export class AgoraEduSDK {
   static config (params: AgoraEduSDKConfigParams) {
     Object.assign(configParams, params)
     eduModularApi.updateConfig({
-      restToken: configParams.token,
+      restToken: configParams.restToken,
       sdkDomain: "https://api-solutions-dev.bj2.agoralab.co",
       appId: configParams.appId,
       token: configParams.token
@@ -155,6 +173,14 @@ export class AgoraEduSDK {
       locks.set("launch", true)
       const data = await eduModularApi.getConfig()
       console.log("data >>> ", data)
+
+      let mainPath = roomTypes[option.roomType]?.path || '/classroom/one-to-one'
+      let roomPath = mainPath
+
+      if (option.pretest) {
+        mainPath = '/setting'
+      }
+
       const store = new AppStore({
         config: {
           agoraAppId: configParams.appId,
@@ -179,8 +205,13 @@ export class AgoraEduSDK {
           userRole: option.roleType,
           roomType: +option.roomType,
         },
+        mainPath: mainPath,
+        roomPath: roomPath,
+        pretest: option.pretest,
         listener: option.listener,
       })
+      //@ts-ignore
+      window.globalStore = store
       stores.set("app", store)
       RenderLiveRoom({dom, store}, this._map["classroom"])
       if (store.params.listener) {
@@ -202,7 +233,7 @@ export class AgoraEduSDK {
 
     const store = new ReplayAppStore({
       config: {
-        agoraAppId: "47b7535dcb9a4bb4aa592115266eae98",
+        agoraAppId: configParams.appId,
         agoraNetlessAppId: "646/P8Kb7e_DJZVAQw",
         agoraRestFullToken: "MjdiZjhjMmRkNTNhNGQwZGEwMWQxNmM4MTllOWE5Yzc6YjM2N2NiMjRiOTExNDQyYTg5YjU5YTdmN2Y0YjM1OWM=",
         enableLog: true,

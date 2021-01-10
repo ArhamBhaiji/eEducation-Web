@@ -7,6 +7,7 @@ import { NetlessBoard } from '@/components/netless-board';
 import { ScreenSharing } from '@/components/screen-sharing';
 import { observer } from 'mobx-react';
 import { useRoomStore, useSceneStore } from '@/hooks';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const BigClass = observer(() => {
 
@@ -57,13 +58,13 @@ export const BigClass = observer(() => {
         <div className="biz-container">
           <NetlessBoard />
           <ScreenSharing />
-          <div className={`interactive ${sceneStore.roomInfo.userRole}`}>
-            {sceneStore.roomInfo.userRole === 'teacher' && roomStore.notice ?
+          <div className={`interactive ${sceneStore.roomInfo.userRole === EduRoleTypeEnum.student ? 'student' : 'teacher'}`}>
+            {sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher && roomStore.notice ?
               <ControlItem name={roomStore.notice.reason}
                 onClick={handleNotice}
                 active={roomStore.notice.reason ? true : false} />
             : null}
-            {sceneStore.roomInfo.userRole !== 'teacher'?
+            {sceneStore.roomInfo.userRole !== EduRoleTypeEnum.teacher?
               <ControlItem
                 name={sceneStore.cameraEduStream ? 'hands_up_end' : 'hands_up'}
                 onClick={handleHandClick}
@@ -77,7 +78,7 @@ export const BigClass = observer(() => {
           {studentStreams.map((studentStream: any, key: number) => (
             <VideoPlayer
               key={key}
-              showClose={roomInfo.userRole === 'teacher' || roomInfo.userUuid === studentStream.userUuid}
+              showClose={roomInfo.userRole === EduRoleTypeEnum.teacher || roomInfo.userUuid === studentStream.userUuid}
               role="student"
               {...studentStream}
             />
@@ -94,7 +95,7 @@ export const BigClass = observer(() => {
         </div>
         <ChatBoard
           name={sceneStore.roomInfo.roomName}
-          canChat={sceneStore.roomInfo.userRole === 'teacher'}
+          canChat={sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher}
           messages={roomStore.roomChatMessages}
           mute={sceneStore.mutedChat}
           value={chat}

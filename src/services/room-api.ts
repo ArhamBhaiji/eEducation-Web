@@ -104,9 +104,9 @@ export class RoomApi {
     }
   }
 
-  async fetchRoom(params: {roomName: string, roomType: number}) {
+  async fetchRoom(params: {roomUuid: string, roomName: string, roomType: number}) {
     const roomConfig: any = {
-      roomUuid: `${params.roomName}${params.roomType}`,
+      roomUuid: `${params.roomUuid}`,
       roomName: `${params.roomName}`,
       roleConfig: {
         host: {
@@ -184,7 +184,7 @@ export class RoomApi {
       
       await this.createRoom(roomConfig)
     } catch (err) {
-      if (err.msg !== 'Room conflict!') {
+      if (err.message !== 'Room conflict!') {
         throw err
       }
     }

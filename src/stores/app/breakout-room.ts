@@ -1,15 +1,13 @@
 import { EduBoardService } from '../../sdk/board/edu-board-service';
-import { EduRecordService } from '../../sdk/record/edu-record-service';
-import { EduRoleTypeEnum, EduAudioSourceType, EduTextMessage, EduClassroomStateType, EduSceneType } from '../../sdk/education/interfaces/index.d';
-import { RemoteUserRenderer } from '../../sdk/education/core/media-service/renderer/index';
-import { RoomApi } from '../../services/room-api';
+import { EduRecordService } from '@/sdk/record/edu-record-service';
+import { EduAudioSourceType, EduTextMessage, EduClassroomStateType, EduSceneType, EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d';
+import { RemoteUserRenderer } from '@/sdk/education/core/media-service/renderer/index';
+import { RoomApi } from '@/services/room-api';
 import { EduClassroomManager } from '@/sdk/education/room/edu-classroom-manager';
-import { GlobalStorage } from '../../utils/custom-storage';
-import { NetworkQuality } from '../../sdk/education/user/edu-student-service';
-import { EduUserService, PeerInviteEnum } from '@/sdk/education/user/edu-user-service';
-import { LocalUserRenderer, UserRenderer } from '../../sdk/education/core/media-service/renderer/index';
+import { PeerInviteEnum } from '@/sdk/education/user/edu-user-service';
+import { LocalUserRenderer, UserRenderer } from '@/sdk/education/core/media-service/renderer/index';
 import { AppStore } from '@/stores/app/index';
-import { AgoraWebRtcWrapper } from '../../sdk/education/core/media-service/web/index';
+import { AgoraWebRtcWrapper } from '@/sdk/education/core/media-service/web/index';
 import { toJS, observable, computed, action, runInAction, autorun } from 'mobx';
 import { AgoraElectronRTCWrapper } from '@/sdk/education/core/media-service/electron';
 import { StartScreenShareParams, PrepareScreenShareParams } from '@/sdk/education/core/media-service/interfaces';
@@ -18,7 +16,7 @@ import { debounce, get } from 'lodash';
 import { EduCourseState, EduUser, EduStream, EduVideoSourceType, EduRoleType } from '@/sdk/education/interfaces/index.d';
 import { ChatMessage } from '@/utils/types';
 import { t } from '@/i18n';
-import { SimpleInterval } from '../mixin/simple-interval';
+import { SimpleInterval } from '@/stores/mixin/simple-interval';
 import { DialogType } from '@/components/dialog';
 import { Mutex } from '@/utils/mutex';
 import { BizLogger } from '@/utils/biz-logger';
@@ -295,7 +293,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         if (err.code === 'ELECTRON_PERMISSION_DENIED') {
           this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing_permission_denied'))
         } else {
-          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.msg}`)
+          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.message}`)
         }
       })
     }
@@ -333,7 +331,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       //   await this.mediaService.stopScreenShare()
       // }
       this.waitingShare = false
-      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.message}`)
       // throw err
     }
   }
@@ -571,7 +569,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       }
       this.sharing = false
     } catch(err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.message}`)
     } finally {
       this.waitingShare = false
     }
@@ -605,12 +603,12 @@ export class BreakoutRoomStore extends SimpleInterval {
         this.mediaService.screenRenderer.stop()
         this.mediaService.screenRenderer = undefined
         this._screenVideoRenderer = undefined
-        this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.msg}`)
+        this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.message}`)
       } else {
         if (err.code === 'PERMISSION_DENIED') {
           this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing_permission_denied'))
         } else {
-          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.msg}`)
+          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.message}`)
         }
       }
       BizLogger.info('SCREEN-SHARE ERROR ', err)
@@ -704,7 +702,7 @@ export class BreakoutRoomStore extends SimpleInterval {
 
   @action
   async sendMessageToCurrentRoom(message: any) {
-    if (this.roomInfo.userRole === 'teacher') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
       try {
         const fromRoomUuid = this.currentStudentRoomUuid || ''
         const payload = JSON.stringify({
@@ -731,7 +729,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       }
     }
 
-    if (this.roomInfo.userRole === 'assistant') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.assistant) {
       try {
         const fromRoomUuid = this.currentStudentRoomUuid
         const payload = JSON.stringify({
@@ -771,7 +769,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       fromRoomName: this.groupClassroomManager?.roomName || '',
     })
     
-    if (this.roomInfo.userRole === 'student') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.student) {
       try {
         await this.largeClassroomManager?.userService.sendRoomChatMessage(payload)
         await this.groupClassroomManager?.userService.sendRoomChatMessage(payload)
@@ -874,11 +872,11 @@ export class BreakoutRoomStore extends SimpleInterval {
   }
 
   get roomManager(): EduClassroomManager | undefined {
-    if (this.roomInfo.userRole === 'teacher') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
       return this.largeClassroomManager
     }
 
-    if (this.roomInfo.userRole === 'student') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.student) {
       return this.groupClassroomManager
     }
   }
@@ -998,7 +996,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         // await this.closeMicrophone()
         await this.mediaService.leave()
         let role = this.roomInfo.userRole
-        if(role === 'student' || role === 'assistant') {
+        if(role === EduRoleTypeEnum.student || role === EduRoleTypeEnum.assistant) {
           await this.mediaService.leaveSubChannel(this.teacherChannel)
           this.teacherChannel = ''
         }
@@ -1036,7 +1034,7 @@ export class BreakoutRoomStore extends SimpleInterval {
 
   isBigClassStudent(): boolean {
     const userRole = this.roomInfo.userRole
-    return +this.roomInfo.roomType === 2 && userRole === 'student'
+    return +this.roomInfo.roomType === 2 && userRole === EduRoleTypeEnum.student
   }
 
   get eduManager() {
@@ -1111,14 +1109,14 @@ export class BreakoutRoomStore extends SimpleInterval {
     })
   }
 
-  async prepareLargeClassroom(roomUuid: string, userRole: string) {
+  async prepareLargeClassroom(roomUuid: string, userRole: EduRoleTypeEnum) {
     const roomManager = this.eduManager.createClassroom({
       roomUuid: roomUuid,
       roomName: this.roomInfo.roomName
     })
     roomManager.on('seqIdChanged', (evt: any) => {
       BizLogger.info("seqIdChanged", evt)
-      if (this.roomInfo.userRole === 'teacher') {
+      if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
         this.appStore.uiStore.updateCurSeqId(evt.curSeqId)
         this.appStore.uiStore.updateLastSeqId(evt.latestSeqId)
       }
@@ -1140,7 +1138,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           return
         }
         try {
-          if (this.roomInfo.userRole !== 'teacher') return
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) return
           if (evt.type === 'main') {
             const localStream = roomManager.getLocalStreamData()
             BizLogger.info("[demo] [breakout] largeClassroom local-stream-updated# localStream ", localStream, this.joiningRTC)
@@ -1185,7 +1183,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
           BizLogger.info("[demo] [breakout] largeClassroom# local-stream-updated", evt)
         } catch (err) {
-          BizLogger.error('[demo] [breakout] largeClassroom# local-stream-updated ', err.msg)
+          BizLogger.error('[demo] [breakout] largeClassroom# local-stream-updated ', err.message)
           BizLogger.error(err)
         }
       })
@@ -1197,7 +1195,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           return
         }
         try {
-          if (this.roomInfo.userRole !== 'teacher') return
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) return
           if (evt.type === 'main') {
             this._cameraEduStream = undefined
             await this.closeCamera()
@@ -1205,7 +1203,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
           BizLogger.info("local-stream-removed", evt)
         } catch (err) {
-          BizLogger.error('[demo] [breakout] LargeClassroom# local-stream-removed ', err.msg)
+          BizLogger.error('[demo] [breakout] LargeClassroom# local-stream-removed ', err.message)
           BizLogger.error(err)
         }
       })
@@ -1235,7 +1233,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     roomManager.on('remote-stream-added', (evt: any) => {
       runInAction(() => {
         this.teacherRoomStreamList = roomManager.getFullStreamList()
-        if (this.roomInfo.userRole !== 'teacher') {
+        if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
           if (this.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
             this.sharing = true
           } else { 
@@ -1249,7 +1247,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     roomManager.on('remote-stream-removed', (evt: any) => {
       runInAction(() => {
         this.teacherRoomStreamList = roomManager.getFullStreamList()
-        if (this.roomInfo.userRole !== 'teacher') {
+        if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
           if (this.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
             this.sharing = true
           } else { 
@@ -1263,7 +1261,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     roomManager.on('remote-stream-updated', (evt: any) => {
       runInAction(() => {
         this.teacherRoomStreamList = roomManager.getFullStreamList()
-        if (this.roomInfo.userRole !== 'teacher') {
+        if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
           if (this.streamList.find((it: EduStream) => it.videoSourceType === EduVideoSourceType.screen)) {
             this.sharing = true
           } else { 
@@ -1328,7 +1326,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       const {textMessage} = evt;
       const message = textMessage as EduTextMessage
       const payload = JSON.parse(message.message)
-      if (this.roomInfo.userRole !== 'teacher') {
+      if (this.roomInfo.userRole !== EduRoleTypeEnum.teacher) {
         if (+payload.role === EduRoleTypeEnum.teacher) {
           this.addChatMessage({
             id: message.fromUser.userUuid,
@@ -1343,7 +1341,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         }
       }
 
-      if (this.roomInfo.userRole === 'teacher') {
+      if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
         this.addChatMessage({
           id: message.fromUser.userUuid,
           ts: message.timestamp,
@@ -1358,9 +1356,9 @@ export class BreakoutRoomStore extends SimpleInterval {
     })
 
     const roles: Record<string, string> = {
-      'teacher': 'host',
-      'student': 'audience',
-      'assistant': 'assistant'
+      [EduRoleTypeEnum.teacher]: 'host',
+      [EduRoleTypeEnum.student]: 'audience',
+      [EduRoleTypeEnum.assistant]: 'assistant'
     }
 
     BizLogger.info("[rules] current Role", roles[userRole])
@@ -1400,20 +1398,20 @@ export class BreakoutRoomStore extends SimpleInterval {
   studentRoomStreamList: EduStream[] = []
 
   @action
-  async prepareStudentClassroom(roomUuid: string, roomName: string, userRole: string) {
+  async prepareStudentClassroom(roomUuid: string, roomName: string, userRole: EduRoleTypeEnum) {
     const roomManager = this.eduManager.createClassroom({
       roomUuid: roomUuid,
       roomName: roomName
     })
 
     const roles: Record<string, string> = {
-      'student': 'broadcaster',
-      'assistant': 'assistant'
+      [EduRoleTypeEnum.student]: 'broadcaster',
+      [EduRoleTypeEnum.assistant]: 'assistant'
     }
 
     roomManager.on('seqIdChanged', (evt: any) => {
       // BizLogger.info("[student] seqIdChanged", evt)
-      if (this.roomInfo.userRole === 'student') {
+      if (this.roomInfo.userRole === EduRoleTypeEnum.student) {
         this.appStore.uiStore.updateCurSeqId(evt.curSeqId)
         this.appStore.uiStore.updateLastSeqId(evt.latestSeqId)
       }
@@ -1435,7 +1433,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           return
         }
         try {
-          if (this.roomInfo.userRole !== 'student') return
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.student) return
           if (evt.type === 'main') {
             const localStream = roomManager.getLocalStreamData()
             BizLogger.info("[demo] [breakout] [student] local-stream-updated# localStream ", localStream, this.joiningRTC)
@@ -1468,7 +1466,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
 
           if (evt.type === 'screen') {
-            // if (this.roomInfo.userRole === 'teacher') {
+            // if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
             const screenStream = roomManager.getLocalScreenData()
             BizLogger.info("[demo] [breakout] [student] getLocalScreenData#screenStream ", screenStream)
             if (screenStream && screenStream.state !== 0) {
@@ -1483,7 +1481,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
           BizLogger.info("[demo] [breakout] [student] local-stream-updated", evt)
         } catch (err) {
-          BizLogger.error('[demo] [breakout] [student] Classroom# local-stream-updated ', err.msg)
+          BizLogger.error('[demo] [breakout] [student] Classroom# local-stream-updated ', err.message)
           BizLogger.error(err)
         }
       })
@@ -1495,7 +1493,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           return
         }
         try {
-          if (this.roomInfo.userRole !== 'student') return
+          if (this.roomInfo.userRole !== EduRoleTypeEnum.student) return
           if (evt.type === 'main') {
             this._cameraEduStream = undefined
             await this.closeCamera()
@@ -1503,7 +1501,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
           BizLogger.info("[demo] [breakout] [student] local-stream-removed", evt)
         } catch (err) {
-          BizLogger.error('[demo] [breakout] [student] Classroom# local-stream-removed ', err.msg)
+          BizLogger.error('[demo] [breakout] [student] Classroom# local-stream-removed ', err.message)
           BizLogger.error(err)
         }
       })
@@ -1579,18 +1577,18 @@ export class BreakoutRoomStore extends SimpleInterval {
     return roomManager
   }
 
-  getLargeClassroomRole(role: string) {
-    if (role === 'teacher') {
+  getLargeClassroomRole(role: EduRoleTypeEnum) {
+    if (role === EduRoleTypeEnum.teacher) {
       return 'host'
     }
-    if (role === 'assistant') {
-      return 'assistant'
+    if (role === EduRoleTypeEnum.assistant) {
+      return EduRoleTypeEnum.assistant
     }
     return 'audience'
   }
 
   @action
-  async prepareClassroom(role: string) {
+  async prepareClassroom(role: EduRoleTypeEnum) {
     this.roomApi = new RoomApi({
       appId: this.eduManager.config.appId,
       sdkDomain: this.eduManager.config.sdkDomain as string,
@@ -1598,6 +1596,8 @@ export class BreakoutRoomStore extends SimpleInterval {
     })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
+      // roomUuid: `${this.roomInfo.roomName}${this.roomInfo.roomType}`,
+      roomUuid: `${this.roomInfo.roomUuid}`,
       roomType: +this.roomInfo.roomType as number,
     })
     BizLogger.info('[breakout] uuid', this.userUuid)
@@ -1606,7 +1606,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     BizLogger.info('[breakout] login succeed', this.userUuid)
     const roomManager = await this.prepareLargeClassroom(roomUuid, role)
     BizLogger.info('[breakout] prepareLargeClassroom succeed')
-    if (['student'].includes(role)) {
+    if ([EduRoleTypeEnum.student].includes(role)) {
       let groupData = await this.prepareGroup(roomUuid, roomManager.userToken)
       const studentRoomManager = await this.prepareStudentClassroom(groupData.roomUuid, groupData.roomName, role)
       this.appStore.groupClassroomManager = studentRoomManager
@@ -1638,7 +1638,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         prefix: this.eduManager.prefix["record"],
       })
       BizLogger.info('[breakout whiteboard] invoke init')
-      await this.appStore.boardStore.init()
+      await this.appStore.boardStore.fetchInit()
       BizLogger.info('[breakout whiteboard] after invoke init')
       const mainStream = groupManager.data.streamMap['main']
       const largeRoomMainStream = largeRoomManager.data.streamMap['main']
@@ -1696,7 +1696,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           }
         }
       } catch (err) {
-        this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.msg}`)
+        this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.message}`)
         BizLogger.warn(err)
       }
     
@@ -1734,7 +1734,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       prefix: this.eduManager.prefix["record"],
     })
     BizLogger.info('[breakout whiteboard] invoke init')
-    await this.appStore.boardStore.init()
+    await this.appStore.boardStore.fetchInit()
     BizLogger.info('[breakout whiteboard] after invoke init')
     const mainStream = roomManager.data.streamMap['main']
     const roomInfo = this.largeClassroomManager.getClassroomInfo()
@@ -1775,7 +1775,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         }
       }
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.message}`)
       BizLogger.warn(err)
     }
 
@@ -1806,6 +1806,8 @@ export class BreakoutRoomStore extends SimpleInterval {
     })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
+      // roomUuid: `${this.roomInfo.roomName}${this.roomInfo.roomType}`,
+      roomUuid: `${this.roomInfo.roomUuid}`,
       roomType: +this.roomInfo.roomType as number,
     })
     BizLogger.info('[breakout] uuid', this.userUuid)
@@ -1830,7 +1832,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       window.addEventListener('popstate', this.handlePopState, false)
       this.appStore.uiStore.startLoading()
       if (this.roomInfo) {
-        if (this.roomInfo.userRole === 'assistant') {
+        if (this.roomInfo.userRole === EduRoleTypeEnum.assistant) {
           if (!this.largeClassroomManager) {
             await this.assistantJoinLargeClassroom()
           }
@@ -1869,7 +1871,7 @@ export class BreakoutRoomStore extends SimpleInterval {
   //   try {
   //     this.appStore.uiStore.startLoading()
   //     if (this.roomInfo) {
-  //       if (this.roomInfo.userRole === 'assistant') {
+  //       if (this.roomInfo.userRole === EduRoleTypeEnum.assistant) {
   //         await this.joinGroupAsAssistant(courseName)
   //       }
   //     }
@@ -1886,7 +1888,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     try {
       this.appStore.uiStore.startLoading()
       if (this.roomInfo) {
-        if (this.roomInfo.userRole === 'assistant') {
+        if (this.roomInfo.userRole === EduRoleTypeEnum.assistant) {
           await this.leaveGroupAsAssistant(courseName)
         }
       }
@@ -1964,7 +1966,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         prefix: this.eduManager.prefix["record"],
       })
       BizLogger.info('[breakout whiteboard] invoke init')
-      await this.appStore.boardStore.init()
+      await this.appStore.boardStore.fetchInit()
       BizLogger.info('[breakout whiteboard] after invoke init')
       const mainStream = groupManager.data.streamMap['main']
       const largeRoomMainStream = largeRoomManager.data.streamMap['main']
@@ -2025,7 +2027,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     try {
       this.appStore.uiStore.startLoading()
       if (this.roomInfo) {
-        if (this.roomInfo.userRole === 'assistant') {
+        if (this.roomInfo.userRole === EduRoleTypeEnum.assistant) {
           await this.joinAsAssistant(courseUuid, this.roomInfo.groupName as string)
         }
       }
@@ -2043,10 +2045,10 @@ export class BreakoutRoomStore extends SimpleInterval {
       window.addEventListener('popstate', this.handlePopState, false)
       this.appStore.uiStore.startLoading()
       if (this.roomInfo) {
-        if (this.roomInfo.userRole === 'teacher') {
+        if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
           await this.joinAsTeacher()
         }
-        if (this.roomInfo.userRole === 'student') {
+        if (this.roomInfo.userRole === EduRoleTypeEnum.student) {
           await this.joinAsStudent()
         }
       }
@@ -2076,7 +2078,7 @@ export class BreakoutRoomStore extends SimpleInterval {
   get teacherStream(): EduMediaStream {
     // 当本地是老师时
     const localUser = this.localUser
-    if (localUser && localUser.userRole === 'teacher'
+    if (localUser && localUser.userRole === EduRoleTypeEnum.teacher
       && this.cameraEduStream) {
       return {
         local: true,
@@ -2190,7 +2192,7 @@ export class BreakoutRoomStore extends SimpleInterval {
 
     const localUser = this.localUser
 
-    const isStudent = ['student'].includes(localUser.userRole)
+    const isStudent = [EduRoleTypeEnum.student].includes(localUser.userRole)
 
     if (this.cameraEduStream && isStudent) {
       streamList = [{
@@ -2319,7 +2321,7 @@ export class BreakoutRoomStore extends SimpleInterval {
   }
 
   canControl(userUuid: string): boolean {
-    return ['teacher', 'assistant'].includes(this.roomInfo.userRole) || this.userUuid === userUuid
+    return [EduRoleTypeEnum.teacher, EduRoleTypeEnum.assistant].includes(this.roomInfo.userRole) || this.userUuid === userUuid
   }
 
   private _unreadMessageCount: number = 0
@@ -2350,7 +2352,7 @@ export class BreakoutRoomStore extends SimpleInterval {
 
   @computed
   get roomChatMessages(): ChatMessage[] {
-    if (['student', 'assistant'].includes(this.roomInfo.userRole)) {
+    if ([EduRoleTypeEnum.student, EduRoleTypeEnum.assistant].includes(this.roomInfo.userRole)) {
       if (this.currentStudentRoomUuid) {
         return this._roomChatMessages
           .filter(
@@ -2359,7 +2361,7 @@ export class BreakoutRoomStore extends SimpleInterval {
           )
       }
     }
-    if (this.roomInfo.userRole === 'teacher') {
+    if (this.roomInfo.userRole === EduRoleTypeEnum.teacher) {
       if (this.currentStudentRoomUuid) {
         return this._roomChatMessages
           .filter(
@@ -2374,7 +2376,7 @@ export class BreakoutRoomStore extends SimpleInterval {
   @computed
   get muteControl(): boolean {
     if (this.roomInfo) {
-      return this.roomInfo.userRole === 'teacher'
+      return this.roomInfo.userRole === EduRoleTypeEnum.teacher
     }
     return false
   }
@@ -2457,8 +2459,8 @@ export class BreakoutRoomStore extends SimpleInterval {
   }
 
   @action
-  async muteAudio(userUuid: string, isLocal: boolean, userRole: string) {
-    if (userRole === 'teacher') {
+  async muteAudio(userUuid: string, isLocal: boolean, userRole: EduRoleTypeEnum) {
+    if (userRole === EduRoleTypeEnum.teacher) {
       if (isLocal) {
         BizLogger.info('before muteLocalAudio', this.microphoneLock)
         await this.muteLocalMicrophone()
@@ -2470,8 +2472,8 @@ export class BreakoutRoomStore extends SimpleInterval {
     }
   }
 
-  async unmuteAudio(userUuid: string, isLocal: boolean, userRole: string) {
-    if (userRole === 'teacher') {
+  async unmuteAudio(userUuid: string, isLocal: boolean, userRole: EduRoleTypeEnum) {
+    if (userRole === EduRoleTypeEnum.teacher) {
       if (isLocal) {
         BizLogger.info('before unmuteLocalMicrophone', this.microphoneLock)
         await this.unmuteLocalMicrophone()
@@ -2484,7 +2486,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     }
   }
 
-  async muteVideo(userUuid: string, isLocal: boolean, userRole: string) {
+  async muteVideo(userUuid: string, isLocal: boolean, userRole: EduRoleTypeEnum) {
     if (isLocal) {
       BizLogger.info('before muteLocalCamera', this.cameraLock)
       await this.muteLocalCamera()
@@ -2495,7 +2497,7 @@ export class BreakoutRoomStore extends SimpleInterval {
     }
   }
 
-  async unmuteVideo(userUuid: string, isLocal: boolean, userRole: string) {
+  async unmuteVideo(userUuid: string, isLocal: boolean, userRole: EduRoleTypeEnum) {
     if (isLocal) {
       BizLogger.info('before unmuteLocalCamera', this.cameraLock)
       await this.unmuteLocalCamera()
@@ -2540,7 +2542,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       this.recordId = recordId
       this.appStore.uiStore.addToast(t('toast.start_recording_successfully'))
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.start_recording_failed') + `, ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.start_recording_failed') + `, ${err.message}`)
     }
   }
 
@@ -2551,7 +2553,7 @@ export class BreakoutRoomStore extends SimpleInterval {
       this.appStore.uiStore.addToast(t('toast.successfully_ended_recording'))
       this.recordId = ''
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_recording') + `, ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_recording') + `, ${err.message}`)
     }
   }
 
@@ -2613,7 +2615,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         await this.largeClassroomManager?.userService.sendCoVideoApply(teacher)
       }
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_a_raise_of_hand_application') + ` ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_a_raise_of_hand_application') + ` ${err.message}`)
     }
   }
 
@@ -2625,7 +2627,7 @@ export class BreakoutRoomStore extends SimpleInterval {
         await this.largeClassroomManager?.userService.studentCancelApply(teacher)
       }
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_the_call') + ` ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_the_call') + ` ${err.message}`)
     }
   }
 

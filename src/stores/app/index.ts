@@ -29,6 +29,16 @@ import { BizLogger } from '@/utils/biz-logger';
 import { platform } from '@/utils/platform';
 import { SceneStore } from './scene';
 import { ListenerCallback } from '@/modular/declare';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
+
+type RoomInfoParams = {
+  roomName: string
+  roomType: number
+  roomUuid: string
+  userName: string
+  userRole: number
+  userUuid: string
+}
 
 export type AppStoreConfigParams = {
   agoraAppId: string
@@ -50,13 +60,16 @@ export type AppStoreInitParams = {
   roomInfoParams?: RoomInfo
   config: AppStoreConfigParams
   listener?: ListenerCallback
+  pretest?: boolean
+  mainPath?: string
+  roomPath?: string
 }
 
 export type RoomInfo = {
   roomName: string
   roomType: number
   userName: string
-  userRole: string
+  userRole: EduRoleTypeEnum
   userUuid: string
   roomUuid: string
   groupName?: string
@@ -173,6 +186,10 @@ export class AppStore {
     console.log(" config >>> params: ", this.params)
     const {config, roomInfoParams} = params
 
+    // if (roomInfoParams) {
+
+    // }
+
     if (config.enableLog) {
       EduManager.enableDebugLog(true);
     }
@@ -185,6 +202,10 @@ export class AppStore {
           roomInfo: data.roomInfo,
         })
       })
+    } else {
+      this.setRoomInfo(
+        roomInfoParams
+      )
     }
 
     if (platform === 'electron') {
@@ -228,7 +249,7 @@ export class AppStore {
   }
 
   @computed
-  get userRole (): string {
+  get userRole (): EduRoleTypeEnum {
     return this.roomInfo.userRole
   }
 
@@ -244,19 +265,21 @@ export class AppStore {
         roomName: '',
         roomType: 0,
         userName: '',
-        userRole: '',
+        userRole: 0,
         userUuid: '',
         roomUuid: '',
         groupName: '',
         groupUuid: '',
       },
       config: {
-        agoraAppId: '',
-        agoraNetlessAppId: '',
-        agoraRestFullToken: '',
+        agoraAppId: this.params.config.agoraAppId,
+        agoraNetlessAppId: this.params.config.agoraNetlessAppId,
+        agoraRestFullToken: this.params.config.agoraRestFullToken,
         enableLog: true,
-        sdkDomain: ''
-      }
+        sdkDomain: this.params.config.sdkDomain,
+      },
+      mainPath: '',
+      roomPath: '',
     }
   }
 
@@ -267,7 +290,7 @@ export class AppStore {
       roomUuid: "",
       roomType: 0,
       userName: "",
-      userRole: "",
+      userRole: 0,
       userUuid: "",
     }
   }
@@ -294,13 +317,13 @@ export class AppStore {
   }
 
   @action
-  setRoomInfo(payload: any) {
+  setRoomInfo(payload: RoomInfo) {
     this.roomInfo = {
       roomName: payload.roomName,
       roomType: payload.roomType,
       roomUuid: payload.roomUuid,
       userName: payload.userName,
-      userRole: payload.role,
+      userRole: payload.userRole,
       userUuid: payload.userUuid,
       // userUuid: `${payload.userName}${payload.role}`
     }
@@ -321,7 +344,7 @@ export class AppStore {
       }
       this.sharing = false
     } catch(err) {
-      this.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.msg}`)
+      this.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.message}`)
     } finally {
       this.waitingShare = false
     }
@@ -356,9 +379,9 @@ export class AppStore {
         this.mediaService.screenRenderer.stop()
         this.mediaService.screenRenderer = undefined
         this._screenVideoRenderer = undefined
-        this.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.msg}`)
+        this.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.message}`)
       } else {
-        this.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + `${err.msg}`)
+        this.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + `${err.message}`)
       }
       BizLogger.info('SCREEN-SHARE ERROR ', err)
       BizLogger.error(err)
@@ -467,7 +490,7 @@ export class AppStore {
       //   await this.mediaService.stopScreenShare()
       // }
       this.waitingShare = false
-      this.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.msg}`)
+      this.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.message}`)
       // throw err
     }
   }

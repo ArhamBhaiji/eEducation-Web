@@ -1,3 +1,4 @@
+import uuidv4 from 'uuid/v4';
 import { GenericErrorWrapper } from './../utils/generic-error';
 import { EduLogger } from './../logger';
 import { LocalUserRenderer, RemoteUserRenderer } from './renderer/index';
@@ -22,8 +23,11 @@ export class MediaService extends EventEmitter implements IMediaService {
 
   screenShareIds: any[] = []
 
+  readonly _id!: string
+
   constructor(rtcProvider: RTCProviderInitParams) {
     super();
+    this._id = uuidv4()
     EduLogger.info(`[rtcProvider] appId: ${rtcProvider.appId}, platform: ${rtcProvider.platform}`)
     if (rtcProvider.platform === 'electron') {
       const electronLogPath = rtcProvider.electronLogPath as any;

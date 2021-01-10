@@ -5,6 +5,7 @@ import { EduMediaStream } from '@/stores/app/room'
 import { t } from '@/i18n'
 import { ChatPanel } from '@/components/chat/panel'
 import { StudentList } from '@/components/student-list'
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts'
 
 export const AssistantChatBoard = observer(() => {
   const breakoutRoomStore = useBreakoutRoomStore()
@@ -40,7 +41,7 @@ export const AssistantChatBoard = observer(() => {
 
   const handleClick = async (evt: any, id: string, type: string) => {
     const isLocal = (userUuid: string) => breakoutRoomStore.roomInfo.userUuid === userUuid
-    if (breakoutRoomStore.roomInfo.userRole === 'assistant' || isLocal(id)) {
+    if (breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.assistant || isLocal(id)) {
       const target = studentStreams.find((it: EduMediaStream) => it.userUuid === id)
       switch (type) {
         case 'grantBoard': {
@@ -97,7 +98,7 @@ export const AssistantChatBoard = observer(() => {
       </div>
       <div className={`chat-container ${breakoutRoomStore.activeTab === 'first' ? '' : 'hide'}`}>
         <ChatPanel
-          canChat={breakoutRoomStore.roomInfo.userRole === 'assistant'}
+          canChat={breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.assistant}
           muteControl={breakoutRoomStore.muteControl}
           muteChat={breakoutRoomStore.mutedChat}
           handleMute={handleMute}

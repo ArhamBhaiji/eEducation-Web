@@ -1,7 +1,5 @@
 import { AgoraFetchParams } from "@/sdk/education/interfaces/index.d";
-import { EduRoomType } from "@/sdk/education/core/services/interface.d";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
-import { BizLogger } from "@/utils/biz-logger";
 
 export class EduModularApi {
 
@@ -11,10 +9,6 @@ export class EduModularApi {
   private token!: string
 
   constructor() {
-    // this.token = params.token
-    // this.restToken = params.restToken
-    // this.appId = params.appId
-    // this.sdkDomain = params.sdkDomain
   }
 
   updateConfig(params: {
@@ -46,7 +40,8 @@ export class EduModularApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
+        'token': `${this.token ? this.token : ""}`,
+        'Authorization': `Basic ${this.restToken}`
       }
     }
     
@@ -87,10 +82,18 @@ export class EduModularApi {
     return res
   }
 
-  async checkIn(roomUuid: string) {
+  async checkIn(params: {
+    roomUuid: string,
+    roomName: string,
+    roomType: number
+  }) {
     const res = await this.fetch({
-      url: `/v2/rooms/${roomUuid}`,
-      method: 'PUT'
+      url: `/v2/rooms/${params.roomUuid}`,
+      method: 'PUT',
+      data: {
+        roomName: params.roomName,
+        roomType: params.roomType
+      }
     })
 
     return res
@@ -120,13 +123,14 @@ export class EduModularApi {
 
   async sendChat(params: {
     roomUuid: string,
+    userUuid: string,
     data: {
       message: string,
       type: number
     }
   }) {
     const res = await this.fetch({
-      url: `/v2/rooms/${params.roomUuid}/chat`,
+      url: `/v2/rooms/${params.roomUuid}/from/${params.userUuid}/chat`,
       method: 'POST',
       data: params.data
     })
@@ -139,8 +143,10 @@ export class EduModularApi {
   }) {
     const res = await this.fetch({
       url: `/v2/rooms/${params.roomUuid}/mute`,
-      method: 'POST',
-      data: params.muteChat
+      method: 'PUT',
+      data: {
+        muteChat: params.muteChat
+      }
     })
     return res
   }
@@ -151,10 +157,13 @@ export class EduModularApi {
     payload: any
   }) {
     const res = await this.fetch({
-      url: `/v2/rooms/${params.roomUuid}/handup${params.toUserUuid}`,
+      url: `/v2/rooms/${params.roomUuid}/handup/${params.toUserUuid}`,
       method: 'POST',
       data: {
-        payload: params.payload
+        payload: JSON.stringify({
+          cmd: 1,
+          data: params.payload
+        })
       }
     })
     return res

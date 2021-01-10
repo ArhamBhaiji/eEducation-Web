@@ -399,7 +399,7 @@ export class EduClassroomDataController {
         EduLogger.info(`[${this._id}] [seqId] : ${seq} syncFullSequences data succeed`)
         return
       } catch (err) {
-        EduLogger.warn('syncFullSequences ', err.msg, err)
+        EduLogger.warn('syncFullSequences ', err.message, err)
         --times
       }
     } while(times > 0)

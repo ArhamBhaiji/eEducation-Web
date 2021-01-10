@@ -5,6 +5,7 @@ import { NetlessBoard } from '@/components/netless-board';
 import { ScreenSharing } from '@/components/screen-sharing';
 import { useRoomStore, useSceneStore } from '@/hooks';
 import { observer } from 'mobx-react';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const OneToOne = observer(() => {
 
@@ -57,7 +58,7 @@ export const OneToOne = observer(() => {
                 userUuid={''}
                 streamUuid={''}
                 showClose={false}
-                account={'student'}
+                account={"student"}
                 renderer={{}}
                 local={false}
                 role="student"
@@ -68,7 +69,7 @@ export const OneToOne = observer(() => {
             }
         </div>
         <ChatBoard
-          canChat={roomStore.roomInfo.userRole === 'teacher'}
+          canChat={roomStore.roomInfo.userRole === EduRoleTypeEnum.teacher}
           messages={roomStore.roomChatMessages}
           value={chat}
           sendMessage={sendMessage}

@@ -35,6 +35,7 @@ ReactDOM.render(
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       enableLog: true
     }}
+    // basename={"/education_web"}
   />,
   document.getElementById('root')
 );

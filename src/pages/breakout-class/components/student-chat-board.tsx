@@ -5,6 +5,7 @@ import { EduMediaStream } from '@/stores/app/room'
 import { t } from '@/i18n'
 import { ChatPanel } from '@/components/chat/panel'
 import { StudentList } from '@/components/student-list'
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const StudentChatBoard = observer(() => {
   const breakoutRoomStore = useBreakoutRoomStore()
@@ -40,7 +41,7 @@ export const StudentChatBoard = observer(() => {
 
   const handleClick = async (evt: any, id: string, type: string) => {
     const isLocal = (userUuid: string) => breakoutRoomStore.roomInfo.userUuid === userUuid
-    if (breakoutRoomStore.roomInfo.userRole === 'teacher' || isLocal(id)) {
+    if (breakoutRoomStore.roomInfo.userRole === EduRoleTypeEnum.teacher || isLocal(id)) {
       const target = studentStreams.find((it: EduMediaStream) => it.userUuid === id)
       switch (type) {
         case 'audio': {

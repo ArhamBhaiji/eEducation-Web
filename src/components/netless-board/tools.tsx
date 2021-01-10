@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {CustomIcon} from '@/components/icon';
 import { Tooltip, ClickAwayListener } from '@material-ui/core';
 import {UploadBtn} from './upload/upload-btn'
@@ -9,6 +9,7 @@ import { BoardStore } from '@/stores/app/board';
 import { SketchPicker } from 'react-color';
 import { get } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const ToolItem = (props: any) => {
   const onClick = (evt: any) => {
@@ -63,7 +64,7 @@ export const Tools = observer(() => {
           <div className="board-tools-menu">
             {items
               .filter((it: any) => {
-                if (get(sceneStore, 'roomInfo.userRole', 'student') === 'student') {
+                if (get(sceneStore, 'roomInfo.userRole', EduRoleTypeEnum.student) === EduRoleTypeEnum.student) {
                   if (['add', 'upload', 'hand_tool', 'extension_tool'].indexOf(it.name) !== -1) return false
                 }
                 if (it.name === 'extension_tool' && !isMiddleClass) {

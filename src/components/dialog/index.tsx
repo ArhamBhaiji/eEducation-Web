@@ -31,7 +31,7 @@ function RoomDialog(
   onConfirm,
   onClose,
   dialogId,
-  dialogMessage
+  dialogMessage,
 }: RoomProps) {
 
   const uiStore = useUIStore()
@@ -63,20 +63,13 @@ function RoomDialog(
           </DialogContentText>
           <div className="button-group">
             <CustomButton name={t("toast.confirm")} className="confirm" onClick={handleConfirm} color="primary" />
-            <CustomButton name={t("toast.cancel")} className="cancel" onClick={handleClose} color="primary" />
+            {dialogMessage.type !== 'classSessionEnded' ? <CustomButton name={t("toast.cancel")} className="cancel" onClick={handleClose} color="primary" /> : null}
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-
-// const useLocationGuard = observer(() => {
-
-
-
-//   return {handleLocationConfirm}
-// })
 
 export const RoomNavigationDialog = observer((props: any) => {
   const appStore = useAppStore()
@@ -134,6 +127,14 @@ export const RoomNavigationDialog = observer((props: any) => {
     else if (type === 'rejectConfirm') {
       extensionStore.removeApplyUserBy(option.userUuid)
     }
+    else if (type === 'endClass') {
+      await roomStore.endRoom()
+    }
+    else if (type === 'classSessionEnded') {
+      uiStore.unblock()
+      uiStore.reset()
+      history.push('/')
+    }
 
     return;
   }, [props.handleLocationConfirm, location.pathname, breakoutRoomStore, roomStore, uiStore, history, extensionStore, appStore])
@@ -154,18 +155,10 @@ export const RoomNavigationDialog = observer((props: any) => {
 })
 
 export const ConfirmDialog = observer(() => {
-  // const {
-  //   handleLocationConfirm,
-  //   // handleLocationCancel
-  // } = useLocationGuard()
-
   const uiStore = useUIStore()
   const location = useLocation()
 
   const history = useHistory()
-
-  //@ts-ignore
-  window.reactHistory = history
 
   useEffect(() => {
     if (location.pathname.startsWith('/classroom')) {

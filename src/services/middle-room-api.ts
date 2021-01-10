@@ -1,3 +1,4 @@
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d';
 import { AgoraFetchParams } from "@/sdk/education/interfaces/index.d";
 // import { this.appId, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
@@ -15,7 +16,7 @@ export type SessionInfo = {
   roomName: string
   userUuid: string
   userName: string
-  role: string
+  role: EduRoleTypeEnum
   userToken: string
 }
 

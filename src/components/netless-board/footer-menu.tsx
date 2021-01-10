@@ -7,6 +7,7 @@ import {observer} from 'mobx-react';
 import ScaleController from './scale-controller';
 import { useLocation } from 'react-router-dom';
 import { ApplyUserList } from '../apply-user-list';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 export const FooterMenu = () => {
 
@@ -80,7 +81,7 @@ const BasicSceneFooterMenu = observer((props: any) => {
         <span>
           <ControlItem
             loading={sceneStore.recording}
-            name={sceneStore.recording ? 'icon-loading ' : (sceneStore.recordId ? 'stop_recording' : 'recording')}
+            name={sceneStore.recording ? 'icon-loading ' : (sceneStore.isRecording ? 'stop_recording' : 'recording')}
             onClick={handleRecording}
             active={false}
           />
@@ -138,7 +139,7 @@ const BreakoutClassSceneFooterMenu = observer(() => {
   }
 
   return (
-    roomStore.roomInfo.userRole === 'teacher' ?
+    roomStore.roomInfo.userRole === EduRoleTypeEnum.teacher ?
     <>
     <div className="pagination">
     {!roomStore.sharing ?

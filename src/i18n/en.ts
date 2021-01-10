@@ -171,7 +171,9 @@ const en = {
     'the_teacher_refused': 'Teacher refused',
     'failed_to_initiate_a_raise_of_hand_application': 'Failed to initiate a raise of hand application',
     'failed_to_end_the_call': 'Failed to end the call',
+    'failed_to_join_board': 'Failed to join board',
   },
+  'end_class_confirm': 'Are you sure to end class room？',
   'notice': {
     'student_interactive_apply': `"{reason}" wants to interact with you`
   },
@@ -289,6 +291,7 @@ const en = {
     'group_down_platform': 'Please let the group go first',
     'groupText': 'Group: maximum number of students in a group. For a classroom with 5 students, 2 divides the group into 3 groups (2,2,1), 4 divides the students into 2 groups (4,1), 6 leaves the students into just one group(5)'
   },
+  'class_ended': 'Class session is ended, please click confirm leave room',
   'course_recording': 'course recording',
   'build_version': `build version: ${build_version}`,
   'cancel_confirm': 'Are you sure to ignore？',

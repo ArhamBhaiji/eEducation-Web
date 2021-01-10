@@ -1,10 +1,10 @@
+import { eduModularApi } from '@/services/edu-modular-api';
 import { roomTypes } from './../../pages/breakout-class/breakout-class';
 import { Mutex } from './../../utils/mutex';
-import uuidv4 from 'uuid/v4';
 import { SimpleInterval } from './../mixin/simple-interval';
 import { EduBoardService } from './../../sdk/board/edu-board-service';
 import { EduRecordService } from './../../sdk/record/edu-record-service';
-import { EduAudioSourceType, EduTextMessage, EduSceneType } from './../../sdk/education/interfaces/index.d';
+import { EduSceneType } from './../../sdk/education/interfaces/index.d';
 import { RemoteUserRenderer } from './../../sdk/education/core/media-service/renderer/index';
 import { RoomApi } from './../../services/room-api';
 import { EduClassroomManager } from '@/sdk/education/room/edu-classroom-manager';
@@ -18,10 +18,10 @@ import { StartScreenShareParams, PrepareScreenShareParams } from '@/sdk/educatio
 import { MediaService } from '@/sdk/education/core/media-service';
 import { get } from 'lodash';
 import { EduCourseState, EduUser, EduStream, EduVideoSourceType, EduRoleType } from '@/sdk/education/interfaces/index.d';
-import { ChatMessage } from '@/utils/types';
 import { t } from '@/i18n';
 import { DialogType } from '@/components/dialog';
 import { BizLogger } from '@/utils/biz-logger';
+import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 
 const delay = 2000
 
@@ -172,6 +172,7 @@ export class SceneStore extends SimpleInterval {
 
   @action
   reset() {
+    this.mediaService.reset()
     this.cameraLabel = '';
     this.microphoneLabel = '';
     this._cameraId = '';
@@ -253,7 +254,7 @@ export class SceneStore extends SimpleInterval {
   @computed
   get canChat(): boolean {
     const userRole = get(this.roomInfo, 'userRole', '')
-    if (userRole === 'teacher') {
+    if (userRole === EduRoleTypeEnum.teacher) {
       return true
     }
 
@@ -333,14 +334,14 @@ export class SceneStore extends SimpleInterval {
         if (err.code === 'ELECTRON_PERMISSION_DENIED') {
           this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing_permission_denied'))
         } else {
-          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.msg}`)
+          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.message}`)
         }
       })
     }
   }
 
   get roomUuid(): string {
-    return this.roomManager?.roomUuid
+    return this.appStore.roomInfo.roomUuid
   }
 
   @action
@@ -349,7 +350,7 @@ export class SceneStore extends SimpleInterval {
       this.waitingShare = true
       await this.roomManager?.userService.startShareScreen()
       const params: any = {
-        channel: this.roomManager?.roomUuid,
+        channel: this.roomUuid,
         uid: +this.roomManager?.userService.screenStream.stream.streamUuid,
         token: this.roomManager?.userService.screenStream.token,
       }
@@ -368,7 +369,7 @@ export class SceneStore extends SimpleInterval {
     } catch (err) {
       BizLogger.warn(err)
       this.waitingShare = false
-      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.message}`)
     }
   }
 
@@ -539,7 +540,7 @@ export class SceneStore extends SimpleInterval {
       }
       this.sharing = false
     } catch(err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_screen_sharing') + `${err.message}`)
     } finally {
       this.waitingShare = false
     }
@@ -555,7 +556,7 @@ export class SceneStore extends SimpleInterval {
       })
       await this.roomManager?.userService.startShareScreen()
       const params: any = {
-        channel: this.roomManager?.roomUuid,
+        channel: this.roomUuid,
         uid: +this.roomManager?.userService.screenStream.stream.streamUuid,
         token: this.roomManager?.userService.screenStream.token,
       }
@@ -571,12 +572,12 @@ export class SceneStore extends SimpleInterval {
         this.mediaService.screenRenderer.stop()
         this.mediaService.screenRenderer = undefined
         this._screenVideoRenderer = undefined
-        this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.msg}`)
+        this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing_to_remote') + `${err.message}`)
       } else {
         if (err.code === 'PERMISSION_DENIED') {
           this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing_permission_denied'))
         } else {
-          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.msg}`)
+          this.appStore.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + ` code: ${err.code}, msg: ${err.message}`)
         }
       }
       BizLogger.info('SCREEN-SHARE ERROR ', err)
@@ -663,7 +664,7 @@ export class SceneStore extends SimpleInterval {
 
   isBigClassStudent(): boolean {
     const userRole = this.roomInfo.userRole
-    return +this.roomInfo.roomType === 2 && userRole === 'student'
+    return +this.roomInfo.roomType === 2 && userRole === EduRoleTypeEnum.student
   }
 
   get eduManager() {
@@ -699,7 +700,7 @@ export class SceneStore extends SimpleInterval {
   @computed
   get muteControl(): boolean {
     if (this.roomInfo) {
-      return this.roomInfo.userRole === 'teacher'
+      return this.roomInfo.userRole === EduRoleTypeEnum.teacher
     }
     return false
   }
@@ -709,9 +710,8 @@ export class SceneStore extends SimpleInterval {
   }
 
   @computed
-  get isRecording(): boolean {
-    if (this.recordId) return true
-    return false
+  get isRecording() {
+    return this.recordState
   }
   
   async joinRTC(args: any) {
@@ -765,7 +765,7 @@ export class SceneStore extends SimpleInterval {
   get teacherStream(): EduMediaStream {
     // 当本地是老师时
     const localUser = this.localUser
-    if (localUser && localUser.userRole === 'teacher'
+    if (localUser && localUser.userRole === EduRoleTypeEnum.teacher
       && this.cameraEduStream) {
       return {
         local: true,
@@ -877,7 +877,7 @@ export class SceneStore extends SimpleInterval {
 
     const localUser = this.localUser
 
-    const isStudent = ['student'].includes(localUser.userRole)
+    const isStudent = [EduRoleTypeEnum.student].includes(localUser.userRole)
 
     if (this.cameraEduStream && isStudent) {
       streamList = [{
@@ -897,7 +897,11 @@ export class SceneStore extends SimpleInterval {
   @action
   async startClass() {
     try {
-      await this.roomManager?.userService.updateCourseState(EduCourseState.EduCourseStateStart)
+      await eduModularApi.updateClassState({
+        roomUuid: `${this.roomUuid}`,
+        state: 1
+      })
+      // await this.roomManager?.userService.updateCourseState(EduCourseState.EduCourseStateStart)
       // this.classState = true
       this.appStore.uiStore.addToast(t('toast.course_started_successfully'))
     } catch (err) {
@@ -909,7 +913,11 @@ export class SceneStore extends SimpleInterval {
   @action
   async stopClass() {
     try {
-      await this.roomManager?.userService.updateCourseState(EduCourseState.EduCourseStateStop)
+      await eduModularApi.updateClassState({
+        roomUuid: `${this.roomUuid}`,
+        state: 2
+      })
+      // await this.roomManager?.userService.updateCourseState(EduCourseState.EduCourseStateStop)
       this.appStore.uiStore.addToast(t('toast.the_course_ends_successfully'))
     } catch (err) {
       BizLogger.info(err)
@@ -931,23 +939,19 @@ export class SceneStore extends SimpleInterval {
 
   @action
   async muteChat() {
-    const sceneType = +this.roomInfo.roomType === 2 ? EduSceneType.SceneLarge : +this.roomInfo.roomType
-    const roles = ['broadcaster']
-    if ([EduSceneType.SceneLarge, EduSceneType.SceneMedium].includes(sceneType)) {
-      roles.push('audience')
-    }
-    await this.roomManager?.userService.muteStudentChatByRoles(roles)
+    await eduModularApi.muteChat({
+      roomUuid: this.roomInfo.roomUuid,
+      muteChat: 1
+    })
     this.isMuted = true
   }
 
   @action
   async unmuteChat() {
-    const sceneType = +this.roomInfo.roomType === 2 ? EduSceneType.SceneLarge : +this.roomInfo.roomType
-    const roles = ['broadcaster']
-    if ([EduSceneType.SceneLarge, EduSceneType.SceneMedium].includes(sceneType)) {
-      roles.push('audience')
-    }
-    await this.roomManager?.userService.unmuteStudentChatByRoles(roles)
+    await eduModularApi.muteChat({
+      roomUuid: this.roomInfo.roomUuid,
+      muteChat: 0
+    })
     this.isMuted = false
   }
 
@@ -956,7 +960,7 @@ export class SceneStore extends SimpleInterval {
    * @param userUuid string
    */
   canControl(userUuid: string): boolean {
-    return this.roomInfo.userRole === 'teacher' || this.userUuid === userUuid
+    return this.roomInfo.userRole === EduRoleTypeEnum.teacher || this.userUuid === userUuid
   }
 
   async closeStream(userUuid: string, isLocal: boolean) {
@@ -1059,22 +1063,30 @@ export class SceneStore extends SimpleInterval {
   @action
   async startRecording() {
     try {
-      let {recordId} = await this.recordService.startRecording(this.roomUuid)
-      this.recordId = recordId
+      await eduModularApi.updateRecordingState({
+        roomUuid: this.roomUuid,
+        state: 1
+      })
+      // let {recordId} = await this.recordService.startRecording(this.roomUuid)
+      // this.recordId = recordId
       this.appStore.uiStore.addToast(t('toast.start_recording_successfully'))
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.start_recording_failed') + `, ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.start_recording_failed') + `, ${err.message}`)
     }
   }
 
   @action
   async stopRecording() {
     try {
-      await this.recordService.stopRecording(this.roomUuid, this.recordId)
+      await eduModularApi.updateRecordingState({
+        roomUuid: this.roomUuid,
+        state: 0
+      })
+      // await this.recordService.stopRecording(this.roomUuid, this.recordId)
       this.appStore.uiStore.addToast(t('toast.successfully_ended_recording'))
       this.recordId = ''
     } catch (err) {
-      this.appStore.uiStore.addToast(t('toast.failed_to_end_recording') + `, ${err.msg}`)
+      this.appStore.uiStore.addToast(t('toast.failed_to_end_recording') + `, ${err.message}`)
     }
   }
 }
