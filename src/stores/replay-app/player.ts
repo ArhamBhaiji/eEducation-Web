@@ -96,7 +96,7 @@ export class PlayerStore {
       userToken: '',
       prefix: `${config.sdkDomain}/recording/apps/%app_id`.replace('%app_id', config.agoraAppId),
     })
-    this.mediaUrl = replayConfig.videoUrl
+    this.mediaUrl = replayConfig.whiteboardUrl
     this.boardId = replayConfig.whiteboardId
     this.boardToken = replayConfig.whiteboardToken
     this.startTime = replayConfig.startTime

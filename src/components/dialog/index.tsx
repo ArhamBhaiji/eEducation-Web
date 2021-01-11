@@ -61,7 +61,7 @@ function RoomDialog(
           <DialogContentText className="dialog-title">
             {dialogMessage.message}
           </DialogContentText>
-          <div className="button-group">
+          <div className={`button-group ${dialogMessage.type === 'classSessionEnded' ? 'center' : ''}`}>
             <CustomButton name={t("toast.confirm")} className="confirm" onClick={handleConfirm} color="primary" />
             {dialogMessage.type !== 'classSessionEnded' ? <CustomButton name={t("toast.cancel")} className="cancel" onClick={handleClose} color="primary" /> : null}
           </div>

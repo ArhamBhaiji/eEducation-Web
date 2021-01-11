@@ -53,6 +53,7 @@ const RoomController = observer(({children}: any) => {
 
   useEffect(() => {
     if (!appStore.userRole) {
+      uiStore.unblock()
       history.push('/')
       return
     }

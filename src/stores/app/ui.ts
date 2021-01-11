@@ -36,16 +36,16 @@ export class UIStore {
       text: 'home.large_class',
       value: 2,
     },
-    {
-      path: 'breakout-class',
-      text: 'home.super_mini_class',
-      value: 3,
-    },
-    {
-      path: 'middle-class',
-      text: 'home.middle_class',
-      value: 4,
-    },
+    // {
+    //   path: 'breakout-class',
+    //   text: 'home.super_mini_class',
+    //   value: 3,
+    // },
+    // {
+    //   path: 'middle-class',
+    //   text: 'home.middle_class',
+    //   value: 4,
+    // },
   ]
 
   static languages: any[] = [

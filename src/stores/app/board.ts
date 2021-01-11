@@ -526,7 +526,8 @@ export class BoardStore {
         const scenePath = room.state.sceneState.scenePath
         const currentPath = `/${pathName(scenePath)}`
         if (room.isWritable) {
-          room.putScenes(currentPath, [{}], newIndex)
+          room.putScenes("/", [{}], newIndex)
+          // room.putScenes(currentPath, [{}], newIndex)
           room.setSceneIndex(newIndex)
         }
         break;

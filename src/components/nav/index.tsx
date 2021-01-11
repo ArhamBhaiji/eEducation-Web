@@ -114,6 +114,7 @@ const BasicUploadButton = observer(() => {
     try {
       setLock(true)
       const id = await EduManager.uploadLog(sceneStore.roomUuid)
+      console.log("handleUpload uploadLog ", id)
       uiStore.showDialog({
         type: 'feedLog',
         message: `id: ${id}`

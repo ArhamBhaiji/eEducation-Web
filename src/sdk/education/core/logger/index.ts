@@ -157,7 +157,7 @@ export class EduLogger {
 
     const now = this.ts
 
-    const file = await new File([logsStr], `${now}`)
+    const file = new File([logsStr], `${now}`)
     
     let res: any = await this.logUploader.uploadLogFile(
       roomId,

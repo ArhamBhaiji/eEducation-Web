@@ -1,6 +1,7 @@
 /// <reference types="react-scripts" />
 /// <reference types="./sdk/education/interface/index.d.ts" />
 
+declare const REACT_APP_AGORA_RESTFULL_TOKEN: string;
 declare const REACT_APP_AGORA_APP_SDK_DOMAIN: string;
 declare const REACT_APP_AGORA_APP_SDK_LOG_SECRET: string;
 declare const REACT_APP_AGORA_RECORDING_OSS_URL: string;

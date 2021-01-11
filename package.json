@@ -1,6 +1,6 @@
 {
   "name": "Agora-Edu-Web",
-  "version": "6.1.1",
+  "version": "6.2.0",
   "private": true,
   "homepage": ".",
   "main": "./src/index.tsx",

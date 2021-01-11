@@ -13,6 +13,7 @@ const path = require("path");
 
 module.exports = {
   entry: {
+    edu_sdk: "./src/edu-sdk/index.ts",
     live_room: "./src/monolithic/live-room",
     replay_room: "./src/monolithic/replay-room",
   },

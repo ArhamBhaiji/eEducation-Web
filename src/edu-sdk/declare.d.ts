@@ -1,18 +1,6 @@
 import { LaunchOption, ReplayOption } from './index';
 import { config } from "@/sdk/education/core/media-service/electron/types/utils"
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
-
-declare interface RoomParameters {
-  roomUuid: string
-  userUuid: string
-  roomName: string
-  userName: string
-  userRole: EduRoleTypeEnum
-  roomType: number
-}
-
-declare type ListenerCallback = (evt: AgoraEduEvent) => void
-
 abstract class EduRoom {
   app: AgoraEduApplication
 
@@ -25,11 +13,17 @@ declare type RoomConfigProps = {
   store: AppStore
 }
 
-
 declare interface RoomComponentConfigProps {
   store: AppStore
   dom: Element
 }
+
+
+declare enum AgoraEduEvent {
+  ready = 1,
+  destroyed = 2
+}
+
 
 declare type AgoraEduSDKConfigParams = {
   userName: string
@@ -43,6 +37,17 @@ declare type AgoraEduSDKConfigParams = {
   token: string
   restToken: string
 }
+
+declare interface RoomParameters {
+  roomUuid: string
+  userUuid: string
+  roomName: string
+  userName: string
+  userRole: EduRoleTypeEnum
+  roomType: number
+}
+
+declare type ListenerCallback = (evt: AgoraEduEvent) => void
 
 declare interface ReplayRoom {
   async destroy()

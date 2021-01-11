@@ -28,8 +28,10 @@ import { AgoraElectronRTCWrapper } from '@/sdk/education/core/media-service/elec
 import { BizLogger } from '@/utils/biz-logger';
 import { platform } from '@/utils/platform';
 import { SceneStore } from './scene';
-import { ListenerCallback } from '@/modular/declare';
+import { AgoraEduSDK, ListenerCallback } from '@/edu-sdk/declare';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
+import { AgoraEduEvent } from '@/edu-sdk';
+import { isEmpty } from 'lodash';
 
 type RoomInfoParams = {
   roomName: string
@@ -121,8 +123,17 @@ export class AppStore {
 
   private load() {
     const storage = GlobalStorage.read("room")
-    if (storage) {
+    if (storage || !isEmpty(storage)) {
       this.roomInfo = storage.roomInfo
+    } else {
+      this.roomInfo = {
+        roomName: "",
+        roomUuid: "",
+        roomType: 0,
+        userName: "",
+        userRole: 0,
+        userUuid: "",
+      }
     }
   }
 
@@ -183,18 +194,15 @@ export class AppStore {
 
   constructor(params: AppStoreInitParams) {
     this.params = params
-    console.log(" config >>> params: ", this.params)
-    const {config, roomInfoParams} = params
+    console.log(" roomInfoParams ", params.roomInfoParams)
+    console.log(" config >>> params: ", {...this.params})
+    const {config, roomInfoParams} = this.params
 
     // if (roomInfoParams) {
 
     // }
 
-    if (config.enableLog) {
-      EduManager.enableDebugLog(true);
-    }
-
-    if (!roomInfoParams) {
+    if (isEmpty(roomInfoParams)) {
       this.load()
       autorun(() => {
         const data = toJS(this)
@@ -204,7 +212,7 @@ export class AppStore {
       })
     } else {
       this.setRoomInfo(
-        roomInfoParams
+        roomInfoParams!
       )
     }
 
@@ -232,6 +240,10 @@ export class AppStore {
         codec: 'vp8',
         sdkDomain: config.sdkDomain,
       })
+    }
+
+    if (config.enableLog) {
+      EduManager.enableDebugLog(true);
     }
 
     this.mediaStore = new MediaStore(this)
@@ -517,9 +529,16 @@ export class AppStore {
     try {
       await this.roomStore.leave()
       this.resetStates()
+      if (this.params && this.params.listener) {
+        this.params.listener(AgoraEduEvent.destroyed)
+      }
     } catch (err) {
       this.resetStates()
-      throw new GenericErrorWrapper(err)
+      const exception = new GenericErrorWrapper(err)
+      if (this.params && this.params.listener) {
+        this.params.listener(AgoraEduEvent.destroyed)
+      }
+      throw exception
     }
   }
 

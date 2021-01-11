@@ -13,5 +13,8 @@ export class GenericErrorWrapper extends Error {
     if (err.hasOwnProperty('name')) {
       this.name = err.name
     }
+    if (err instanceof String) {
+      this.message = `${err}`
+    }
   }
 }

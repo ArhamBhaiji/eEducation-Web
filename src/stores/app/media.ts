@@ -70,7 +70,7 @@ export class MediaStore {
       }
     })
     this.mediaService.on('watch-rtt', (evt: any) => {
-      console.log(`media-service: ${this.mediaService._id}`)
+      // console.log(`media-service: ${this.mediaService._id}`)
       this._delay = evt.RTT
     })
     this.mediaService.on('user-published', (evt: any) => {

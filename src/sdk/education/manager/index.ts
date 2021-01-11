@@ -63,6 +63,7 @@ export class EduManager extends EventEmitter {
       }
     }
     this._mediaService = new MediaService(buildOption)
+    console.log("EduManager this.config ", JSON.stringify(this.config))
     this.apiService = new AgoraEduApi(
       this.config.appId,
       this.authorization,
@@ -75,6 +76,7 @@ export class EduManager extends EventEmitter {
         sdkDomain: this.config.sdkDomain
       }
     )
+    console.log("internalEduManagerConfig", internalEduManagerConfig)
   }
 
   private get rtmWrapper(): RTMWrapper {
@@ -92,6 +94,7 @@ export class EduManager extends EventEmitter {
   static enableDebugLog(enable: boolean) {
     this.enable = enable
     if (this.enable) {
+      console.log("internalEduManagerConfig#enableDebugLog", internalEduManagerConfig)
       EduLogger.init(internalEduManagerConfig.appId, internalEduManagerConfig.sdkDomain)
     }
   }

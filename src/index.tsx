@@ -1,13 +1,14 @@
 import 'promise-polyfill/src/polyfill';
+import './index.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.scss';
 import { App } from '@/monolithic/app';
 import * as serviceWorker from '@/serviceWorker';
 import TagManager from 'react-gtm-module';
 import {isElectron} from '@/utils/platform';
 import { EduManager } from '@/sdk/education/manager';
-import {AgoraEduSDK} from '@/modular';
+import {AgoraEduSDK} from '@/edu-sdk';
+import { eduModularApi } from './services/edu-modular-api';
 
 //@ts-ignore
 window.AgoraEduSDK = AgoraEduSDK
@@ -15,6 +16,19 @@ window.AgoraEduSDK = AgoraEduSDK
 if (isElectron) {
   EduManager.useElectron()
 }
+
+eduModularApi.updateConfig({
+  restToken: `${REACT_APP_AGORA_RESTFULL_TOKEN}`,
+  sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
+  appId: `${REACT_APP_AGORA_APP_ID}`,
+  token: ""
+})
+
+// AgoraEduSDK.config({
+//   appId: `${REACT_APP_AGORA_APP_ID}`,
+//   restToken: `${REACT_APP_AGORA_APP_TOKEN}`,
+//   token: "eyJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6ImY0ODg0OTNkMTg4NjQzNWY5NjNkZmIzZDk1OTg0ZmQ0IiwidXNlclV1aWQiOiJqYXNvbnRlYWNoZXIiLCJyb29tVXVpZCI6Imphc29uMSIsImlhdCI6MTYxMDIxMzA1Mn0.9CgTA_y4DNVyXAUPqDsomAz69MQ5DxPRRXlnGSsSv8g"
+// })
 
 // // use gtm
 // if (REACT_APP_AGORA_GTM_ID) {

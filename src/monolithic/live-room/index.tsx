@@ -1,6 +1,6 @@
 import { RoomContainer } from '@/containers/app-container'
-import { DelegateType } from '@/modular'
-import { RoomComponentConfigProps, RoomConfigProps } from '@/modular/declare'
+import { DelegateType } from '@/edu-sdk'
+import { RoomComponentConfigProps, RoomConfigProps } from '@/edu-sdk/declare'
 import React from 'react'
 import {render} from 'react-dom'
 

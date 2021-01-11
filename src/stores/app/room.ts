@@ -739,9 +739,9 @@ export class RoomStore extends SimpleInterval {
           type: PeerInviteEnum.teacherReject,
         }
       })
-      if (res === 0) {
-        throw new GenericErrorWrapper('callApply failure')
-      }
+      // if (res === 0) {
+      //   throw new GenericErrorWrapper('callApply failure')
+      // }
       // await this.roomManager?.userService.rejectCoVideoApply(user)
     }
   }

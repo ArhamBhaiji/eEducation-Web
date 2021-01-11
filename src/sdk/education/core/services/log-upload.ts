@@ -83,7 +83,7 @@ export class LogUpload {
     let sign =  md5(signStr)
 
     let data = await AgoraFetchJson({
-      url: `${REACT_APP_AGORA_APP_SDK_DOMAIN}/monitor/v1/log/oss/policy`,
+      url: `${this.sdkDomain}/monitor/v1/log/oss/policy`,
       data: body,    
       method: 'POST',
       outHeaders: {
@@ -151,7 +151,7 @@ export class LogUpload {
     try {
       let res = await ossClient.put(ossKey, file, {
         callback: {
-          url: `${REACT_APP_AGORA_APP_SDK_DOMAIN}/monitor/v1/log/oss/callback`,
+          url: `${this.sdkDomain}/monitor/v1/log/oss/callback`,
           body: callbackBody,
           contentType: 'application/json',
         }

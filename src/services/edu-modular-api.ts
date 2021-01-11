@@ -9,6 +9,13 @@ export class EduModularApi {
   private token!: string
 
   constructor() {
+    // this.sdkDomain = 'https://api-solutions-dev.bj2.agoralab.co'
+    // this.restToken = 'OGJmMzUzMzM1MjA2NDg1NThhZDFiNzM2Y2ZhNWQyZjE6NzQ1NDIxYzgxYWJiNGFjOWExZmM3YzdlNTBlOTE5OTk='
+    // this.restToken = 'MjdiZjhjMmRkNTNhNGQwZGEwMWQxNmM4MTllOWE5Yzc6YjM2N2NiMjRiOTExNDQyYTg5YjU5YTdmN2Y0YjM1OWM='
+    // this.token = 'eyJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6ImY0ODg0OTNkMTg4NjQzNWY5NjNkZmIzZDk1OTg0ZmQ0IiwidXNlclV1aWQiOiJqYXNvbnRlYWNoZXIiLCJyb29tVXVpZCI6Imphc29uMSIsImlhdCI6MTYxMDIxMzA1Mn0.9CgTA_y4DNVyXAUPqDsomAz69MQ5DxPRRXlnGSsSv8g'
+    // this.restToken = params.restToken
+    // this.appId = 'f488493d1886435f963dfb3d95984fd4'
+    // this.sdkDomain = params.sdkDomain
   }
 
   updateConfig(params: {

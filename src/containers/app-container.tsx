@@ -6,8 +6,8 @@ import { AppStore, AppStoreConfigParams } from '@/stores/app';
 import { Provider } from 'mobx-react';
 import { Route, HashRouter, Switch, Redirect } from 'react-router-dom';
 import ThemeContainer from '../containers/theme-container';
-import { DelegateType } from '@/modular';
-import { RoomParameters } from '@/modular/declare';
+import { DelegateType } from '@/edu-sdk';
+import { RoomParameters } from '@/edu-sdk/declare';
 import { useAppStore } from '@/hooks';
 export interface RouteContainerProps {
   routes: string[]

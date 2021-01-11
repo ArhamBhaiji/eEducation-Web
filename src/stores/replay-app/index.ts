@@ -1,10 +1,9 @@
-import { AgoraEduEvent } from "@/modular";
+import { AgoraEduEvent } from "@/edu-sdk";
 import { AppStoreConfigParams } from "../app";
 import { PlayerStore } from "./player";
 import { ReplayUIStore } from "./ui";
 
 export type ReplayConfigParam = {
-  videoUrl: string
   logoUrl: string
   whiteboardUrl: string
   whiteboardId: string

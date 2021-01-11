@@ -1,10 +1,12 @@
+import 'promise-polyfill/src/polyfill'
+import '@/index.scss'
 import { RenderLiveRoom } from "@/monolithic/live-room"
 import { RenderReplayRoom } from "@/monolithic/replay-room"
 import { GenericErrorWrapper } from "@/sdk/education/core/utils/generic-error"
 import { AppStore } from "@/stores/app"
 import { ReplayAppStore } from "@/stores/replay-app"
 import { unmountComponentAtNode } from "react-dom"
-import { AgoraEduSDKConfigParams, ListenerCallback } from "./declare.d"
+import { AgoraEduSDKConfigParams, ListenerCallback } from "./declare"
 import { eduModularApi } from '@/services/edu-modular-api'
 import { EduRoleTypeEnum } from "@/sdk/education/interfaces"
 
@@ -36,18 +38,40 @@ export interface ApplicationConfigParameters {
   ossConfig?: WhiteboardOSSConfig
 }
 
-const configParams: AgoraEduSDKConfigParams = {
-  userName: '',
-  userUuid: '',
-  roomName: '',
-  roomUuid: '',
-  roomType: '',
-  roleType: '',
-  appId: '',
-  whiteboardAppId: '',
-  token: '',
-  restToken: ''
+// const configParams: AgoraEduSDKConfigParams = {
+//   userName: '',
+//   userUuid: '',
+//   roomName: '',
+//   roomUuid: '',
+//   roomType: '',
+//   roleType: '',
+//   appId: '',
+//   whiteboardAppId: '',
+//   token: '',
+//   restToken: ''
+// }
+
+type SDKConfig = {
+  configParams: AgoraEduSDKConfigParams
+  sdkDomain: string
 }
+
+const sdkConfig: SDKConfig = {
+  configParams: {
+    userName: '',
+    userUuid: '',
+    roomName: '',
+    roomUuid: '',
+    roomType: '',
+    roleType: '',
+    appId: '',
+    whiteboardAppId: '',
+    token: '',
+    restToken: ''
+  },
+  sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`
+}
+
 
 export type LaunchOption = {
   token: string
@@ -62,8 +86,8 @@ export type LaunchOption = {
 }
 
 export type ReplayOption = {
-  videoUrl: string
   logoUrl: string
+  whiteboardAppId: string
   whiteboardUrl: string
   whiteboardId: string
   whiteboardToken: string
@@ -114,10 +138,6 @@ const stores: Map<string, AppStore> = new Map()
 
 const locks: Map<string, boolean> = new Map()
 
-const getConfig = async () => {
-
-}
-
 const instances: Record<string, any> = {
 
 }
@@ -143,12 +163,12 @@ export class AgoraEduSDK {
   }
 
   static config (params: AgoraEduSDKConfigParams) {
-    Object.assign(configParams, params)
+    Object.assign(sdkConfig.configParams, params)
     eduModularApi.updateConfig({
-      restToken: configParams.restToken,
-      sdkDomain: "https://api-solutions-dev.bj2.agoralab.co",
-      appId: configParams.appId,
-      token: configParams.token
+      restToken: sdkConfig.configParams.restToken,
+      sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
+      appId: sdkConfig.configParams.appId,
+      token: sdkConfig.configParams.token
     })
   }
 
@@ -172,7 +192,6 @@ export class AgoraEduSDK {
     try {
       locks.set("launch", true)
       const data = await eduModularApi.getConfig()
-      console.log("data >>> ", data)
 
       let mainPath = roomTypes[option.roomType]?.path || '/classroom/one-to-one'
       let roomPath = mainPath
@@ -183,11 +202,11 @@ export class AgoraEduSDK {
 
       const store = new AppStore({
         config: {
-          agoraAppId: configParams.appId,
+          agoraAppId: sdkConfig.configParams.appId,
           agoraNetlessAppId: data.netless.appId,
           agoraRestFullToken: window.btoa(`${data.customerId}:${data.customerCertificate}`),
           enableLog: true,
-          sdkDomain: "https://api-solutions-dev.bj2.agoralab.co",
+          sdkDomain: sdkConfig.sdkDomain,
           oss: {
             region: data.netless.oss.region,
             bucketName: data.netless.oss.bucketName,
@@ -227,22 +246,22 @@ export class AgoraEduSDK {
   }
 
   static async replay(dom: Element, option: ReplayOption) {
+    console.log(" replay ", dom, " option ", JSON.stringify(option))
     if (locks.has("replay") || instances["replay"]) {
       throw new GenericErrorWrapper("already replayed")
     }
 
     const store = new ReplayAppStore({
       config: {
-        agoraAppId: configParams.appId,
-        agoraNetlessAppId: "646/P8Kb7e_DJZVAQw",
-        agoraRestFullToken: "MjdiZjhjMmRkNTNhNGQwZGEwMWQxNmM4MTllOWE5Yzc6YjM2N2NiMjRiOTExNDQyYTg5YjU5YTdmN2Y0YjM1OWM=",
+        agoraAppId: sdkConfig.configParams.appId,
+        agoraNetlessAppId: option.whiteboardAppId,
+        agoraRestFullToken: sdkConfig.configParams.restToken,
         enableLog: true,
-        sdkDomain: "https://api-solutions-dev.bj2.agoralab.co"
+        sdkDomain: sdkConfig.sdkDomain
       },
       replayConfig: {
-        videoUrl: option.videoUrl,
-        logoUrl: option.logoUrl,
         whiteboardUrl: option.whiteboardUrl,
+        logoUrl: option.logoUrl,
         whiteboardId: option.whiteboardId,
         whiteboardToken: option.whiteboardToken,
         startTime: option.startTime,
@@ -251,7 +270,9 @@ export class AgoraEduSDK {
       listener: option.listener,
     })
     RenderReplayRoom({dom, store}, this._map["replay"])
-    store.params.listener(AgoraEduEvent.ready)
+    if (store.params.listener) {
+      store.params.listener(AgoraEduEvent.ready)
+    }
     instances["replay"] = new ReplayRoom(store, dom)
     return instances["replay"]
   }
