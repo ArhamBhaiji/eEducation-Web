@@ -1,7 +1,7 @@
 import {db} from "./db";
 import Dexie from "dexie";
-// eslint-disable
-import LogWorker from 'worker-loader!./log.worker';
+// @ts-ignore
+import LogWorker from 'worker-loader?inline=true&fallback=false!./log.worker';
 import { EduLogLevel } from "./interfaces/index.d";
 import { LogUpload } from "../services/log-upload";
 

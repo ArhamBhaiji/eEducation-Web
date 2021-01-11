@@ -14,8 +14,8 @@ const path = require("path");
 module.exports = {
   entry: {
     edu_sdk: "./src/edu-sdk/index.ts",
-    live_room: "./src/monolithic/live-room",
-    replay_room: "./src/monolithic/replay-room",
+    // live_room: "./src/monolithic/live-room",
+    // replay_room: "./src/monolithic/replay-room",
   },
   mode: "production",
   // devServer: {
@@ -35,7 +35,31 @@ module.exports = {
     }
   },
   module: {
-    rules: [{
+    rules: [
+      // {
+      //   test: /\.worker.ts$/,
+      //   use: {
+      //     loader: 'worker-loader',
+      //     options: {
+      //       // type: "SharedWorker",
+      //       name: "edu.log.worker.js",
+      //       // name: "custom.[name].worker.js",
+      //       inline: true,
+      //       fallback: false
+      //       // name: "log-worker",
+      //       // chunkFilename: ""
+      //       // worker: {
+      //       //   type: "SharedWorker",
+      //       //   options: {
+      //       //     type: "classic",
+      //       //     credentials: "omit",
+      //       //     name: "my-custom-worker-name",
+      //       //   },
+      //       // },
+      //     }
+      //   }
+      // },
+      {
         test: /\.ts(x)?$/,
         // loader: "babel-loader",
         use: [
