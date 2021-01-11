@@ -544,6 +544,13 @@ export class SceneStore extends SimpleInterval {
       })
       this._screenEduStream = this.roomManager?.userService.screenStream.stream
       this._screenVideoRenderer = this.mediaService.screenRenderer
+
+      this.mediaService.web.removeAllListeners("track-ended").on("track-ended", ({screen}) => {
+        if(screen === true) {
+          this.stopWebSharing()
+        }
+      })
+
       this.sharing = true
     } catch (err) {
       if (this.mediaService.screenRenderer) {
