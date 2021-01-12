@@ -1,9 +1,10 @@
-import { eduModularApi } from '@/services/edu-modular-api';
+import { EduLogger } from './../../sdk/education/core/logger/index';
+import { eduSDKApi } from '@/services/edu-sdk-api';
 import uuidv4 from 'uuid/v4';
 import { SimpleInterval } from './../mixin/simple-interval';
 import { EduBoardService } from './../../sdk/board/edu-board-service';
 import { EduRecordService } from './../../sdk/record/edu-record-service';
-import { EduAudioSourceType, EduTextMessage, EduSceneType, RoomProperties } from './../../sdk/education/interfaces/index.d';
+import { EduAudioSourceType, EduTextMessage, EduSceneType, RoomProperties, EduClassroomStateEnum } from './../../sdk/education/interfaces/index.d';
 import { RemoteUserRenderer } from './../../sdk/education/core/media-service/renderer/index';
 import { RoomApi } from './../../services/room-api';
 import { EduClassroomManager } from '@/sdk/education/room/edu-classroom-manager';
@@ -134,7 +135,7 @@ export class RoomStore extends SimpleInterval {
   @action
   async sendMessage(message: any) {
     try {
-      await eduModularApi.sendChat({
+      await eduSDKApi.sendChat({
         roomUuid: this.roomInfo.roomUuid,
         userUuid: this.roomInfo.userUuid,
         data: {
@@ -199,12 +200,26 @@ export class RoomStore extends SimpleInterval {
         restToken: this.eduManager.config.agoraRestToken
       })
       const roomUuid = this.roomInfo.roomUuid
-      let checkInResult = await eduModularApi.checkIn({
+      let checkInResult = await eduSDKApi.checkIn({
         roomUuid,
         roomName: `${this.roomInfo.roomName}`,
         roomType: +this.roomInfo.roomType as number,
+        userUuid: this.roomInfo.userUuid
       })
-      console.log(" checkInResult ", checkInResult)
+      EduLogger.info(" checkInResult:  ", JSON.stringify(checkInResult))
+      if (checkInResult.state === EduClassroomStateEnum.end) {
+        try {
+          await this.appStore.releaseRoom()
+        } catch (err) {
+          EduLogger.info(" appStore.releaseRoom ", JSON.stringify(err))
+        }
+        this.appStore.uiStore.showDialog({
+          type: 'classSessionEnded',
+          message: t('class_ended'),
+        })
+        this.appStore.uiStore.stopLoading()
+        return
+      }
       this.sceneStore.isMuted = checkInResult.muteChat
       this.sceneStore.recordState = !!checkInResult.isRecording
       this.sceneStore.classState = checkInResult.state
@@ -457,7 +472,7 @@ export class RoomStore extends SimpleInterval {
         await this.sceneStore.mutex.dispatch<Promise<void>>(async () => {
           BizLogger.info("classroom-property-updated", classroom)
           const classState = get(classroom, 'roomStatus.courseState')
-          if (classState === 2) {
+          if (classState === EduClassroomStateEnum.end) {
             await this.appStore.releaseRoom()
             this.appStore.uiStore.showDialog({
               type: 'classSessionEnded',
@@ -670,7 +685,7 @@ export class RoomStore extends SimpleInterval {
     try {
       const teacher = this.roomManager?.getFullUserList().find((it: EduUser) => it.userUuid === this.sceneStore.teacherStream.userUuid)
       if (teacher) {
-        const res = await eduModularApi.handsUp({
+        const res = await eduSDKApi.handsUp({
           roomUuid: this.roomInfo.roomUuid,
           toUserUuid: teacher.userUuid,
           payload: {
@@ -730,7 +745,7 @@ export class RoomStore extends SimpleInterval {
     const userUuid = (this.notice as any).userUuid
     const user = this.roomManager?.getFullUserList().find(it => it.userUuid === userUuid)
     if (user) {
-      const res = await eduModularApi.handsUp({
+      const res = await eduSDKApi.handsUp({
         roomUuid: this.roomInfo.roomUuid,
         toUserUuid: user.userUuid,
         payload: {
@@ -750,7 +765,7 @@ export class RoomStore extends SimpleInterval {
     const userUuid = (this.notice as any).userUuid
     const user = this.roomManager?.data.userList.find(it => it.user.userUuid === userUuid)
     if (user) {
-      const res = await eduModularApi.handsUp({
+      const res = await eduSDKApi.handsUp({
         roomUuid: this.roomInfo.roomUuid,
         toUserUuid: user.user.userUuid,
         payload: {
@@ -790,7 +805,7 @@ export class RoomStore extends SimpleInterval {
   }
 
   async endRoom() {
-    await eduModularApi.updateClassState({
+    await eduSDKApi.updateClassState({
       roomUuid: this.roomInfo.roomUuid,
       state: 2
     })

@@ -4,6 +4,10 @@ import { EnumOnlineState } from '../core/services/interface';
 import { isEmpty } from 'lodash';
 import { EduLogger } from '../core/logger';
 
+export enum EduClassroomStateEnum {
+  end = 2
+}
+
 /**
  * 教室状态类型
  * EduClassroomStateTypeAllStudentsChat = 0,

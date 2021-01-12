@@ -1,60 +1,16 @@
+import { ApiBaseInitializerParams } from './../../../../services/base';
+import { ApiBase } from "@/services/base";
 import { AgoraFetchParams } from "../../interfaces";
 import { HttpClient } from "../utils/http-client";
 
-export class AgoraRecordApi {
-
-  private userToken: string;
-  private restToken: string;
-  private record_prefix: string
-
+export class AgoraRecordApi extends ApiBase {
   constructor(
     params: {
       prefix: string
-      restToken: string
-      userToken: string
-    }
+    } & ApiBaseInitializerParams
   ) {
-    this.record_prefix = params.prefix
-    this.restToken = params.restToken
-    this.userToken = params.userToken
-  }
-
-  async fetch (params: AgoraFetchParams) {
-    const {
-      method,
-      data,
-      full_url,
-      url,
-    } = params
-    const opts: any = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
-      }
-    }
-
-    if (this.userToken) {
-      opts.headers['token'] = this.userToken;
-    }
-    
-    if (data) {
-      opts.body = JSON.stringify(data);
-    }
-  
-    let resp: any;
-    if (full_url) {
-      resp = await HttpClient(`${full_url}`, opts);
-    } else {
-      resp = await HttpClient(`${this.record_prefix}${url}`, opts);
-    }
-  
-    // WARN: 需要约定状态码
-    if (resp.code !== 0) {
-      throw {msg: resp.msg}
-    }
-
-    return resp
+    super(params)
+    this.prefix = params.prefix
   }
 
   async queryRoomRecordBy(roomUuid: string) {

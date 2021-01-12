@@ -2,6 +2,7 @@ import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d';
 import { AgoraFetchParams } from "@/sdk/education/interfaces/index.d";
 // import { this.appId, AUTHORIZATION } from "@/utils/config";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
+import { ApiBase, ApiBaseInitializerParams } from './base';
 
 export enum InvitationEnum {
   Apply = 1,
@@ -20,24 +21,11 @@ export type SessionInfo = {
   userToken: string
 }
 
-export class MiddleRoomApi {
+export class MiddleRoomApi extends ApiBase {
 
-  private sdkDomain: string
-  private appId: string
-  private restToken: string
-
-  constructor(params: {
-    restToken: string
-    sdkDomain: string
-    appId: string
-  }) {
-    this.restToken = params.restToken
-    this.appId = params.appId
-    this.sdkDomain = params.sdkDomain
-  }
-
-  get prefix(): string {
-    return `${this.sdkDomain}/scene/apps/%app_id`.replace("%app_id", this.appId)
+  constructor(params: ApiBaseInitializerParams) {
+    super(params)
+    this.prefix =`${this.sdkDomain}/scene/apps/%app_id`.replace("%app_id", this.appId)
   }
 
 
@@ -64,40 +52,6 @@ export class MiddleRoomApi {
 
   get userToken(): string {
     return this._sessionInfo.userToken;
-  }
-
-  // 接口请求
-  async fetch (params: AgoraFetchParams) {
-    const {
-      method,
-      token,
-      data,
-      full_url,
-      url,
-    } = params
-    const opts: any = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
-      }
-    }
-    if (data) {
-      opts.body = JSON.stringify(data);
-    }
-    if (token) {
-      opts.headers['token'] = token
-    }
-    let resp: any;
-    if (full_url) {
-      resp = await HttpClient(`${full_url}`, opts);
-    } else {
-      resp = await HttpClient(`${this.prefix}${url}`, opts);
-    }
-    if (resp.code !== 0) {
-      throw {msg: resp.msg}
-    }
-    return resp
   }
   
   // 中班课分组

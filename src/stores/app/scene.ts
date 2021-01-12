@@ -1,4 +1,4 @@
-import { eduModularApi } from '@/services/edu-modular-api';
+import { eduSDKApi } from '@/services/edu-sdk-api';
 import { roomTypes } from './../../pages/breakout-class/breakout-class';
 import { Mutex } from './../../utils/mutex';
 import { SimpleInterval } from './../mixin/simple-interval';
@@ -897,7 +897,7 @@ export class SceneStore extends SimpleInterval {
   @action
   async startClass() {
     try {
-      await eduModularApi.updateClassState({
+      await eduSDKApi.updateClassState({
         roomUuid: `${this.roomUuid}`,
         state: 1
       })
@@ -913,7 +913,7 @@ export class SceneStore extends SimpleInterval {
   @action
   async stopClass() {
     try {
-      await eduModularApi.updateClassState({
+      await eduSDKApi.updateClassState({
         roomUuid: `${this.roomUuid}`,
         state: 2
       })
@@ -939,7 +939,7 @@ export class SceneStore extends SimpleInterval {
 
   @action
   async muteChat() {
-    await eduModularApi.muteChat({
+    await eduSDKApi.muteChat({
       roomUuid: this.roomInfo.roomUuid,
       muteChat: 1
     })
@@ -948,7 +948,7 @@ export class SceneStore extends SimpleInterval {
 
   @action
   async unmuteChat() {
-    await eduModularApi.muteChat({
+    await eduSDKApi.muteChat({
       roomUuid: this.roomInfo.roomUuid,
       muteChat: 0
     })
@@ -1063,7 +1063,7 @@ export class SceneStore extends SimpleInterval {
   @action
   async startRecording() {
     try {
-      await eduModularApi.updateRecordingState({
+      await eduSDKApi.updateRecordingState({
         roomUuid: this.roomUuid,
         state: 1
       })
@@ -1078,7 +1078,7 @@ export class SceneStore extends SimpleInterval {
   @action
   async stopRecording() {
     try {
-      await eduModularApi.updateRecordingState({
+      await eduSDKApi.updateRecordingState({
         roomUuid: this.roomUuid,
         state: 0
       })

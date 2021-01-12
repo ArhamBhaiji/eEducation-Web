@@ -1,3 +1,5 @@
+import { ApiBaseInitializerParams } from './../../../../services/base';
+import { ApiBase } from "@/services/base";
 import { get } from "lodash";
 import { EduUser, StreamType, DeleteStreamType, AgoraFetchParams, ClassroomStateParams, UserQueryParams, StreamQueryParams, EduStreamParams, EduStream, ChannelMessageParams, PeerMessageParams, EduUserData, EduStreamData, EduCourseState } from "../../interfaces/index.d";
 import { EduLogger } from '../logger';
@@ -89,7 +91,7 @@ type DeleteStreamsParams = {
   streams: Array<DeleteStreamType>
 }
 
-export class AgoraEduApi {
+export class AgoraEduApi extends ApiBase {
   roomUuid: string = '';
   appId!: string;
   authorization!: string;
@@ -103,22 +105,34 @@ export class AgoraEduApi {
 
   private lastUserListTime: number = 0;
   private lastStreamListTime: number = 0;
-  private _prefix: string;
+  // private _prefix: string;
 
-  constructor(
-    public readonly appID: string,
-    public readonly AUTHORIZATION: string,
-    sdkDomain: string
-  ) {
-    this.appId = appID;
-    this.authorization = AUTHORIZATION;
-    // this.setApiPrefix(this.appId);
+  constructor(params: ApiBaseInitializerParams) {
+    super(params)
+    this.appId = params.appId
+    this.authorization = '',
+    this.sdkDomain = params.sdkDomain
     this.nextId = undefined;
     this.latestTime = 0;
     this.lastUserListTime = 0;
     this.lastStreamListTime = 0;
-    this._prefix = `${sdkDomain}/scene/apps/%app_id`.replace('%app_id', this.appId)
+    this.prefix = `${params.sdkDomain}/scene/apps/%app_id`.replace('%app_id', this.appId)
   }
+
+  // constructor(
+  //   public readonly appID: string,
+  //   public readonly AUTHORIZATION: string,
+  //   sdkDomain: string
+  // ) {
+  //   this.appId = appID;
+  //   this.authorization = AUTHORIZATION;
+  //   // this.setApiPrefix(this.appId);
+  //   this.nextId = undefined;
+  //   this.latestTime = 0;
+  //   this.lastUserListTime = 0;
+  //   this.lastStreamListTime = 0;
+  //   this._prefix = `${sdkDomain}/scene/apps/%app_id`.replace('%app_id', this.appId)
+  // }
   
   public get userToken(): string {
     return this._userToken
@@ -149,7 +163,9 @@ export class AgoraEduApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.AUTHORIZATION!.replace(/basic\s+|basic/i, '')}`
+        'x-agora-token': this.rtmToken,
+        'x-agora-uid': this.rtmUid,
+        // 'Authorization': `Basic ${this.AUTHORIZATION!.replace(/basic\s+|basic/i, '')}`
       }
     }
 
@@ -169,7 +185,7 @@ export class AgoraEduApi {
     if (full_url) {
       resp = await HttpClient(`${full_url}`, opts);
     } else {
-      const rawUrl = `${this._prefix}${url}`
+      const rawUrl = `${this.prefix}${url}`
       resp = await HttpClient(`${rawUrl}`, opts);
     }  
     

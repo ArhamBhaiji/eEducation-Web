@@ -1,64 +1,26 @@
+import { ApiBase, ApiBaseInitializerParams } from './../../../../services/base';
 import { AgoraFetchParams } from "../../interfaces";
 import { get } from "lodash";
 import { BoardInfoResponse } from "./interface";
 import { HttpClient } from "../utils/http-client";
 import { GenericErrorWrapper } from "../utils/generic-error";
 
-export class AgoraBoardApi {
-
-  private board_prefix: string
+export class AgoraBoardApi extends ApiBase {
 
   private userToken: string
   private roomUuid: string
-  private restToken: string
 
   constructor(
     params: {
       prefix: string
-      restToken: string
       userToken: string
       roomUuid: string
-    }
+    } & ApiBaseInitializerParams
   ) {
-    this.board_prefix = params.prefix
-    this.restToken = params.restToken
-    this.userToken = params.userToken
+    super(params)
     this.roomUuid = params.roomUuid
-  }
-
-  async fetch (params: AgoraFetchParams) {
-    const {
-      method,
-      token,
-      data,
-      full_url,
-      url,
-      type
-    } = params
-    const opts: any = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
-      }
-    }
-
-    if (this.userToken) {
-      opts.headers['token'] = this.userToken;
-    }
-    
-    if (data) {
-      opts.body = JSON.stringify(data);
-    }
-
-    const resp = await HttpClient(`${this.board_prefix}${url}`, opts);
-  
-    // WARN: 需要约定状态码
-    if (resp.code !== 0) {
-      throw {msg: resp.msg}
-    }
-
-    return resp
+    this.userToken = params.userToken
+    this.prefix = params.prefix
   }
 
   async getBoardInfo(roomUuid: string): Promise<BoardInfoResponse> {

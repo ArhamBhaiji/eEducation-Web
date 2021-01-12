@@ -8,7 +8,7 @@ import TagManager from 'react-gtm-module';
 import {isElectron} from '@/utils/platform';
 import { EduManager } from '@/sdk/education/manager';
 import {AgoraEduSDK} from '@/edu-sdk';
-import { eduModularApi } from './services/edu-modular-api';
+import { eduSDKApi } from './services/edu-sdk-api';
 
 //@ts-ignore
 window.AgoraEduSDK = AgoraEduSDK
@@ -17,11 +17,9 @@ if (isElectron) {
   EduManager.useElectron()
 }
 
-eduModularApi.updateConfig({
-  restToken: `${REACT_APP_AGORA_RESTFULL_TOKEN}`,
+eduSDKApi.updateConfig({
   sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
   appId: `${REACT_APP_AGORA_APP_ID}`,
-  token: ""
 })
 
 // AgoraEduSDK.config({

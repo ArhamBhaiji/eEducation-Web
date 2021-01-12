@@ -7,7 +7,7 @@ import { AppStore } from "@/stores/app"
 import { ReplayAppStore } from "@/stores/replay-app"
 import { unmountComponentAtNode } from "react-dom"
 import { AgoraEduSDKConfigParams, ListenerCallback } from "./declare"
-import { eduModularApi } from '@/services/edu-modular-api'
+import { eduSDKApi } from '@/services/edu-sdk-api'
 import { EduRoleTypeEnum } from "@/sdk/education/interfaces"
 
 export enum AgoraEduEvent {
@@ -164,7 +164,7 @@ export class AgoraEduSDK {
 
   static config (params: AgoraEduSDKConfigParams) {
     Object.assign(sdkConfig.configParams, params)
-    eduModularApi.updateConfig({
+    eduSDKApi.updateConfig({
       restToken: sdkConfig.configParams.restToken,
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       appId: sdkConfig.configParams.appId,
@@ -191,7 +191,7 @@ export class AgoraEduSDK {
     }
     try {
       locks.set("launch", true)
-      const data = await eduModularApi.getConfig()
+      const data = await eduSDKApi.getConfig()
 
       let mainPath = roomTypes[option.roomType]?.path || '/classroom/one-to-one'
       let roomPath = mainPath

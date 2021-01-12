@@ -2,6 +2,7 @@ import { AgoraFetchParams } from "@/sdk/education/interfaces/index.d";
 import { EduRoomType } from "@/sdk/education/core/services/interface.d";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
 import { BizLogger } from "@/utils/biz-logger";
+import { ApiBase, ApiBaseInitializerParams } from "./base";
 
 export interface QueryRoomResponseData {
   roomName: string
@@ -28,70 +29,11 @@ export interface EduClassroomConfig {
   }
 }
 
-export class RoomApi {
+export class RoomApi extends ApiBase {
 
-  private sdkDomain: string
-  private appId: string
-  private restToken: string
-
-  constructor(params: {
-    restToken: string
-    sdkDomain: string
-    appId: string
-  }) {
-    this.restToken = params.restToken
-    this.appId = params.appId
-    this.sdkDomain = params.sdkDomain
-  }
-
-  get prefix(): string {
-    return `${this.sdkDomain}/scene/apps/%app_id`.replace("%app_id", this.appId)
-  }
-
-  async fetch (params: AgoraFetchParams) {
-    const {
-      method,
-      token,
-      data,
-      full_url,
-      url,
-      type
-    } = params
-    const opts: any = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${this.restToken!.replace(/basic\s+|basic/i, '')}`
-      }
-    }
-    
-    if (data) {
-      opts.body = JSON.stringify(data);
-    }
-
-    if (token) {
-      opts.headers['token'] = token
-    }
-  
-    let resp: any;
-    if (full_url) {
-      resp = await HttpClient(`${full_url}`, opts);
-    } else {
-      resp = await HttpClient(`${this.prefix}${url}`, opts);
-      // switch (type) {
-      //   default: {
-      //     fetchResponse = await fetch(`${this.prefix}${url}`, opts);
-      //     break;
-      //   }
-      // }
-    }
-      
-    // WARN: 需要约定状态码
-    if (resp.code !== 0) {
-      throw {msg: resp.msg}
-    }
-
-    return resp
+  constructor(params: ApiBaseInitializerParams) {
+    super(params)
+    this.prefix = `${this.sdkDomain}/scene/apps/%app_id`.replace("%app_id", this.appId)
   }
   
   async acquireRoomGroupBy(roomUuid: string, userToken: string) {
