@@ -150,13 +150,6 @@ export class ExtensionStore {
   }
 
   async acceptApply(userUuid: string, streamUuid: string) {
-    const exists = this.sceneStore.streamList.find((stream) => stream.streamUuid === streamUuid)
-    const idx = this.applyUsers.findIndex((user) => user.userUuid === userUuid)
-    this.applyUsers.splice(idx, 1)
-    this.applyUsers = this.applyUsers.filter((user) => user.userName !== userUuid)
-    if (exists) {
-      return
-    }
     await this.answerAcceptInvitationApply(userUuid, streamUuid);
   }
 
@@ -288,6 +281,7 @@ export class ExtensionStore {
           audioState: MediaState.hasAudio,
         }])
       }
+      this.applyUsers = this.applyUsers.filter((user) => user.userUuid !== userUuid)
     } catch (err) {
       console.warn(err)
       this.appStore.uiStore.addToast(t(`invitation.apply_failed`))
