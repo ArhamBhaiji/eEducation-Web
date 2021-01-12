@@ -27,7 +27,8 @@ export const App = (props: AppType) => {
     appConfig: props.appConfig,
     roomConfig: props.roomConfig,
     globalId: "demo",
-    basename: props.basename
+    basename: props.basename,
+    resetRoomInfo: true
   })
   return (
     <AppContainer

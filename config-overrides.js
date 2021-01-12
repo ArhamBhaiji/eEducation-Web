@@ -13,6 +13,9 @@ const {
   addWebpackAlias,
   // addWebpackTarget,
 } = require('customize-cra')
+const PurifyCSS = require('purifycss-webpack')
+const glob = require('glob-all')
+
 const dotenv = require('dotenv')
 const {DefinePlugin} = require('webpack')
 const addWebpackTarget = target => config => {
@@ -85,8 +88,6 @@ const useOptimizeBabelConfig = () => config => {
 
 const config = process.env
 
-console.log(" config ", config.REACT_APP_BUILD_VERSION)
-
 module.exports = override(
   // useBabelRc(),
   // isElectron && addWebpackTarget('electron-renderer'),
@@ -134,6 +135,18 @@ module.exports = override(
   addWebpackPlugin(
     new SimpleProgressWebpackPlugin()
   ),
+  addWebpackPlugin(
+    new PurifyCSS({
+      paths: glob.sync([
+        path.resolve(__dirname, './*.html'),
+        path.resolve(__dirname, './src/pages/*.tsx'),
+        path.resolve(__dirname, './src/components/*.tsx'),
+        path.resolve(__dirname, './src/components/**/*.tsx'),
+        path.resolve(__dirname, './src/**/*.ts'),
+        path.resolve(__dirname, './src/*.ts')
+      ])
+    })
+  ),
   babelInclude([
     path.resolve("src")
   ]),
@@ -147,7 +160,16 @@ module.exports = override(
       environmentHash: {
         root: process.cwd(),
         directories: [],
-        files: ['package.json', 'package-lock.json', 'yarn.lock', '.env', '.env.local', 'env.local'],
+        files: [
+          'package.json',
+          'package-lock.json',
+          'yarn.lock',
+          '.env',
+          '.env.local',
+          'env.local',
+          'config-overrides.js',
+          'webpack.config.js',
+        ],
       }
     })
   ),

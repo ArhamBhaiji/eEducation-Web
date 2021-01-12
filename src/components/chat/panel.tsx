@@ -88,7 +88,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = observer(({
           <div className={`icon ${muteChat ? 'icon-chat-off' : 'icon-chat-on' }`}
             onClick={handleMute}></div> : null}
         <Input
-          disabled={canChat ? false : muteChat}
+          disabled={canChat ? false : !!muteChat}
           value={!showText ? value : ''}
           placeholder={showText ? t("chat.banned") : t("chat.placeholder")}
           disableUnderline

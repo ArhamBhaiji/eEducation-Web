@@ -15,6 +15,7 @@ export const TestReportPage = observer(() => {
   
   const onExit = useCallback(() => {
     deviceStore.setActiveItem('video')
+    console.log("appStore.params: ##### ", JSON.stringify(appStore.params))
     if (appStore.params?.roomPath) {
       history.push(`${appStore.params.roomPath}`)
       return

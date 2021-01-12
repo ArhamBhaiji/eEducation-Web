@@ -49,46 +49,46 @@
 //   }
 // }
 
-@media screen and (min-width: 1920px) and (min-height: 1080px) {
-  .classroom.small-class {
-    min-width: 1920px;
-    min-height: 1080px;
+// @media screen and (min-width: 1920px) and (min-height: 1080px) {
+//   .classroom.small-class {
+//     min-width: 1920px;
+//     min-height: 1080px;
 
-    .chat-board {
-      // min-height: 866px;
-    }
+//     .chat-board {
+//       // min-height: 866px;
+//     }
 
-    .whiteboard {
-      min-height: 866px;
-      min-width: 1640px;
-    }
+//     .whiteboard {
+//       min-height: 866px;
+//       min-width: 1640px;
+//     }
 
-    // .video-marquee-container {
-    //   display: flex;
-    //   min-width: 1920px;
-    //   background: #F5F7F8;
-    //   max-height: 165px;
-    //   min-height: 165px;
-    //   align-items: flex-start;
-    //   padding-top: 2px;
-    //   margin-bottom: -2px;
+//     // .video-marquee-container {
+//     //   display: flex;
+//     //   min-width: 1920px;
+//     //   background: #F5F7F8;
+//     //   max-height: 165px;
+//     //   min-height: 165px;
+//     //   align-items: flex-start;
+//     //   padding-top: 2px;
+//     //   margin-bottom: -2px;
 
-    //   .agora-video-view {
-    //     min-width: 264px;
-    //     min-height: 150px;
-    //     border-radius: 2px;
-    //     box-sizing: border-box;
-    //     .teacher-placeholder,
-    //     .student-placeholder {
-    //       min-width: 264px;
-    //       min-height: 126px;
-    //       border-radius: 2px;
-    //       box-sizing: border-box;
-    //     }
-    //   }
-    // }
-  }
-}
+//     //   .agora-video-view {
+//     //     min-width: 264px;
+//     //     min-height: 150px;
+//     //     border-radius: 2px;
+//     //     box-sizing: border-box;
+//     //     .teacher-placeholder,
+//     //     .student-placeholder {
+//     //       min-width: 264px;
+//     //       min-height: 126px;
+//     //       border-radius: 2px;
+//     //       box-sizing: border-box;
+//     //     }
+//     //   }
+//     // }
+//   }
+// }
 
 .small-class {
   .room-container {

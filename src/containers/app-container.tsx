@@ -83,16 +83,18 @@ type GenAppContainerProps = {
   globalId: string
   appConfig: AppStoreConfigParams
   roomConfig?: RoomParameters
+  resetRoomInfo: boolean
   forwardWire?: DelegateType
   basename?: string
 }
 
 type GenAppComponentProps = Pick<AppContainerComponentProps, "routes" | "basename">
 
-export const GenAppContainer = ({globalId, forwardWire, ...config}: GenAppContainerProps) => {
+export const GenAppContainer = ({globalId, forwardWire, resetRoomInfo, ...config}: GenAppContainerProps) => {
   const appStore = new AppStore({
     config: config.appConfig,
-    roomInfoParams: config.roomConfig
+    roomInfoParams: config.roomConfig,
+    resetRoomInfo
   })
   if (forwardWire) {
     forwardWire.delegate = appStore

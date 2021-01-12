@@ -224,6 +224,7 @@ export class AgoraEduSDK {
           userRole: option.roleType,
           roomType: +option.roomType,
         },
+        resetRoomInfo: false,
         mainPath: mainPath,
         roomPath: roomPath,
         pretest: option.pretest,

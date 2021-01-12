@@ -56,6 +56,7 @@ function RoomDialog(
         aria-describedby="alert-dialog-description"
       >
         <DialogContent
+          // disableElevation
           className="modal-container"
         >
           <DialogContentText className="dialog-title">

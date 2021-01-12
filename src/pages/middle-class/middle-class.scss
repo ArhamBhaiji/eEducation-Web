@@ -43,49 +43,49 @@
   }
 }
 
-@media screen and (min-width: 1366px) and (min-height: 768px) {
-  .classroom {
-    min-width: 1366px;
-    // min-height: 768px;
+// @media screen and (min-width: 1366px) and (min-height: 768px) {
+//   .classroom {
+//     min-width: 1366px;
+//     // min-height: 768px;
 
-    .whiteboard {
-      flex: 1;
-      // min-height: 720px;
-      min-width: 1086px;
-    }
+//     .whiteboard {
+//       flex: 1;
+//       // min-height: 720px;
+//       min-width: 1086px;
+//     }
 
-    .live-board {
-      // min-height: 720px;    
-    }
+//     .live-board {
+//       // min-height: 720px;    
+//     }
 
-    // TODO: comment for brand resolution
-    // .chat-board {
-    //   min-height: 559px;
-    // }
-  }
-}
+//     // TODO: comment for brand resolution
+//     // .chat-board {
+//     //   min-height: 559px;
+//     // }
+//   }
+// }
 
-@media screen and (max-width: 1366px) and (max-height: 768px) {
-  .big-class.classroom {
-    .chat-board {
-      // min-height: 499px;
-    }
-  }
-  .classroom {
-    min-width: 990px;
-    // min-height: 706px;
+// @media screen and (max-width: 1366px) and (max-height: 768px) {
+//   .big-class.classroom {
+//     .chat-board {
+//       // min-height: 499px;
+//     }
+//   }
+//   .classroom {
+//     min-width: 990px;
+//     // min-height: 706px;
 
-    .chat-board {
-      // min-height: 340px;
-    }
+//     .chat-board {
+//       // min-height: 340px;
+//     }
 
-    .whiteboard {
-      flex: 1;
-      // min-height: 658px;
-      // min-width: 710px;
-    }
-  }
-}
+//     .whiteboard {
+//       flex: 1;
+//       // min-height: 658px;
+//       // min-width: 710px;
+//     }
+//   }
+// }
 
 .classroom {
   .live-container {

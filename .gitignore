@@ -15,3 +15,4 @@ node_modules
 native_module
 docs
 src/stores/replay-app/*.js
+fast-edu-electron-app

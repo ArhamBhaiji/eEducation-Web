@@ -3,6 +3,10 @@ const webpack = require("webpack");
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const PurifyCSS = require('purifycss-webpack');
+const glob = require('glob-all');
 
 const config = require('dotenv').config().parsed
 
@@ -14,14 +18,8 @@ const path = require("path");
 module.exports = {
   entry: {
     edu_sdk: "./src/edu-sdk/index.ts",
-    // live_room: "./src/monolithic/live-room",
-    // replay_room: "./src/monolithic/replay-room",
   },
   mode: "production",
-  // devServer: {
-  //   contentBase: path.join(__dirname, "dist"),
-  //   port: 3001,
-  // },
   output: {
     publicPath: '',
     filename: '[name].bundle.js',
@@ -36,37 +34,12 @@ module.exports = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.worker.ts$/,
-      //   use: {
-      //     loader: 'worker-loader',
-      //     options: {
-      //       // type: "SharedWorker",
-      //       name: "edu.log.worker.js",
-      //       // name: "custom.[name].worker.js",
-      //       inline: true,
-      //       fallback: false
-      //       // name: "log-worker",
-      //       // chunkFilename: ""
-      //       // worker: {
-      //       //   type: "SharedWorker",
-      //       //   options: {
-      //       //     type: "classic",
-      //       //     credentials: "omit",
-      //       //     name: "my-custom-worker-name",
-      //       //   },
-      //       // },
-      //     }
-      //   }
-      // },
       {
         test: /\.ts(x)?$/,
-        // loader: "babel-loader",
         use: [
           {
             loader: "babel-loader",
             options: {
-              // cacheDirectory: false,
               presets: [
                 "@babel/preset-react",
                 "@babel/preset-typescript"
@@ -80,16 +53,9 @@ module.exports = {
           }
         ],
         exclude: /node_modules/,
-        // options: {
-        //   presets: [
-        //     "@babel/preset-react",
-        //     "@babel/preset-typescript"
-        //   ],
-        // },
       },
       {
         test: /\.(scss|css)$/i,
-        // exclude: /node_modules/,
         use: [
           process.env.NODE_ENV === 'production' ? {
             loader: MiniCssExtractPlugin.loader,
@@ -173,16 +139,34 @@ module.exports = {
       REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE),
       REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER),
       // 'process': 'utils'
+    }),
+    new HardSourceWebpackPlugin({
+      root: process.cwd(),
+      directories: [],
+      environmentHash: {
+        root: process.cwd(),
+        directories: [],
+        files: [
+          'package.json',
+          'package-lock.json',
+          'yarn.lock',
+          '.env',
+          '.env.local',
+          'env.local',
+          'config-overrides.js',
+          'webpack.config.js',
+        ],
+      }
+    }),
+    new BundleAnalyzerPlugin(),
+    new PurifyCSS({
+      paths: glob.sync([
+        path.resolve(__dirname, './src/pages/*.tsx'),
+        path.resolve(__dirname, './src/components/*.tsx'),
+        path.resolve(__dirname, './src/components/**/*.tsx'),
+        path.resolve(__dirname, './src/**/*.ts'),
+        path.resolve(__dirname, './src/*.ts')
+      ])
     })
-    // new ModuleFederationPlugin({
-    //   name: "app1",
-    //   remotes: {
-    //     app2: "app2@http://localhost:3002/remoteEntry.js",
-    //   },
-    //   shared: ["react", "react-dom"],
-    // }),
-    // new HtmlWebpackPlugin({
-    //   template: "./public/index.html",
-    // }),
   ],
 };

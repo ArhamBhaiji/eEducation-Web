@@ -40,16 +40,6 @@ export class ReplayUIStore {
     },
   ]
 
-  static languages: any[] = [
-    {
-      text: '中文', name: 'zh-CN',
-    },
-    {
-      text: 'En', name: 'en'
-    }
-  ]
-
-
   @observable
   loading?: boolean = false;
 
@@ -220,16 +210,6 @@ export class ReplayUIStore {
       this.ipc.send('close')
     }
   }
-  @computed
-  get language(): string {
-    return this._language;
-  }
-
-  @action
-  setLanguage(language: string) {
-    this._language = language
-    GlobalStorage.setLanguage(this._language)
-  }
 
   hasDialog(type: string) {
     return this.dialogs.find(it => it.dialog.type === type)
@@ -238,9 +218,6 @@ export class ReplayUIStore {
   @observable
   dialogs: DialogType[] = []
   
-  @observable
-  _language: string = GlobalStorage.getLanguage();
-
   @observable
   curSeqId: number = 0
 

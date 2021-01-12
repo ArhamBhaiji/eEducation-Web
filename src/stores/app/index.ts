@@ -65,6 +65,7 @@ export type AppStoreInitParams = {
   pretest?: boolean
   mainPath?: string
   roomPath?: string
+  resetRoomInfo: boolean
 }
 
 export type RoomInfo = {
@@ -282,6 +283,7 @@ export class AppStore {
         roomUuid: '',
         groupName: '',
         groupUuid: '',
+        ...this.params.roomInfoParams
       },
       config: {
         agoraAppId: this.params.config.agoraAppId,
@@ -290,20 +292,23 @@ export class AppStore {
         enableLog: true,
         sdkDomain: this.params.config.sdkDomain,
       },
-      mainPath: '',
-      roomPath: '',
+      mainPath: this.params.mainPath,
+      roomPath: this.params.roomPath,
+      resetRoomInfo: this.params.resetRoomInfo
     }
   }
 
   @action
   resetRoomInfo() {
-    this.roomInfo = {
-      roomName: "",
-      roomUuid: "",
-      roomType: 0,
-      userName: "",
-      userRole: 0,
-      userUuid: "",
+    if (this.params.resetRoomInfo) {
+      this.roomInfo = {
+        roomName: "",
+        roomUuid: "",
+        roomType: 0,
+        userName: "",
+        userRole: 0,
+        userUuid: "",
+      }
     }
   }
 

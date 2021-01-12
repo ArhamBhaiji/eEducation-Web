@@ -7,7 +7,7 @@ const FETCH_TIMEOUT = 10000
 export async function Fetch (input: RequestInfo, init?: RequestInit, retryCount: number = 0): Promise<any> {
   return new Promise((resolve, reject) => {
     const onResponse = (response: Response) => {
-      EduLogger.info("OnResponse success")
+      EduLogger.info(`OnResponse success, ${JSON.stringify(input)}`)
       // WARN: 需要考虑服务器异常情况
       if (!response.ok) {
         EduLogger.info('status', response.status, ' ok ', response.ok)
@@ -51,7 +51,7 @@ export async function AgoraFetch(input: RequestInfo, init?: RequestInit, retryCo
     return await Fetch(input, init, retryCount);
   } catch(err) {
     if (err && err.message === 'request timeout') {
-      throw new GenericErrorWrapper({code: err.code, msg: null, response: null})
+      throw new GenericErrorWrapper({code: err.code, message: null, name: 'AgoraFetch request timeout'})
     }
     throw new GenericErrorWrapper(err)
   }
