@@ -142,7 +142,7 @@ export class MiddleRoomApi {
   async handInvitationStart(action: number, toUserUuid: string) {
     let res = await this.fetch({
       full_url: `${REACT_APP_AGORA_APP_SDK_DOMAIN}/invitation/apps/${APP_ID}/v1/rooms/${this.room.uuid}/users/${toUserUuid}/process/${this.room.uuid}`,
-      method: 'POST',
+      method: 'DELETE',
       data: {
         fromUserUuid: this.me.uuid,
         waitAck: false,
