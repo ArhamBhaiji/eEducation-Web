@@ -197,7 +197,8 @@ export class RoomStore extends SimpleInterval {
       this.roomApi = new RoomApi({
         appId: this.eduManager.config.appId,
         sdkDomain: this.eduManager.config.sdkDomain as string,
-        restToken: this.eduManager.config.agoraRestToken
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
       })
       const roomUuid = this.roomInfo.roomUuid
       let checkInResult = await eduSDKApi.checkIn({
@@ -550,15 +551,21 @@ export class RoomStore extends SimpleInterval {
       }
       this.sceneStore._roomManager = roomManager;
       this.appStore._boardService = new EduBoardService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: roomManager.userToken,
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
         roomUuid: roomManager.roomUuid,
-        prefix: this.eduManager.prefix["board"],
+        userToken: roomManager.userToken,
       })
       this.appStore._recordService = new EduRecordService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: roomManager.userToken,
-        prefix: this.eduManager.prefix["record"],
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
+        roomUuid: roomManager.roomUuid,
       })
   
       const roomInfo = roomManager.getClassroomInfo()
@@ -689,8 +696,8 @@ export class RoomStore extends SimpleInterval {
           roomUuid: this.roomInfo.roomUuid,
           toUserUuid: teacher.userUuid,
           payload: {
-            userId: teacher.userUuid,
-            userName: teacher.userName,
+            userId: this.roomInfo.userUuid,
+            userName: this.roomInfo.userName,
             type: PeerInviteEnum.studentApply,
           }
         })

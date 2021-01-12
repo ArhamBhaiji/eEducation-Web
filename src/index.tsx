@@ -43,9 +43,11 @@ ReactDOM.render(
     appConfig={{
       agoraAppId: `${REACT_APP_AGORA_APP_ID}`,
       agoraNetlessAppId: `${REACT_APP_NETLESS_APP_ID}`,
-      agoraRestFullToken: window.btoa(`${REACT_APP_AGORA_CUSTOMER_ID}:${REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`),
+      // agoraRestFullToken: window.btoa(`${REACT_APP_AGORA_CUSTOMER_ID}:${REACT_APP_AGORA_CUSTOMER_CERTIFICATE}`),
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
-      enableLog: true
+      enableLog: true,
+      rtmToken: '',
+      rtmUid: '',
     }}
     // basename={"/education_web"}
   />,

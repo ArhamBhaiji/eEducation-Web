@@ -58,6 +58,7 @@ export const routesMap: Record<string, AppRouteComponent> = {
   },
   'home': {
     path: '/',
+    // component: () => <div>hello</div>
     component: () => <HomePage />
   }
 }

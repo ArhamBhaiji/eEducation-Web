@@ -40,9 +40,13 @@ export class ReplayStore {
     this.appStore = appStore
     this.boardClient = new BoardClient({identity: 'host', appIdentifier: this.appStore.params.config.agoraNetlessAppId})
     this.recordService = new EduRecordService({
-      restToken: this.appStore.eduManager.config.agoraRestToken,
-      userToken: '',
-      prefix: this.appStore.eduManager.prefix["record"],
+      prefix: '',
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      appId: this.appStore.params.config.agoraAppId,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
+      roomUuid: `${this.appStore.params.roomInfoParams?.roomUuid}`,
+      // userToken: `${}`,
     })
   }
 

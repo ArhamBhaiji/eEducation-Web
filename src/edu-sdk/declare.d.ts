@@ -35,7 +35,9 @@ declare type AgoraEduSDKConfigParams = {
   appId: string
   whiteboardAppId: string
   token: string
-  restToken: string
+  // restToken: string
+  rtmToken: string
+  rtmUid: string
 }
 
 declare interface RoomParameters {

@@ -212,7 +212,6 @@ export class ExtensionStore {
     return false
   }
 
-
   @computed
   get middleRoomApi() {
     return this.appStore.middleRoomStore.middleRoomApi
@@ -230,7 +229,7 @@ export class ExtensionStore {
   async startInvitationApply () {
     try {
       const teacherUuid = this.teacherUuid
-      await this.middleRoomApi.handInvitationStart(
+      await this.middleRoomApi.raiseHands(
         InvitationEnum.Apply,
         teacherUuid,
       )

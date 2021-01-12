@@ -94,7 +94,8 @@ export const DeviceViews: React.FC<DeviceViewsProps> = (props) => {
           }}/>
         </div>
         }
-        {uiStore.isElectron && <div className="electron-menu-position-top">
+        {/* {
+        uiStore.isElectron && <div className="electron-menu-position-top">
           <>
               <div className="icon-container">
                 <CustomIcon className="icon-minimum" onClick={() => {
@@ -107,7 +108,7 @@ export const DeviceViews: React.FC<DeviceViewsProps> = (props) => {
               </div>
           </>
         </div>
-        }
+        } */}
         {props.active === 'video' && <VideoPage />}
         {props.active === 'audio' && <AudioPage />}
         {props.active === 'speaker' && <SpeakerPage />}

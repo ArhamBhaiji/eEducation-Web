@@ -92,9 +92,12 @@ export class PlayerStore {
     this.appStore = appStore
     this._boardClient = new BoardClient({identity: "host", appIdentifier: config.agoraNetlessAppId})
     this._recordService = new EduRecordService({
-      restToken: config.agoraRestFullToken,
-      userToken: '',
       prefix: `${config.sdkDomain}/recording/apps/%app_id`.replace('%app_id', config.agoraAppId),
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      appId: this.appStore.params.config.agoraAppId,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
+      roomUuid: '',
     })
     this.mediaUrl = replayConfig.whiteboardUrl
     this.boardId = replayConfig.whiteboardId

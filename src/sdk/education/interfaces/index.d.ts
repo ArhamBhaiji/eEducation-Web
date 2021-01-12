@@ -134,7 +134,7 @@ export enum LogLevel {
 
 export interface EduConfiguration {
   appId: string;
-  agoraRestToken: string
+  // agoraRestToken: string
   platform: 'web' | 'electron';
   agoraRtc?: IAgoraRTC;
   agoraRtm?: any;
@@ -143,6 +143,8 @@ export interface EduConfiguration {
   logDirectoryPath: string;
   codec?: string
   sdkDomain?: string
+  rtmUid: string
+  rtmToken: string
 }
 
 export interface EduClassroomConfiguration extends EduConfiguration {

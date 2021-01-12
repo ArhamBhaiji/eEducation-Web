@@ -367,14 +367,16 @@ export class MiddleRoomStore extends SimpleInterval {
     try {
       this.appStore.uiStore.startLoading()
       this.roomApi = new RoomApi({
-        appId: this.eduManager.config.appId,
-        sdkDomain: this.eduManager.config.sdkDomain as string,
-        restToken: this.eduManager.config.agoraRestToken
+        appId: this.appStore.params.config.agoraAppId,
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
       })
       this.middleRoomApi = new MiddleRoomApi({
         appId: this.eduManager.config.appId,
         sdkDomain: this.eduManager.config.sdkDomain as string,
-        restToken: this.eduManager.config.agoraRestToken
+        rtmToken: this.eduManager.config.rtmToken,
+        rtmUid: this.eduManager.config.rtmUid,
       })
       let {roomUuid} = await this.roomApi.fetchRoom({
         roomName: `${this.roomInfo.roomName}`,
@@ -792,15 +794,21 @@ export class MiddleRoomStore extends SimpleInterval {
       }
       this.sceneStore._roomManager = roomManager;
       this.appStore._boardService = new EduBoardService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: roomManager.userToken,
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
         roomUuid: roomManager.roomUuid,
-        prefix: this.eduManager.prefix["board"],
+        userToken: roomManager.userToken,
       })
       this.appStore._recordService = new EduRecordService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: roomManager.userToken,
-        prefix: this.eduManager.prefix["record"],
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
+        roomUuid: roomManager.roomUuid,
       })
   
       const roomInfo = roomManager.getClassroomInfo()

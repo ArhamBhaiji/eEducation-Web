@@ -4,7 +4,6 @@ type ConfigResult = {
   customerId: string,
   customerCertificate: string,
   netless: {
-    enable: boolean
     appId: string
     token: string,
     oss: {
@@ -45,16 +44,17 @@ export class EduSDKApi extends ApiBase {
       url: `/v2/configs`,
       method: 'GET',
     })
-    return res
+    return res.data
   }
 
   async checkIn(params: {
     roomUuid: string,
     roomName: string,
-    roomType: number
+    roomType: number,
+    userUuid: string,
   }) {
     const res = await this.fetch({
-      url: `/v2/rooms/${params.roomUuid}`,
+      url: `/v2/rooms/${params.roomUuid}/users/${params.userUuid}`,
       method: 'PUT',
       data: {
         roomName: params.roomName,
@@ -62,7 +62,7 @@ export class EduSDKApi extends ApiBase {
       }
     })
 
-    return res
+    return res.data
   }
 
   async updateClassState(params: {
@@ -73,7 +73,7 @@ export class EduSDKApi extends ApiBase {
       url: `/v2/rooms/${params.roomUuid}/states/${params.state}`,
       method: 'PUT'
     })
-    return res
+    return res.data
   }
 
   async updateRecordingState(params: {
@@ -84,7 +84,7 @@ export class EduSDKApi extends ApiBase {
       url: `/v2/rooms/${params.roomUuid}/records/states/${params.state}`,
       method: 'PUT'
     })
-    return res
+    return res.data
   }
 
   async sendChat(params: {
@@ -100,7 +100,7 @@ export class EduSDKApi extends ApiBase {
       method: 'POST',
       data: params.data
     })
-    return res
+    return res.data
   }
 
   async muteChat(params: {
@@ -114,7 +114,7 @@ export class EduSDKApi extends ApiBase {
         muteChat: params.muteChat
       }
     })
-    return res
+    return res.data
   }
 
   async handsUp(params: {
@@ -132,7 +132,7 @@ export class EduSDKApi extends ApiBase {
         })
       }
     })
-    return res
+    return res.data
   }
 }
 

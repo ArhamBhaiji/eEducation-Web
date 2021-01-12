@@ -18,6 +18,7 @@ import {isElectron} from '@/utils/platform';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 import {observer} from 'mobx-react';
 import './home.scss';
+import { homeApi } from '@/services/home-api';
 
 const useStyles = makeStyles ((theme: Theme) => ({
   formControl: {
@@ -34,6 +35,7 @@ type SessionInfo = {
 }
 
 const roleName = [
+  '',
   'teacher',
   'student',
   'assistant'
@@ -93,7 +95,7 @@ export const HomePage = observer(() => {
 
   const [required, setRequired] = useState<any>({} as any);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!session.roomName) {
       setRequired({...required, roomName: t('home.missing_room_name')});
       return;
@@ -115,13 +117,20 @@ export const HomePage = observer(() => {
 
     const userRole = roles[session.role]
 
+    const roomUuid = `${session.roomName}${roomType}`;
+    const uid = `${session.userName}${userRole}`;
+
+    let {userUuid, rtmToken} = await homeApi.login(uid)
+
     appStore.setRoomInfo({
+      rtmUid: userUuid,
+      rtmToken: rtmToken,
       roomType: roomType,
       roomName: session.roomName,
       userName: session.userName,
       userRole: userRole,
-      userUuid: `${session.userName}${userRole}`,
-      roomUuid: `${session.roomName}${roomType}`,
+      userUuid: `${userUuid}`,
+      roomUuid: `${roomUuid}`,
     })
     const path = roomTypes[session.roomType].path
 
@@ -173,7 +182,7 @@ export const HomePage = observer(() => {
       </div>
       }
       <div className="custom-card">
-        {!uiStore.isElectron ? <GithubIcon /> : null}
+        {/* {!uiStore.isElectron ? <GithubIcon /> : null} */}
         <div className="flex-item cover">
           {uiStore.isElectron ? 
           <>

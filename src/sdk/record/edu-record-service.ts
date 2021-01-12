@@ -1,15 +1,27 @@
+import { ApiInitParams } from '@/services/base';
 import { AgoraRecordApi } from './../education/core/services/record-api';
+
+type EduRecordServiceInitParams = {
+  sdkDomain: string
+  appId: string
+  rtmToken: string
+  rtmUid: string
+  prefix: string
+  roomUuid: string
+}
 
 export class EduRecordService {
 
   apiService: AgoraRecordApi;
 
-  constructor(params: {
-    userToken: string
-    restToken: string
-    prefix: string
-  }) {
-    this.apiService = new AgoraRecordApi(params)
+  constructor(params: EduRecordServiceInitParams) {
+    this.apiService = new AgoraRecordApi({
+      sdkDomain: params.sdkDomain,
+      appId: params.appId,
+      rtmToken: params.rtmToken,
+      rtmUid: params.rtmUid,
+      roomUuid: params.roomUuid,
+    })
   }
 
   async getCourseRecordBy(roomUuid: string) {

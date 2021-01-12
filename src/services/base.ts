@@ -1,6 +1,16 @@
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
 import { AgoraFetchParams } from "@/sdk/education/interfaces";
 
+export type ApiInitParams = {
+  userToken: string
+  sdkDomain: string
+  appId: string
+  rtmToken: string
+  rtmUid: string
+  prefix: string
+  roomUuid: string
+}
+
 export type ApiBaseInitializerParams = {
   sdkDomain: string
   appId: string
@@ -13,6 +23,7 @@ export abstract class ApiBase {
   protected rtmUid: string = ''
   protected appId: string = ''
   protected sdkDomain: string = '';
+  protected userToken: string = '';
   
   protected prefix!: string
 
@@ -21,6 +32,14 @@ export abstract class ApiBase {
     this.sdkDomain = params.sdkDomain
     this.rtmToken = params.rtmToken
     this.rtmUid = params.rtmUid
+  }
+
+  updateRtmConfig(info: {
+    rtmUid: string
+    rtmToken: string
+  }) {
+    this.rtmUid = info.rtmUid
+    this.rtmToken = info.rtmToken
   }
 
   // 接口请求
@@ -45,6 +64,10 @@ export abstract class ApiBase {
     }
     if (token) {
       opts.headers['token'] = token
+    } else {
+      if (this.userToken) {
+        opts.headers['token'] = this.userToken
+      }
     }
     let resp: any;
     if (full_url) {

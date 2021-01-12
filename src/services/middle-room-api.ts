@@ -109,10 +109,27 @@ export class MiddleRoomApi extends ApiBase {
   }
 
   // 举手邀请开启
-  async handInvitationStart(action: number, toUserUuid: string) {
+  async raiseHands(action: number, toUserUuid: string) {
     let res = await this.fetch({
       full_url: `${this.sdkDomain}/invitation/apps/${this.appId}/v2/rooms/${this.room.uuid}/users/${toUserUuid}/process/${this.room.uuid}`,
       method: 'POST',
+      data: {
+        fromUserUuid: this.me.uuid,
+        action: action,
+        payload: {
+          fromRoom: this.room,
+          // fromUser: this.me,
+        },
+      },
+      token: this.userToken
+    })
+    return res.data
+  }
+
+  async handInvitationStart(action: number, toUserUuid: string) {
+    let res = await this.fetch({
+      full_url: `${this.sdkDomain}/invitation/apps/${this.appId}/v2/rooms/${this.room.uuid}/users/${toUserUuid}/process/${this.room.uuid}`,
+      method: 'DELETE',
       data: {
         fromUserUuid: this.me.uuid,
         action: action,

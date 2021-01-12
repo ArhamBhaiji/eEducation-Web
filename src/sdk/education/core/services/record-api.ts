@@ -1,16 +1,24 @@
-import { ApiBaseInitializerParams } from './../../../../services/base';
+import { ApiBaseInitializerParams, ApiInitParams } from './../../../../services/base';
 import { ApiBase } from "@/services/base";
 import { AgoraFetchParams } from "../../interfaces";
 import { HttpClient } from "../utils/http-client";
 
+type AgoraRecordApiParams = {
+  // userToken: string
+  sdkDomain: string
+  appId: string
+  rtmToken: string
+  rtmUid: string
+  // prefix: string
+  roomUuid: string
+}
+
 export class AgoraRecordApi extends ApiBase {
   constructor(
-    params: {
-      prefix: string
-    } & ApiBaseInitializerParams
+    params: AgoraRecordApiParams
   ) {
     super(params)
-    this.prefix = params.prefix
+    this.prefix = `${params.sdkDomain}/recording/apps/%app_id`.replace('%app_id', this.appId)
   }
 
   async queryRoomRecordBy(roomUuid: string) {

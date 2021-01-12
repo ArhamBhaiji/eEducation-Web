@@ -59,11 +59,11 @@ export const BigClass = observer(() => {
           <NetlessBoard />
           <ScreenSharing />
           <div className={`interactive ${sceneStore.roomInfo.userRole === EduRoleTypeEnum.student ? 'student' : 'teacher'}`}>
-            {sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher && roomStore.notice ?
+            {/* {sceneStore.roomInfo.userRole === EduRoleTypeEnum.teacher && roomStore.notice ?
               <ControlItem name={roomStore.notice.reason}
                 onClick={handleNotice}
                 active={roomStore.notice.reason ? true : false} />
-            : null}
+            : null} */}
             {sceneStore.roomInfo.userRole !== EduRoleTypeEnum.teacher?
               <ControlItem
                 name={sceneStore.cameraEduStream ? 'hands_up_end' : 'hands_up'}

@@ -71,10 +71,12 @@
   justify-content: flex-end;
   position: absolute;
   z-index: 3;
-  &.student {
-    bottom: 10px;
-    right: 10px;
-  }
+  bottom: 10px;
+  right: 10px;
+  // &.student {
+  //   bottom: 10px;
+  //   right: 10px;
+  // }
   .items {
     display: flex;
     height: 42px;

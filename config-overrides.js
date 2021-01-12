@@ -135,18 +135,18 @@ module.exports = override(
   addWebpackPlugin(
     new SimpleProgressWebpackPlugin()
   ),
-  addWebpackPlugin(
-    new PurifyCSS({
-      paths: glob.sync([
-        path.resolve(__dirname, './*.html'),
-        path.resolve(__dirname, './src/pages/*.tsx'),
-        path.resolve(__dirname, './src/components/*.tsx'),
-        path.resolve(__dirname, './src/components/**/*.tsx'),
-        path.resolve(__dirname, './src/**/*.ts'),
-        path.resolve(__dirname, './src/*.ts')
-      ])
-    })
-  ),
+  // addWebpackPlugin(
+  //   new PurifyCSS({
+  //     paths: glob.sync([
+  //       path.resolve(__dirname, './*.html'),
+  //       path.resolve(__dirname, './src/pages/*.tsx'),
+  //       path.resolve(__dirname, './src/components/*.tsx'),
+  //       path.resolve(__dirname, './src/components/**/*.tsx'),
+  //       path.resolve(__dirname, './src/**/*.ts'),
+  //       path.resolve(__dirname, './src/*.ts')
+  //     ])
+  //   })
+  // ),
   babelInclude([
     path.resolve("src")
   ]),

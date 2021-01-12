@@ -145,18 +145,18 @@ function getIpc() {
 }
 
 export const BreakoutRoomController = observer(({ children }: any) => {
-  useEffect(() => {
-    const ipc = getIpc()
-    if (ipc && ipc.send) {
-      ipc.send('resize-window', { width: 990, height: 706 });
-    }
-    return () => {
-      const ipc = getIpc()
-      if (ipc && ipc.send) {
-        ipc.send('resize-window', { width: 700, height: 500 });
-      }
-    }
-  }, [getIpc])
+  // useEffect(() => {
+  //   const ipc = getIpc()
+  //   if (ipc && ipc.send) {
+  //     ipc.send('resize-window', { width: 990, height: 706 });
+  //   }
+  //   return () => {
+  //     const ipc = getIpc()
+  //     if (ipc && ipc.send) {
+  //       ipc.send('resize-window', { width: 700, height: 500 });
+  //     }
+  //   }
+  // }, [getIpc])
 
   const uiStore = useUIStore()
 

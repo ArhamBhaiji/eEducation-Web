@@ -17,9 +17,6 @@ export type ClassroomInitParams = {
 
 export type ClassRoomAuthorization = string
 
-// const symbolConfig = Symbol.for("config")
-
-
 const internalEduManagerConfig: {
   appId: string,
   sdkDomain: string
@@ -65,9 +62,12 @@ export class EduManager extends EventEmitter {
     this._mediaService = new MediaService(buildOption)
     console.log("EduManager this.config ", JSON.stringify(this.config))
     this.apiService = new AgoraEduApi(
-      this.config.appId,
-      this.authorization,
-      this.config.sdkDomain as string
+      {
+        appId: this.config.appId,
+        rtmToken: this.config.rtmToken,
+        rtmUid: this.config.rtmUid,
+        sdkDomain: `${this.config.sdkDomain}`
+      }
     )
     Object.assign(
       internalEduManagerConfig,
@@ -76,7 +76,18 @@ export class EduManager extends EventEmitter {
         sdkDomain: this.config.sdkDomain
       }
     )
-    console.log("internalEduManagerConfig", internalEduManagerConfig)
+  }
+
+  updateRtmConfig(info: {
+    rtmUid: string
+    rtmToken: string
+  }) {
+    this.config.rtmUid = info.rtmUid
+    this.config.rtmToken = info.rtmToken
+    this.apiService.updateRtmConfig({
+      rtmUid: this.config.rtmUid,
+      rtmToken: this.config.rtmToken
+    })
   }
 
   private get rtmWrapper(): RTMWrapper {
@@ -94,7 +105,6 @@ export class EduManager extends EventEmitter {
   static enableDebugLog(enable: boolean) {
     this.enable = enable
     if (this.enable) {
-      console.log("internalEduManagerConfig#enableDebugLog", internalEduManagerConfig)
       EduLogger.init(internalEduManagerConfig.appId, internalEduManagerConfig.sdkDomain)
     }
   }
@@ -107,23 +117,6 @@ export class EduManager extends EventEmitter {
   
   static async uploadLog(roomUuid: string): Promise<any> {
     return await EduLogger.enableUpload(roomUuid, this.isElectron)
-  }
-
-  get authorization(): string {
-    return this.config.agoraRestToken
-  }
-
-  get prefix() {
-    if (this.config.sdkDomain) {
-      return {
-        "board": `${this.config.sdkDomain}/board/apps/%app_id`.replace('%app_id', this.config.appId),
-        "record": `${this.config.sdkDomain}/recording/apps/%app_id`.replace('%app_id', this.config.appId)
-      }
-    }
-    return {
-      "board": "",
-      "record": ""
-    }
   }
 
   private async prepareLogin(userUuid: string) {
@@ -226,9 +219,12 @@ export class EduManager extends EventEmitter {
       roomName: params.roomName,
       eduManager: this,
       apiService: new AgoraEduApi(
-        this.config.appId,
-        this.authorization,
-        this.config.sdkDomain as string
+        {
+          appId: this.config.appId,
+          rtmToken: this.config.rtmToken,
+          rtmUid: this.config.rtmUid,
+          sdkDomain: `${this.config.sdkDomain}`
+        }
       ),
     })
     this._classroomMap[params.roomUuid] = classroomManager

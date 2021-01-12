@@ -32,6 +32,7 @@ import { AgoraEduSDK, ListenerCallback } from '@/edu-sdk/declare';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 import { AgoraEduEvent } from '@/edu-sdk';
 import { isEmpty } from 'lodash';
+import { eduSDKApi } from '@/services/edu-sdk-api';
 
 type RoomInfoParams = {
   roomName: string
@@ -45,9 +46,11 @@ type RoomInfoParams = {
 export type AppStoreConfigParams = {
   agoraAppId: string
   agoraNetlessAppId: string
-  agoraRestFullToken: string
+  // agoraRestFullToken: string
   enableLog: boolean
   sdkDomain: string
+  rtmUid: string
+  rtmToken: string
   oss?: {
     region: string
     bucketName: string
@@ -59,7 +62,7 @@ export type AppStoreConfigParams = {
 }
 
 export type AppStoreInitParams = {
-  roomInfoParams?: RoomInfo
+  roomInfoParams?: RoomInfoParams
   config: AppStoreConfigParams
   listener?: ListenerCallback
   pretest?: boolean
@@ -75,6 +78,8 @@ export type RoomInfo = {
   userRole: EduRoleTypeEnum
   userUuid: string
   roomUuid: string
+  rtmUid: string
+  rtmToken: string
   groupName?: string
   groupUuid?: string
 }
@@ -123,9 +128,13 @@ export class AppStore {
   }
 
   private load() {
-    const storage = GlobalStorage.read("room")
+    const storage = GlobalStorage.read('agora_edu_room')
     if (storage || !isEmpty(storage)) {
       this.roomInfo = storage.roomInfo
+      this.updateRtmInfo({
+        rtmUid: this.roomInfo.rtmUid,
+        rtmToken: this.roomInfo.rtmToken,
+      })
     } else {
       this.roomInfo = {
         roomName: "",
@@ -134,6 +143,8 @@ export class AppStore {
         userName: "",
         userRole: 0,
         userUuid: "",
+        rtmUid: "",
+        rtmToken: "",
       }
     }
   }
@@ -199,28 +210,12 @@ export class AppStore {
     console.log(" config >>> params: ", {...this.params})
     const {config, roomInfoParams} = this.params
 
-    // if (roomInfoParams) {
-
-    // }
-
-    if (isEmpty(roomInfoParams)) {
-      this.load()
-      autorun(() => {
-        const data = toJS(this)
-        GlobalStorage.save("room", {
-          roomInfo: data.roomInfo,
-        })
-      })
-    } else {
-      this.setRoomInfo(
-        roomInfoParams!
-      )
-    }
-
     if (platform === 'electron') {
       this.eduManager = new EduManager({
         appId: config.agoraAppId,
-        agoraRestToken: config.agoraRestFullToken,
+        rtmUid: config.rtmUid,
+        rtmToken: config.rtmToken,
+        // agoraRestToken: config.agoraRestFullToken,
         platform: 'electron',
         logLevel: '' as any,
         logDirectoryPath: '',
@@ -232,7 +227,9 @@ export class AppStore {
     } else {
       this.eduManager = new EduManager({
         appId: config.agoraAppId,
-        agoraRestToken: config.agoraRestFullToken,
+        rtmUid: config.rtmUid,
+        rtmToken: config.rtmToken,
+        // agoraRestToken: config.agoraRestFullToken,
         platform: 'web',
         logLevel: '' as any,
         logDirectoryPath: '',
@@ -240,6 +237,22 @@ export class AppStore {
         agoraRtm: AgoraRTM,
         codec: 'vp8',
         sdkDomain: config.sdkDomain,
+      })
+    }
+
+    if (isEmpty(roomInfoParams)) {
+      this.load()
+      autorun(() => {
+        const data = toJS(this)
+        GlobalStorage.save('agora_edu_room', {
+          roomInfo: data.roomInfo,
+        })
+      })
+    } else {
+      this.setRoomInfo({
+        rtmUid: this.params.config.rtmUid,
+        rtmToken: this.params.config.rtmToken,
+        ...roomInfoParams!
       })
     }
 
@@ -281,16 +294,16 @@ export class AppStore {
         userRole: 0,
         userUuid: '',
         roomUuid: '',
-        groupName: '',
-        groupUuid: '',
         ...this.params.roomInfoParams
       },
       config: {
         agoraAppId: this.params.config.agoraAppId,
         agoraNetlessAppId: this.params.config.agoraNetlessAppId,
-        agoraRestFullToken: this.params.config.agoraRestFullToken,
+        // agoraRestFullToken: this.params.config.agoraRestFullToken,
         enableLog: true,
         sdkDomain: this.params.config.sdkDomain,
+        rtmUid: this.params.config.rtmUid,
+        rtmToken: this.params.config.rtmToken,
       },
       mainPath: this.params.mainPath,
       roomPath: this.params.roomPath,
@@ -308,6 +321,8 @@ export class AppStore {
         userName: "",
         userRole: 0,
         userUuid: "",
+        rtmUid: "",
+        rtmToken: "",
       }
     }
   }
@@ -334,6 +349,23 @@ export class AppStore {
   }
 
   @action
+  updateRtmInfo(info: {
+    rtmUid: string
+    rtmToken: string
+  }) {
+    this.params.config.rtmToken = info.rtmToken
+    this.params.config.rtmUid = info.rtmUid
+    this.eduManager.updateRtmConfig({
+      rtmUid: this.params.config.rtmUid,
+      rtmToken: this.params.config.rtmToken,
+    })
+    eduSDKApi.updateRtmInfo({
+      rtmToken: this.params.config.rtmToken,
+      rtmUid: this.params.config.rtmUid,
+    })
+  }
+
+  @action
   setRoomInfo(payload: RoomInfo) {
     this.roomInfo = {
       roomName: payload.roomName,
@@ -342,8 +374,13 @@ export class AppStore {
       userName: payload.userName,
       userRole: payload.userRole,
       userUuid: payload.userUuid,
-      // userUuid: `${payload.userName}${payload.role}`
+      rtmUid: payload.rtmUid,
+      rtmToken: payload.rtmToken
     }
+    this.updateRtmInfo({
+      rtmUid: payload.rtmUid,
+      rtmToken: payload.rtmToken
+    })
   }
 
   @action

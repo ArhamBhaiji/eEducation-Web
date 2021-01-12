@@ -22,7 +22,7 @@ const ReplayWrapper = observer((props: any) => {
               }}></CustomIcon>
             </div>
           </Tooltip> */}
-          {uiStore.isElectron && 
+          {/* {uiStore.isElectron && 
           <div className="menu-group">
             <CustomIcon className="icon-minimum" icon onClick={() => {
               uiStore.windowMinimum()
@@ -33,7 +33,7 @@ const ReplayWrapper = observer((props: any) => {
             <CustomIcon className="icon-close" icon onClick={() => {
               uiStore.windowClose()
             }} />
-          </div>}
+          </div>} */}
         </div>
       </div>
       {props.children}
@@ -66,7 +66,8 @@ const ReplayPlayerWrapper = observer((props: any) => {
               }}></CustomIcon>
             </div>
           </Tooltip> */}
-          {uiStore.isElectron && 
+          {/* {
+          uiStore.isElectron && 
           <div className="menu-group">
             <CustomIcon className="icon-minimum" icon onClick={() => {
               uiStore.windowMinimum()
@@ -77,7 +78,8 @@ const ReplayPlayerWrapper = observer((props: any) => {
             <CustomIcon className="icon-close" icon onClick={() => {
               uiStore.windowClose()
             }} />
-          </div>}
+          </div>
+          } */}
         </div>
       </div>
       {props.children}

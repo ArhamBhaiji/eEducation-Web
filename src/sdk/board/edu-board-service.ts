@@ -1,16 +1,19 @@
+import { ApiInitParams } from '@/services/base';
 import { AgoraBoardApi } from "../education/core/services/board-api";
 import { EduLogger } from '../education/core/logger';
 
 export class EduBoardService {
   apiService: AgoraBoardApi;
 
-  constructor(params: {
-    prefix: string
-    userToken: string
-    restToken: string
-    roomUuid: string
-  }) {
-    this.apiService = new AgoraBoardApi(params)
+  constructor(params: ApiInitParams) {
+    this.apiService = new AgoraBoardApi({
+      userToken: params.userToken,
+      roomUuid: params.roomUuid,
+      rtmUid: params.rtmUid,
+      rtmToken: params.rtmToken,
+      appId: params.appId,
+      sdkDomain: params.sdkDomain,
+    })
   }
 
   async getBoardInfo() {

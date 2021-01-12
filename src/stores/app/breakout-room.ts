@@ -1590,9 +1590,10 @@ export class BreakoutRoomStore extends SimpleInterval {
   @action
   async prepareClassroom(role: EduRoleTypeEnum) {
     this.roomApi = new RoomApi({
-      appId: this.eduManager.config.appId,
-      sdkDomain: this.eduManager.config.sdkDomain as string,
-      restToken: this.eduManager.config.agoraRestToken
+      appId: this.appStore.params.config.agoraAppId,
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
     })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
@@ -1627,15 +1628,22 @@ export class BreakoutRoomStore extends SimpleInterval {
       const largeRoomManager = this.largeClassroomManager
       BizLogger.info('[breakout] groupManager', groupManager)
       this.appStore._boardService = new EduBoardService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: largeRoomManager.userToken,
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
         roomUuid: largeRoomManager.roomUuid,
-        prefix: this.eduManager.prefix["board"],
+        userToken: largeRoomManager.userToken,
       })
       this.appStore._recordService = new EduRecordService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: largeRoomManager.userToken,
-        prefix: this.eduManager.prefix["record"],
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
+        roomUuid: largeRoomManager.roomUuid,
+        // userToken: largeRoomManager.userToken,
       })
       BizLogger.info('[breakout whiteboard] invoke init')
       await this.appStore.boardStore.fetchInit()
@@ -1723,15 +1731,22 @@ export class BreakoutRoomStore extends SimpleInterval {
     BizLogger.info('[breakout] classroom as teacher')
     const roomManager = this.largeClassroomManager
     this.appStore._boardService = new EduBoardService({
-      restToken: this.eduManager.config.agoraRestToken,
-      userToken: roomManager.userToken,
+      prefix: '',
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      appId: this.appStore.params.config.agoraAppId,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
       roomUuid: roomManager.roomUuid,
-      prefix: this.eduManager.prefix["board"],
+      userToken: roomManager.userToken,
     })
     this.appStore._recordService = new EduRecordService({
-      restToken: this.eduManager.config.agoraRestToken,
-      userToken: roomManager.userToken,
-      prefix: this.eduManager.prefix["record"],
+      prefix: '',
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      appId: this.appStore.params.config.agoraAppId,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
+      roomUuid: roomManager.roomUuid,
+      // userToken: roomManager.userToken,
     })
     BizLogger.info('[breakout whiteboard] invoke init')
     await this.appStore.boardStore.fetchInit()
@@ -1800,9 +1815,10 @@ export class BreakoutRoomStore extends SimpleInterval {
   @action
   async assistantJoinLargeClassroom() {
     this.roomApi = new RoomApi({
-      appId: this.eduManager.config.appId,
-      sdkDomain: this.eduManager.config.sdkDomain as string,
-      restToken: this.eduManager.config.agoraRestToken
+      appId: this.appStore.params.config.agoraAppId,
+      sdkDomain: this.appStore.params.config.sdkDomain,
+      rtmToken: this.appStore.params.config.rtmToken,
+      rtmUid: this.appStore.params.config.rtmUid,
     })
     let {roomUuid} = await this.roomApi.fetchRoom({
       roomName: `${this.roomInfo.roomName}`,
@@ -1955,15 +1971,22 @@ export class BreakoutRoomStore extends SimpleInterval {
       const groupManager = this.groupClassroomManager
       const largeRoomManager = this.largeClassroomManager
       this.appStore._boardService = new EduBoardService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: largeRoomManager.userToken,
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
         roomUuid: largeRoomManager.roomUuid,
-        prefix: this.eduManager.prefix["board"],
+        userToken: largeRoomManager.userToken,
       })
       this.appStore._recordService = new EduRecordService({
-        restToken: this.eduManager.config.agoraRestToken,
-        userToken: largeRoomManager.userToken,
-        prefix: this.eduManager.prefix["record"],
+        prefix: '',
+        sdkDomain: this.appStore.params.config.sdkDomain,
+        appId: this.appStore.params.config.agoraAppId,
+        rtmToken: this.appStore.params.config.rtmToken,
+        rtmUid: this.appStore.params.config.rtmUid,
+        roomUuid: largeRoomManager.roomUuid,
+        // userToken: largeRoomManager.userToken,
       })
       BizLogger.info('[breakout whiteboard] invoke init')
       await this.appStore.boardStore.fetchInit()

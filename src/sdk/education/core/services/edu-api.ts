@@ -95,7 +95,7 @@ export class AgoraEduApi extends ApiBase {
   roomUuid: string = '';
   appId!: string;
   authorization!: string;
-  _userToken: string = '';
+  // _userToken: string = '';
 
   nextId?: string;
 
@@ -133,10 +133,6 @@ export class AgoraEduApi extends ApiBase {
   //   this.lastStreamListTime = 0;
   //   this._prefix = `${sdkDomain}/scene/apps/%app_id`.replace('%app_id', this.appId)
   // }
-  
-  public get userToken(): string {
-    return this._userToken
-  }
 
   public updateLastTime(t: number) {
     this.latestTime = t
@@ -200,22 +196,6 @@ export class AgoraEduApi extends ApiBase {
 
     return resp
   }
-
-  public set userToken(token: string) {
-    window.sessionStorage.setItem("edu-userToken", token)
-  }
-
-  // create room
-  // async createRoom (params: EduClassroomConfig): Promise<any> {
-  //   const {roomUuid, ...data} = params
-  //   let res = await this.fetch({
-  //     url: `/v1/rooms/${roomUuid}/config`,
-  //     method: 'POST',
-  //     data: data,
-  //   })
-  //   this.roomUuid = roomUuid
-  //   return res;
-  // }
 
   async getRoomConfig(roomId: string): Promise<any> {
     return await this.fetch({

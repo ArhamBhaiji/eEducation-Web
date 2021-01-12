@@ -8,7 +8,6 @@ import { Route, HashRouter, Switch, Redirect } from 'react-router-dom';
 import ThemeContainer from '../containers/theme-container';
 import { DelegateType } from '@/edu-sdk';
 import { RoomParameters } from '@/edu-sdk/declare';
-import { useAppStore } from '@/hooks';
 export interface RouteContainerProps {
   routes: string[]
   mainPath?: string
@@ -29,8 +28,6 @@ export const RouteContainer = (props: RouteContainerProps) => {
     acc.push(routesMap[item])
     return acc
   }, [])
-
-  console.log(" props ", props.mainPath)
 
   return (
     <>

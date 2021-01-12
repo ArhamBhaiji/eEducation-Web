@@ -236,7 +236,7 @@ export const Nav = observer((props: any) => {
               </span>
             </Tooltip>
           </div>
-          {uiStore.isElectron &&
+          {/* {uiStore.isElectron &&
             <div className="menu-group">
               <CustomIcon className="icon-minimum" icon onClick={() => {
                 uiStore.windowMinimum()
@@ -247,7 +247,7 @@ export const Nav = observer((props: any) => {
               <CustomIcon className="icon-close" icon onClick={() => {
                 uiStore.windowClose()
               }} />
-            </div>}
+            </div>} */}
         </div>
       </div>
     </>

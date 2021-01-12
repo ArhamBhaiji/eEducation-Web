@@ -7,20 +7,22 @@ import { GenericErrorWrapper } from "../utils/generic-error";
 
 export class AgoraBoardApi extends ApiBase {
 
-  private userToken: string
   private roomUuid: string
 
   constructor(
     params: {
-      prefix: string
       userToken: string
       roomUuid: string
-    } & ApiBaseInitializerParams
+      rtmUid: string
+      rtmToken: string
+      sdkDomain: string
+      appId: string
+    }
   ) {
     super(params)
     this.roomUuid = params.roomUuid
     this.userToken = params.userToken
-    this.prefix = params.prefix
+    this.prefix = `${this.sdkDomain}/board/apps/%app_id%`.replace('%app_id%', this.appId)
   }
 
   async getBoardInfo(roomUuid: string): Promise<BoardInfoResponse> {

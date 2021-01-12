@@ -67,7 +67,8 @@ const sdkConfig: SDKConfig = {
     appId: '',
     whiteboardAppId: '',
     token: '',
-    restToken: ''
+    rtmUid: '',
+    rtmToken: '',
   },
   sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`
 }
@@ -83,6 +84,8 @@ export type LaunchOption = {
   roomName: string
   listener: ListenerCallback
   pretest: boolean
+  rtmUid: string
+  rtmToken: string
 }
 
 export type ReplayOption = {
@@ -94,6 +97,8 @@ export type ReplayOption = {
   startTime: number
   endTime: number
   listener: ListenerCallback
+  rtmUid: string
+  rtmToken: string
 }
 
 export type DelegateType = {
@@ -165,10 +170,14 @@ export class AgoraEduSDK {
   static config (params: AgoraEduSDKConfigParams) {
     Object.assign(sdkConfig.configParams, params)
     eduSDKApi.updateConfig({
-      restToken: sdkConfig.configParams.restToken,
+      // restToken: sdkConfig.configParams.restToken,
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       appId: sdkConfig.configParams.appId,
-      token: sdkConfig.configParams.token
+      // token: sdkConfig.configParams.token
+    })
+    eduSDKApi.updateRtmInfo({
+      rtmToken: sdkConfig.configParams.rtmToken,
+      rtmUid: sdkConfig.configParams.rtmUid
     })
   }
 
@@ -191,6 +200,10 @@ export class AgoraEduSDK {
     }
     try {
       locks.set("launch", true)
+      eduSDKApi.updateRtmInfo({
+        rtmUid: option.rtmUid,
+        rtmToken: option.rtmToken,
+      })
       const data = await eduSDKApi.getConfig()
 
       let mainPath = roomTypes[option.roomType]?.path || '/classroom/one-to-one'
@@ -204,17 +217,19 @@ export class AgoraEduSDK {
         config: {
           agoraAppId: sdkConfig.configParams.appId,
           agoraNetlessAppId: data.netless.appId,
-          agoraRestFullToken: window.btoa(`${data.customerId}:${data.customerCertificate}`),
+          // agoraRestFullToken: window.btoa(`${data.customerId}:${data.customerCertificate}`),
           enableLog: true,
           sdkDomain: sdkConfig.sdkDomain,
           oss: {
             region: data.netless.oss.region,
-            bucketName: data.netless.oss.bucketName,
+            bucketName: data.netless.oss.bucket,
             folder: data.netless.oss.folder,
             accessKey: data.netless.oss.accessKey,
             secretKey: data.netless.oss.secretKey,
             endpoint: data.netless.oss.endpoint
-          }
+          },
+          rtmUid: option.rtmUid,
+          rtmToken: option.rtmToken,
         },
         roomInfoParams: {
           roomUuid: option.roomUuid,
@@ -256,9 +271,11 @@ export class AgoraEduSDK {
       config: {
         agoraAppId: sdkConfig.configParams.appId,
         agoraNetlessAppId: option.whiteboardAppId,
-        agoraRestFullToken: sdkConfig.configParams.restToken,
+        // agoraRestFullToken: sdkConfig.configParams.restToken,
         enableLog: true,
-        sdkDomain: sdkConfig.sdkDomain
+        sdkDomain: sdkConfig.sdkDomain,
+        rtmUid: option.rtmUid,
+        rtmToken: option.rtmToken,
       },
       replayConfig: {
         whiteboardUrl: option.whiteboardUrl,
@@ -266,7 +283,7 @@ export class AgoraEduSDK {
         whiteboardId: option.whiteboardId,
         whiteboardToken: option.whiteboardToken,
         startTime: option.startTime,
-        endTime: option.endTime
+        endTime: option.endTime,
       },
       listener: option.listener,
     })
