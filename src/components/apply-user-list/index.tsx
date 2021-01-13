@@ -39,14 +39,19 @@ const StudentApplyCard = observer((props: StudentApplyCardProps) => {
       <div className={`icons-lecture-board-inactive ${shake ? "infinity-shake": ""}`} onClick={handleClick} />
       <div style={{width: "25px", cursor: "pointer", marginRight: "5px"}}>
         <Check onClick={() => {
-          uiStore.showDialog({
-            type: 'allowConfirm',
-            option: {
-              userUuid: props.userUuid,
-              streamUuid: props.streamUuid,
-            },
-            message: t('allow_confirm')
-          })
+          const count = uiStore.appStore.middleRoomStore.groups[0].studentStreams.length
+          if (count >= 6) {
+            uiStore.addToast('up to 6 students at the same time')
+          } else {
+            uiStore.showDialog({
+              type: 'allowConfirm',
+              option: {
+                userUuid: props.userUuid,
+                streamUuid: props.streamUuid,
+              },
+              message: t('allow_confirm')
+            })
+          }  
         }}/>
       </div>
       <div style={{width: "25px", cursor: "pointer"}}>
