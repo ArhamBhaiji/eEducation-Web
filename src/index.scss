@@ -20,8 +20,8 @@ html, body, #root {
 
 .draggable {
   z-index: 10000;
-  -webkit-app-region: drag;
-  -webkit-user-select: none;
+  // -webkit-app-region: drag;
+  // -webkit-user-select: none;
   .device-page-container {
     -webkit-app-region: no-drag;
   }

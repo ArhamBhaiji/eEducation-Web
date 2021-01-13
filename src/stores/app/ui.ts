@@ -91,7 +91,7 @@ export class UIStore {
   curSeqId: number = 0
 
   @observable
-  _language: string = GlobalStorage.getLanguage();
+  _language: string = '';
 
   @observable
   dialogs: DialogType[] = []
@@ -124,7 +124,7 @@ export class UIStore {
     this.autoplayToast = false
     this.lastSeqId = 0
     this.curSeqId = 0
-    this._language = GlobalStorage.getLanguage();
+    this._language = ''
     this.dialogs = []
     this.activeTab = 'chatroom'
     this.cancel = undefined

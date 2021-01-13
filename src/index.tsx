@@ -9,7 +9,9 @@ import {isElectron} from '@/utils/platform';
 import { EduManager } from '@/sdk/education/manager';
 import {AgoraEduSDK} from '@/edu-sdk';
 import { eduSDKApi } from './services/edu-sdk-api';
+import { GlobalStorage } from './utils/custom-storage';
 
+GlobalStorage.useSessionStorage()
 //@ts-ignore
 window.AgoraEduSDK = AgoraEduSDK
 

@@ -5,6 +5,7 @@ import { DeviceStore } from './device';
 import { UIStore } from './ui';
 import { EduManager } from '@/sdk/education/manager';
 import { EduUserService } from '@/sdk/education/user/edu-user-service';
+import { LanguageEnum } from '@/edu-sdk';
 import { BoardStore } from './board';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { RoomStore } from './room';
@@ -64,6 +65,7 @@ export type AppStoreConfigParams = {
 export type AppStoreInitParams = {
   roomInfoParams?: RoomInfoParams
   config: AppStoreConfigParams
+  language: LanguageEnum
   listener?: ListenerCallback
   pretest?: boolean
   mainPath?: string
@@ -208,14 +210,13 @@ export class AppStore {
     this.params = params
     console.log(" roomInfoParams ", params.roomInfoParams)
     console.log(" config >>> params: ", {...this.params})
-    const {config, roomInfoParams} = this.params
+    const {config, roomInfoParams, language} = this.params
 
     if (platform === 'electron') {
       this.eduManager = new EduManager({
         appId: config.agoraAppId,
         rtmUid: config.rtmUid,
         rtmToken: config.rtmToken,
-        // agoraRestToken: config.agoraRestFullToken,
         platform: 'electron',
         logLevel: '' as any,
         logDirectoryPath: '',
@@ -229,7 +230,6 @@ export class AppStore {
         appId: config.agoraAppId,
         rtmUid: config.rtmUid,
         rtmToken: config.rtmToken,
-        // agoraRestToken: config.agoraRestFullToken,
         platform: 'web',
         logLevel: '' as any,
         logDirectoryPath: '',
@@ -255,13 +255,17 @@ export class AppStore {
         ...roomInfoParams!
       })
     }
-
     if (config.enableLog) {
       EduManager.enableDebugLog(true);
     }
 
     this.mediaStore = new MediaStore(this)
     this.uiStore = new UIStore(this)
+
+    if (language) {
+      this.uiStore.setLanguage(language)
+    }
+
     this.boardStore = new BoardStore(this)
     this.recordingStore = new RecordingStore(this)
     this.roomStore = new RoomStore(this)
@@ -296,6 +300,7 @@ export class AppStore {
         roomUuid: '',
         ...this.params.roomInfoParams
       },
+      language: this.params.language,
       config: {
         agoraAppId: this.params.config.agoraAppId,
         agoraNetlessAppId: this.params.config.agoraNetlessAppId,

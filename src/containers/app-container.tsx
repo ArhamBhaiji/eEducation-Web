@@ -6,8 +6,8 @@ import { AppStore, AppStoreConfigParams } from '@/stores/app';
 import { Provider } from 'mobx-react';
 import { Route, HashRouter, Switch, Redirect } from 'react-router-dom';
 import ThemeContainer from '../containers/theme-container';
-import { DelegateType } from '@/edu-sdk';
 import { RoomParameters } from '@/edu-sdk/declare';
+import { LanguageEnum } from '@/edu-sdk';
 export interface RouteContainerProps {
   routes: string[]
   mainPath?: string
@@ -81,21 +81,21 @@ type GenAppContainerProps = {
   appConfig: AppStoreConfigParams
   roomConfig?: RoomParameters
   resetRoomInfo: boolean
-  forwardWire?: DelegateType
   basename?: string
 }
 
 type GenAppComponentProps = Pick<AppContainerComponentProps, "routes" | "basename">
 
-export const GenAppContainer = ({globalId, forwardWire, resetRoomInfo, ...config}: GenAppContainerProps) => {
+export const GenAppContainer = ({globalId, resetRoomInfo, ...config}: GenAppContainerProps) => {
   const appStore = new AppStore({
     config: config.appConfig,
     roomInfoParams: config.roomConfig,
+    language: "",
     resetRoomInfo
   })
-  if (forwardWire) {
-    forwardWire.delegate = appStore
-  }
+  // if (forwardWire) {
+  //   forwardWire.delegate = appStore
+  // }
   //@ts-ignore
   window[globalId] = appStore
   return (props: GenAppComponentProps) => (

@@ -142,7 +142,7 @@ export const HomePage = observer(() => {
   }
 
   return (
-    <div className={`flex-container ${uiStore.isElectron ? 'draggable' : 'home-cover-web' }`}>
+    <div className={`flex-container home-cover-web`}>
       {uiStore.isElectron ? null : 
       <div className="web-menu">
         <div className="web-menu-container">
@@ -168,7 +168,7 @@ export const HomePage = observer(() => {
                 value={uiStore.language.match(/^zh/) ? 0 : 1}
                 onChange={(evt: any) => {
                   const value = evt.target.value;
-                  window.location.reload()
+                  // window.location.reload()
                   if (value === 0) {
                     uiStore.setLanguage('zh-CN');
                   } else {
@@ -205,14 +205,14 @@ export const HomePage = observer(() => {
                     <CustomIcon className="icon-setting" onClick={handleSetting}/>
                   </span>
                 </Tooltip>
-                <div className="icon-container">
+                {/* <div className="icon-container">
                   <CustomIcon className="icon-minimum" onClick={() => {
                     uiStore.windowMinimum()
                   }}/>
                   <CustomIcon className="icon-close" onClick={() => {
                     uiStore.windowClose()
                   }}/>
-                </div>
+                </div> */}
             </>
             }
           </div>

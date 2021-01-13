@@ -1,13 +1,38 @@
 import { isEmpty } from "lodash";
 
+type AppStorage = Storage | MemoryStorage
+
+class MemoryStorage {
+  constructor(
+    private readonly _storage = new Map<string, string>()
+  ) {
+  }
+
+  getItem(name: string) {
+    return this._storage.get(name)
+  }
+
+  setItem(name: string, value: string) {
+    this._storage.set(name, value)
+  }
+
+  removeItem(name: string) {
+    this._storage.delete(name)
+  }
+}
+
 export class CustomStorage {
 
-  private storage: Storage;
+  private storage: AppStorage;
 
   languageKey: string = 'demo_language'
 
   constructor() {
-    this.storage = window.sessionStorage;
+    this.storage = new MemoryStorage();
+  }
+
+  useSessionStorage() {
+    this.storage = window.sessionStorage
   }
 
   read(key: string): any {
@@ -64,5 +89,3 @@ export class CustomStorage {
 }
 
 export const GlobalStorage = new CustomStorage();
-// @ts-ignore
-window.GlobalStorage = GlobalStorage;

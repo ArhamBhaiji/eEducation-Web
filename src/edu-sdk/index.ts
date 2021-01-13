@@ -73,6 +73,7 @@ const sdkConfig: SDKConfig = {
   sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`
 }
 
+export type LanguageEnum = "" | "en" | "zh"
 
 export type LaunchOption = {
   token: string
@@ -86,6 +87,7 @@ export type LaunchOption = {
   pretest: boolean
   rtmUid: string
   rtmToken: string
+  language: LanguageEnum
 }
 
 export type ReplayOption = {
@@ -99,6 +101,7 @@ export type ReplayOption = {
   listener: ListenerCallback
   rtmUid: string
   rtmToken: string
+  language: LanguageEnum
 }
 
 export type DelegateType = {
@@ -217,7 +220,6 @@ export class AgoraEduSDK {
         config: {
           agoraAppId: sdkConfig.configParams.appId,
           agoraNetlessAppId: data.netless.appId,
-          // agoraRestFullToken: window.btoa(`${data.customerId}:${data.customerCertificate}`),
           enableLog: true,
           sdkDomain: sdkConfig.sdkDomain,
           oss: {
@@ -231,6 +233,7 @@ export class AgoraEduSDK {
           rtmUid: option.rtmUid,
           rtmToken: option.rtmToken,
         },
+        language: option.language,
         roomInfoParams: {
           roomUuid: option.roomUuid,
           userUuid: option.userUuid,
@@ -277,6 +280,7 @@ export class AgoraEduSDK {
         rtmUid: option.rtmUid,
         rtmToken: option.rtmToken,
       },
+      language: option.language,
       replayConfig: {
         whiteboardUrl: option.whiteboardUrl,
         logoUrl: option.logoUrl,

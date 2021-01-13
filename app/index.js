@@ -51,12 +51,12 @@ async function createWindow() {
 
 
     mainWindow = new BrowserWindow({
-      frame: false,
-      width: 700,
-      height: 500,
+      frame: true,
+      width: 1035,
+      height: 700,
       center: true,
-      resizable: false,
-      show: false,
+      // resizable: false,
+      // show: true,
       webPreferences: {
         autoplayPolicy: 'no-user-gesture-required',
         nodeIntegration: true,
