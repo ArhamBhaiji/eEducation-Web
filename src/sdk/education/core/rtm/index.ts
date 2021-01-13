@@ -211,7 +211,7 @@ export class RTMWrapper extends EventEmitter {
       this.channels[config.channelName] = channel
     } catch (err) {
       if(err.code === 4) {
-        err.message = ': your network is poor'
+        err.message = ': you have poor internet connection, please try again'
       }
       throw err
     }

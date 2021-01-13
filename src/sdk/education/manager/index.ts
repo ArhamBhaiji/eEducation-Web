@@ -167,7 +167,7 @@ export class EduManager extends EventEmitter {
       this._rtmWrapper = rtmWrapper
     } catch (err) {
       if(err.code === 9) {
-        err.message = ': your network is poor'
+        err.message = ': you have poor internet connection, please try again'
       }
       throw err
     }
