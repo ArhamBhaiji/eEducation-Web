@@ -166,6 +166,9 @@ export class EduManager extends EventEmitter {
       EduLogger.debug(`login userUuid: ${userUuid} success`)
       this._rtmWrapper = rtmWrapper
     } catch (err) {
+      if(err.code === 9) {
+        err.message = ': your network is poor'
+      }
       throw err
     }
   }

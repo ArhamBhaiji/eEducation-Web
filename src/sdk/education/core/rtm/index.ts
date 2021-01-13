@@ -210,6 +210,9 @@ export class RTMWrapper extends EventEmitter {
       await channel.join()
       this.channels[config.channelName] = channel
     } catch (err) {
+      if(err.code === 4) {
+        err.message = ': your network is poor'
+      }
       throw err
     }
   }
