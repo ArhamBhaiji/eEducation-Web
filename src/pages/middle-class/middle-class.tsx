@@ -70,8 +70,8 @@ export const MiddleClass = observer(() => {
   const {grantUsers} = boardStore
 
   const sendMessage = async () => {
-    await middleRoomStore.sendMessage(chat)
     setChat('')
+    await middleRoomStore.sendMessage(chat)
   }
 
   const handleClick = useCallback(async (evt: any, id: string, type: string) => {
