@@ -207,7 +207,7 @@ export class RoomStore extends SimpleInterval {
         roomType: +this.roomInfo.roomType as number,
         userUuid: this.roomInfo.userUuid
       })
-      EduLogger.info(" checkInResult:  ", JSON.stringify(checkInResult))
+      EduLogger.info("## classroom ##: checkIn:  ", JSON.stringify(checkInResult))
       if (checkInResult.state === EduClassroomStateEnum.end) {
         try {
           await this.appStore.releaseRoom()
@@ -471,7 +471,7 @@ export class RoomStore extends SimpleInterval {
       // 教室更新
       roomManager.on('classroom-property-updated', async (classroom: any) => {
         await this.sceneStore.mutex.dispatch<Promise<void>>(async () => {
-          BizLogger.info("classroom-property-updated", classroom)
+          BizLogger.info("## classroom ##: ", JSON.stringify(classroom))
           const classState = get(classroom, 'roomStatus.courseState')
           if (classState === EduClassroomStateEnum.end) {
             await this.appStore.releaseRoom()

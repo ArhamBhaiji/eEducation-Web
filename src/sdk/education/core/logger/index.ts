@@ -122,6 +122,7 @@ export class EduLogger {
   }
 
   static async uploadElectronLog(roomId: any) {
+    //@ts-ignore
     let file = await window.doGzip();
     const res = await this.logUploader.uploadZipLogFile(
       roomId,

@@ -854,10 +854,10 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
   }
 
   changePlaybackVolume(volume: number) {
-    this.client.localTracks.forEach((t: ILocalTrack) => {
+    this.client?.localTracks?.forEach((t: ILocalTrack) => {
       t.trackMediaType === 'audio' && (t as ILocalAudioTrack).setVolume(volume)
     })
-    this.client.remoteUsers.forEach((user: IAgoraRTCRemoteUser) => {
+    this.client?.remoteUsers?.forEach((user: IAgoraRTCRemoteUser) => {
       user.audioTrack?.setVolume(volume)
     })
   }

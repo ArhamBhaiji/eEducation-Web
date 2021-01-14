@@ -121,6 +121,7 @@ const BasicUploadButton = observer(() => {
       })
       setLock(false)
     } catch (err) {
+      console.log(err)
       uiStore.addToast(t('upload_log_failed'))
       setLock(false)
     }
