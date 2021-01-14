@@ -41,7 +41,7 @@ const StudentApplyCard = observer((props: StudentApplyCardProps) => {
         <Check onClick={() => {
           const count = uiStore.appStore.middleRoomStore.groups[0].studentStreams.length
           if (count >= 6) {
-            uiStore.addToast('up to 6 students at the same time')
+            uiStore.addToast(t('toast.covideo_student_max'))
           } else {
             uiStore.showDialog({
               type: 'allowConfirm',

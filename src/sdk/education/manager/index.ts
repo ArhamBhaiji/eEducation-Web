@@ -8,6 +8,7 @@ import { EduClassroomManager } from '../room/edu-classroom-manager';
 import { AgoraEduApi } from '../core/services/edu-api';
 import { EduConfiguration } from '../interfaces';
 import { EduClassroomDataController } from '../room/edu-classroom-data-controller';
+import { t } from '@/i18n';
 
 export type ClassroomInitParams = {
   roomUuid: string
@@ -167,7 +168,7 @@ export class EduManager extends EventEmitter {
       this._rtmWrapper = rtmWrapper
     } catch (err) {
       if(err.code === 9) {
-        err.message = ': you have poor internet connection, please try again'
+        err.message = ': ' + t('toast.rtm_timeout')
       }
       throw err
     }

@@ -4,6 +4,7 @@ import AgoraRTM from 'agora-rtm-sdk'
 import { RtmLogLevel } from './constants';
 import { get } from 'lodash';
 import { EduLogger } from '../logger';
+import { t } from '@/i18n';
 
 //@ts-ignore
 AgoraRTM.setParameter({ 
@@ -211,7 +212,7 @@ export class RTMWrapper extends EventEmitter {
       this.channels[config.channelName] = channel
     } catch (err) {
       if(err.code === 4) {
-        err.message = ': you have poor internet connection, please try again'
+        err.message = ': ' + t('toast.rtm_timeout')
       }
       throw err
     }

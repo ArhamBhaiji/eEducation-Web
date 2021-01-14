@@ -479,12 +479,12 @@ export class MiddleRoomStore extends SimpleInterval {
       })
       // 监听本地用户是否被删除
       roomManager.on('local-user-removed', async (evt: any) => {
-        const {user, type} = evt
-        if (type === 2 && this.roomInfo.userRole === 'student') {
-          BizLogger.info(`[demo] local-user-removed`, JSON.stringify(user))
-          this.appStore.uiStore.addToast(t('toast.kick_by_teacher'))
-          this.quit = true
-        }
+        // const {user, type} = evt
+        // if (type === 2 && this.roomInfo.userRole === 'student') {
+        //   BizLogger.info(`[demo] local-user-removed`, JSON.stringify(user))
+        //   this.appStore.uiStore.addToast(t('toast.kick_by_teacher'))
+        //   this.quit = true
+        // }
         // await this.leave()
       })
       // 本地流加入

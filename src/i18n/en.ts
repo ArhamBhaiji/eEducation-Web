@@ -91,6 +91,8 @@ const en = {
     'unlocked_board': 'The whiteboard already unlocked',
   },
   'toast': {
+    'rtm_timeout': 'you have poor internet connection, please try again',
+    'covideo_student_max': 'up to 6 students at the same time',
     'kick_by_teacher': 'Kicked by teacher',
     'upload_log_failure': 'Upload Log Failure，ErrorName: {reason}，see more details in devtool',
     'show_log_id': `Report your log ID: {reason}`,
