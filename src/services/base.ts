@@ -50,6 +50,7 @@ export abstract class ApiBase {
       data,
       full_url,
       url,
+      restToken
     } = params
     const opts: any = {
       method,
@@ -68,6 +69,14 @@ export abstract class ApiBase {
       if (this.userToken) {
         opts.headers['token'] = this.userToken
       }
+    }
+
+    if (restToken) {
+      delete opts.headers['x-agora-token']
+      delete opts.headers['x-agora-uid']
+      Object.assign(opts.headers, {
+        'authorization': `Basic ${restToken}`
+      })
     }
     let resp: any;
     if (full_url) {

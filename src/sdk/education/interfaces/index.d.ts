@@ -252,6 +252,7 @@ export interface AgoraFetchParams {
   token?: string
   full_url?: string
   type?: string
+  restToken?: string
 }
 
 export interface PeerMessageParams {

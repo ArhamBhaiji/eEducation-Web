@@ -232,60 +232,60 @@ async function createWindow() {
       mainWindow.setMenu(menu);
     }
 
-    ipcMain.on('resize-window', (event, reply) => {
-      const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow
+    // ipcMain.on('resize-window', (event, reply) => {
+    //   const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow
       
-      if (platform === 'darwin') {
-        if (reply.width === 700) {
-          currentWindow.setResizable(true);
-          currentWindow.setFullScreen(false);
-          currentWindow.setContentSize(reply.width, reply.height, false);
-          currentWindow.center();
-          currentWindow.setResizable(false);
-          return;
-        }
-      }
+    //   if (platform === 'darwin') {
+    //     if (reply.width === 700) {
+    //       currentWindow.setResizable(true);
+    //       currentWindow.setFullScreen(false);
+    //       currentWindow.setContentSize(reply.width, reply.height, false);
+    //       currentWindow.center();
+    //       currentWindow.setResizable(false);
+    //       return;
+    //     }
+    //   }
 
-      if (platform === 'win32') {
-        if (reply.width === 700) {
-          if (currentWindow.isFullScreen()) {
-            currentWindow.setResizable(true);
-            currentWindow.setFullScreen(false);
-            currentWindow.setResizable(false);
-          }
-        }
-      }
+    //   if (platform === 'win32') {
+    //     if (reply.width === 700) {
+    //       if (currentWindow.isFullScreen()) {
+    //         currentWindow.setResizable(true);
+    //         currentWindow.setFullScreen(false);
+    //         currentWindow.setResizable(false);
+    //       }
+    //     }
+    //   }
 
-      currentWindow.setContentSize(reply.width, reply.height, false);
-      currentWindow.center();
-    });
+    //   currentWindow.setContentSize(reply.width, reply.height, false);
+    //   currentWindow.center();
+    // });
 
-    ipcMain.on('minimum', (event) => {
-      const currentWindow = BrowserWindow.getFocusedWindow()
-      currentWindow.minimize();
-    });
+    // ipcMain.on('minimum', (event) => {
+    //   const currentWindow = BrowserWindow.getFocusedWindow()
+    //   currentWindow.minimize();
+    // });
 
-    ipcMain.on('maximum', () => {
-      const currentWindow = BrowserWindow.getFocusedWindow()
+    // ipcMain.on('maximum', () => {
+    //   const currentWindow = BrowserWindow.getFocusedWindow()
 
-      if (platform === 'win32') {
-        const fullscreen = currentWindow.isFullScreen();
-        if (fullscreen) {
-          currentWindow.setResizable(true);
-          currentWindow.setFullScreen(false);
-          currentWindow.setResizable(false);
-        } else {
-          currentWindow.setResizable(true);
-          currentWindow.setFullScreen(true);
-          currentWindow.setResizable(false);
-        }
-      }
+    //   if (platform === 'win32') {
+    //     const fullscreen = currentWindow.isFullScreen();
+    //     if (fullscreen) {
+    //       currentWindow.setResizable(true);
+    //       currentWindow.setFullScreen(false);
+    //       currentWindow.setResizable(false);
+    //     } else {
+    //       currentWindow.setResizable(true);
+    //       currentWindow.setFullScreen(true);
+    //       currentWindow.setResizable(false);
+    //     }
+    //   }
 
-      if (platform === 'darwin') {
-        const fullscreen = currentWindow.isFullScreen();
-        currentWindow.setFullScreen(!fullscreen);
-      }
-    });
+    //   if (platform === 'darwin') {
+    //     const fullscreen = currentWindow.isFullScreen();
+    //     currentWindow.setFullScreen(!fullscreen);
+    //   }
+    // });
 
     ipcMain.on('close', () => {
       const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow
@@ -316,9 +316,9 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    // if (process.platform !== 'darwin') {
       app.quit()
-    }
+    // }
 });
 
 app.on('activate', function () {

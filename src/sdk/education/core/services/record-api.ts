@@ -18,16 +18,17 @@ export class AgoraRecordApi extends ApiBase {
     params: AgoraRecordApiParams
   ) {
     super(params)
-    this.prefix = `${params.sdkDomain}/recording/apps/%app_id`.replace('%app_id', this.appId)
+    this.prefix = `${params.sdkDomain}/edu/apps/%app_id`.replace('%app_id', this.appId)
   }
 
   async queryRoomRecordBy(roomUuid: string) {
     let nextId = 0
     let buffer: any[] = []
     do {
-      const url = nextId > 0 ? `/v1/rooms/${roomUuid}/records?nextId=${nextId}` : `/v1/rooms/${roomUuid}/records`
+      const url = nextId > 0 ? `/v2/rooms/${roomUuid}/records?nextId=${nextId}` : `/v2/rooms/${roomUuid}/records`
       let {data} = await this.fetch({
         url,
+        restToken: 'OGJmMzUzMzM1MjA2NDg1NThhZDFiNzM2Y2ZhNWQyZjE6NzQ1NDIxYzgxYWJiNGFjOWExZmM3YzdlNTBlOTE5OTk=',
         method: 'GET',
       })
       nextId = data.nextId
@@ -41,7 +42,7 @@ export class AgoraRecordApi extends ApiBase {
 
   async startRecording(roomUuid: string) {
     let res = await this.fetch({
-      url: `/v1/rooms/${roomUuid}/records/start`,
+      url: `/v2/rooms/${roomUuid}/records/start`,
       method: 'POST',
       data: {
         "recordingConfig": {
@@ -63,7 +64,7 @@ export class AgoraRecordApi extends ApiBase {
 
   async stopRecording(roomUuid: string, recordId: string) {
     let res = await this.fetch({
-      url: `/v1/rooms/${roomUuid}/records/${recordId}/stop`,
+      url: `/v2/rooms/${roomUuid}/records/${recordId}/stop`,
       method: 'POST',
     })
     return res.data
