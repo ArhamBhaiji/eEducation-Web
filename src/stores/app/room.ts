@@ -111,7 +111,7 @@ export class RoomStore extends SimpleInterval {
   @action
   async sendMessage(message: any) {
     try {
-      await this.roomManager?.userService.sendRoomChatMessage(message)
+      // add chat message first regardless of request response to get better experience
       this.addChatMessage({
         id: this.userUuid,
         ts: +Date.now(),
@@ -119,6 +119,7 @@ export class RoomStore extends SimpleInterval {
         account: this.roomInfo.userName,
         sender: true,
       })
+      await this.roomManager?.userService.sendRoomChatMessage(message)
     } catch (err) {
       this.appStore.uiStore.addToast(t('toast.failed_to_send_chat'))
       BizLogger.warn(err)
