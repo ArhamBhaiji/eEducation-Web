@@ -149,6 +149,8 @@ export class LogUpload {
     })
 
     try {
+      const ossCallbackUrl = `${this.sdkDomain}/monitor/v1/log/oss/callback`
+      console.log("log: ossCallbackUrl ", ossCallbackUrl, " body ", JSON.stringify(callbackBody))
       let res = await ossClient.put(ossKey, file, {
         callback: {
           url: `${this.sdkDomain}/monitor/v1/log/oss/callback`,

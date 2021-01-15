@@ -86,10 +86,11 @@ export class EduLogger {
 
   static logUploader: LogUpload
 
-  static init(appId: string, sdkDomain: string) {
+  static init(appId: string) {
+    console.log("log: sdkDomain")
     this.logUploader = new LogUpload({
       appId,
-      sdkDomain
+      sdkDomain: 'https://api.agora.io'
     })
     if (!this.thread) {
       this.thread = new LogWorker()

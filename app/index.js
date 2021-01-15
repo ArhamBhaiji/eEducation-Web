@@ -11,9 +11,7 @@ const { crashReporter } = require('electron');
 const os = require('os')
 const platform = os.platform()
 const release = os.release()
-const type = os.type() 
-
-const process = require('process');
+const type = os.type()
 // Module to control application life.
 const {app, Menu, netLog} = electron;
 

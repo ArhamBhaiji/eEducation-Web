@@ -105,7 +105,7 @@ export class EduManager extends EventEmitter {
   static enableDebugLog(enable: boolean) {
     this.enable = enable
     if (this.enable) {
-      EduLogger.init(internalEduManagerConfig.appId, internalEduManagerConfig.sdkDomain)
+      EduLogger.init(internalEduManagerConfig.appId)
     }
   }
 

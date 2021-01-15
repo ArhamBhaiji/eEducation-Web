@@ -212,6 +212,11 @@ export class AppStore {
     console.log(" config >>> params: ", {...this.params})
     const {config, roomInfoParams, language} = this.params
 
+    //@ts-ignore
+    // window.rtcEngine.on('error', (evt) => {
+    //   console.log('electron ', evt)
+    // })
+
     if (platform === 'electron') {
       this.eduManager = new EduManager({
         appId: config.agoraAppId,

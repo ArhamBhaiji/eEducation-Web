@@ -98,6 +98,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         code: ret
       })
     }
+    this.init()
     this.client.setChannelProfile(1)
     this.client.enableVideo()
     this.client.enableAudio()
@@ -109,7 +110,6 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       EduLogger.info(`[electron-log-path] set logPath: ${this.logPath}`)
       this.client.setLogFile(this.logPath)
     }
-    this.init()
   }
   muteRemoteVideoByClient(client: any, uid: string, val: boolean): Promise<any> {
     throw new Error('Method not implemented.');
@@ -196,6 +196,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
   }
 
   init() {
+    EduLogger.info("electron start event observer")
     this.client.on('error', (err: any) => {
       this.fire('exception', err)
     })
@@ -429,6 +430,9 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
           code: ret
         })
       }
+      if (this.joined === false) {
+        return
+      }
       ret = this.client.leaveChannel()
       if (ret < 0) {
         throw new GenericErrorWrapper({
@@ -436,6 +440,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
           code: ret
         })
       }
+      this.joined = false
       return
     } catch(err) {
       throw new GenericErrorWrapper(err)

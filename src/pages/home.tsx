@@ -8,6 +8,7 @@ import {FormInput} from '@/components/form-input';
 import {FormSelect} from '@/components/form-select';
 import {LangSelect} from '@/components/lang-select';
 import {useHistory} from 'react-router-dom';
+import { Loading } from '@/components/loading';
 import {GithubIcon} from '@/components/github-icon';
 import { t } from '../i18n';
 import { useUIStore, useRoomStore, useAppStore } from '@/hooks';
@@ -19,6 +20,7 @@ import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 import {observer} from 'mobx-react';
 import './home.scss';
 import { homeApi } from '@/services/home-api';
+import { BizLogger } from '@/utils/biz-logger';
 
 const useStyles = makeStyles ((theme: Theme) => ({
   formControl: {
@@ -95,6 +97,8 @@ export const HomePage = observer(() => {
 
   const [required, setRequired] = useState<any>({} as any);
 
+  const [loading, setLoading] = useState<boolean>(false)
+
   const handleSubmit = async () => {
     if (!session.roomName) {
       setRequired({...required, roomName: t('home.missing_room_name')});
@@ -120,29 +124,36 @@ export const HomePage = observer(() => {
     const roomUuid = `${session.roomName}${roomType}`;
     const uid = `${session.userName}${userRole}`;
 
-    let {userUuid, rtmToken} = await homeApi.login(uid)
+    try {
+      setLoading(true)
+      let {userUuid, rtmToken} = await homeApi.login(uid)
+      setLoading(false)
 
-    appStore.setRoomInfo({
-      rtmUid: userUuid,
-      rtmToken: rtmToken,
-      roomType: roomType,
-      roomName: session.roomName,
-      userName: session.userName,
-      userRole: userRole,
-      userUuid: `${userUuid}`,
-      roomUuid: `${roomUuid}`,
-    })
-    const path = roomTypes[session.roomType].path
-
-    if (userRole === EduRoleTypeEnum.assistant) {
-      history.push(`/breakout-class/assistant/courses`)
-    } else {
-      history.push(`/classroom/${path}`)
+      appStore.setRoomInfo({
+        rtmUid: userUuid,
+        rtmToken: rtmToken,
+        roomType: roomType,
+        roomName: session.roomName,
+        userName: session.userName,
+        userRole: userRole,
+        userUuid: `${userUuid}`,
+        roomUuid: `${roomUuid}`,
+      })
+      const path = roomTypes[session.roomType].path
+      if (userRole === EduRoleTypeEnum.assistant) {
+        history.push(`/breakout-class/assistant/courses`)
+      } else {
+        history.push(`/classroom/${path}`)
+      }
+    } catch (err) {
+      BizLogger.warn(JSON.stringify(err))
+      setLoading(false)
     }
   }
 
   return (
     <div className={`flex-container home-cover-web`}>
+      {loading ? <Loading /> : null}
       {uiStore.isElectron ? null : 
       <div className="web-menu">
         <div className="web-menu-container">
