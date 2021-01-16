@@ -153,7 +153,8 @@ export class RoomStore extends SimpleInterval {
       })
     } catch (err) {
       this.appStore.uiStore.addToast(t('toast.failed_to_send_chat'))
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -228,7 +229,8 @@ export class RoomStore extends SimpleInterval {
         boardId: checkInResult.board.boardId,
         boardToken: checkInResult.board.boardToken,
       }).catch((err) => {
-        BizLogger.warn(err)
+        const error = new GenericErrorWrapper(err)
+        BizLogger.warn(`${error}`)
         this.appStore.uiStore.addToast(t('toast.failed_to_join_board'))
       })
       this.appStore.uiStore.stopLoading()
@@ -265,9 +267,10 @@ export class RoomStore extends SimpleInterval {
               BizLogger.info(`[demo] tag: ${tag}, [${Date.now()}], main stream closed local-stream-removed, `, JSON.stringify(evt))
             }
             BizLogger.info("[demo] local-stream-removed emit done", evt)
-          } catch (error) {
+          } catch (err) {
             BizLogger.error(`[demo] local-stream-removed async handler failed`)
-            BizLogger.error(error)
+            const error = new GenericErrorWrapper(err)
+            BizLogger.error(`${error}`)
           }
         })
       })
@@ -407,7 +410,8 @@ export class RoomStore extends SimpleInterval {
         try {
           return JSON.parse(str)
         } catch(err) {
-          BizLogger.warn(err)
+          const error = new GenericErrorWrapper(err)
+          BizLogger.warn(`${error}`)
           return null
         }
       }
@@ -438,7 +442,8 @@ export class RoomStore extends SimpleInterval {
                   this.appStore.uiStore.addToast(t('toast.co_video_close_success'))
                 } catch (err) {
                   this.appStore.uiStore.addToast(t('toast.co_video_close_failed'))
-                  BizLogger.warn(err)
+                  const error = new GenericErrorWrapper(err)
+                  BizLogger.warn(`${error}`)
                 }
               }
               if (type === PeerInviteEnum.teacherAccept 
@@ -456,15 +461,18 @@ export class RoomStore extends SimpleInterval {
                     await this.sceneStore.openMicrophone()
                   }
                 } catch (err) {
-                  BizLogger.warn('published failed', err) 
-                  throw err
+                  // BizLogger.warn('published failed', err) 
+                  const error = new GenericErrorWrapper(err)
+                  BizLogger.error(`published failed:${error}`)
+                  throw error
                 }
                 this.appStore.uiStore.addToast(t('toast.publish_rtc_success'))
               }
             }
-          } catch (error) {
+          } catch (err) {
             BizLogger.error(`[demo] user-message async handler failed`)
-            BizLogger.error(error)
+            const error = new GenericErrorWrapper(err)
+            BizLogger.error(`${error}`)
           }
         })
       })
@@ -629,7 +637,8 @@ export class RoomStore extends SimpleInterval {
           }
         } catch (err) {
           this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.message}`)
-          BizLogger.warn(err)
+          const error = new GenericErrorWrapper(err)
+          BizLogger.warn(`${error}`)
         }
       }
   
@@ -807,7 +816,8 @@ export class RoomStore extends SimpleInterval {
       this.appStore.uiStore.updateLastSeqId(0)
     } catch (err) {
       this.reset()
-      BizLogger.error(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.error(`${error}`)
     }
   }
 

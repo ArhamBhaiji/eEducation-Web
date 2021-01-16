@@ -863,6 +863,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
   }
 
   async openTestCamera(option?: CameraOption): Promise<any> {
+    EduLogger.info(" test camera", JSON.stringify(option))
     if (this.cameraTestTrack) throw 'camera test track already exists'
     if (!option) {
       this.cameraTestTrack = await this.agoraWebSdk.createCameraVideoTrack()
@@ -872,6 +873,7 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
         this.fire('track-ended', {video: true})
       })
     } else {
+      EduLogger.info("open test camera create track", JSON.stringify(option))
       this.cameraTestTrack = await this.agoraWebSdk.createCameraVideoTrack({
         cameraId: option.deviceId,
         encoderConfig: option.encoderConfig
@@ -894,10 +896,17 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
   
   async changeTestCamera(deviceId: string): Promise<any> {
     if (this.cameraTestTrack) {
+      EduLogger.info("change test camera try setDevice ", deviceId)
       await this.cameraTestTrack.setDevice(deviceId)
+      EduLogger.info("change test camera setDevice success", deviceId)
+      EduLogger.info("change test camera try checkVideoTrackIsActive", deviceId)
       await this.agoraWebSdk.checkVideoTrackIsActive(this.cameraTestTrack as ILocalVideoTrack)
+      EduLogger.info("change test camera checkVideoTrackIsActive success", deviceId)
     } else {
-      throw 'no camera test track found'
+      EduLogger.info("change test camera try open test camera ", deviceId)
+      await this.openTestCamera({
+        deviceId
+      })
     }
   }
   
@@ -946,7 +955,10 @@ export class AgoraWebRtcWrapper extends EventEmitter implements IWebRTCWrapper {
       await this.microphoneTestTrack.setDevice(deviceId)
       await this.agoraWebSdk.checkAudioTrackIsActive(this.microphoneTestTrack as ILocalAudioTrack)
     } else {
-      throw 'no microphone test track found'
+      await this.openTestMicrophone({
+        deviceId
+      })
+      // throw 'no microphone test track found'
     }
   }
 }

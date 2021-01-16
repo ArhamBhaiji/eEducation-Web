@@ -22,6 +22,7 @@ import { t } from '@/i18n';
 import { DialogType } from '@/components/dialog';
 import { BizLogger } from '@/utils/biz-logger';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
+import { GenericErrorWrapper } from '@/sdk/education/core/utils/generic-error';
 
 const delay = 2000
 
@@ -62,17 +63,17 @@ export type EduMediaStream = {
 }
 
 export class SceneStore extends SimpleInterval {
-  @observable
-  cameraLabel: string = '';
+  // @observable
+  // cameraLabel: string = '';
 
-  @observable
-  microphoneLabel: string = '';
+  // @observable
+  // microphoneLabel: string = '';
 
-  @observable
-  _cameraId: string = '';
+  // @observable
+  // _cameraId: string = '';
 
-  @observable
-  _microphoneId: string = '';
+  // @observable
+  // _microphoneId: string = '';
 
   @observable
   resolution: string = '480p_1'
@@ -173,10 +174,10 @@ export class SceneStore extends SimpleInterval {
   @action
   reset() {
     this.mediaService.reset()
-    this.cameraLabel = '';
-    this.microphoneLabel = '';
-    this._cameraId = '';
-    this._microphoneId = '';
+    // this.cameraLabel = '';
+    // this.microphoneLabel = '';
+    // this._cameraId = '';
+    // this._microphoneId = '';
     this.resolution = '480_p1';
     this._microphoneTrack = undefined;
     this._cameraRenderer = undefined;
@@ -367,7 +368,8 @@ export class SceneStore extends SimpleInterval {
       this.removeScreenShareWindow()
       this.sharing = true
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
       this.waitingShare = false
       this.appStore.uiStore.addToast(t('toast.failed_to_initiate_screen_sharing') + `${err.message}`)
     }
@@ -417,17 +419,18 @@ export class SceneStore extends SimpleInterval {
     }
     this.lockCamera()
     try {
-      const deviceId = this._cameraId
+      const deviceId = this.appStore.deviceStore.cameraId
       await this.mediaService.openCamera({deviceId})
       this._cameraRenderer = this.mediaService.cameraRenderer
-      this.cameraLabel = this.mediaService.getCameraLabel()
-      this._cameraId = this.cameraId
+      // this.cameraLabel = this.mediaService.getCameraLabel()
+      // this._cameraId = this.cameraId
       BizLogger.info('[demo] action in openCamera >>> openCamera')
       this.unLockCamera()
     } catch (err) {
       this.unLockCamera()
       BizLogger.info('[demo] action in openCamera >>> openCamera')
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
       throw err
     }
   }
@@ -503,17 +506,18 @@ export class SceneStore extends SimpleInterval {
     }
     this.lockMicrophone()
     try {
-      const deviceId = this._microphoneId
+      const deviceId = this.appStore.deviceStore.microphoneId
       await this.mediaService.openMicrophone({deviceId})
       this._microphoneTrack = this.mediaService.microphoneTrack
-      this.microphoneLabel = this.mediaService.getMicrophoneLabel()
+      // this.microphoneLabel = this.mediaService.getMicrophoneLabel()
       BizLogger.info('[demo] action in openMicrophone >>> openMicrophone')
-      this._microphoneId = this.microphoneId
+      // this._microphoneId = this.microphoneId
       this.unLockMicrophone()
     } catch (err) {
       this.unLockMicrophone()
       BizLogger.info('[demo] action in openMicrophone >>> openMicrophone')
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
       throw err
     }
   }
@@ -581,7 +585,8 @@ export class SceneStore extends SimpleInterval {
         }
       }
       BizLogger.info('SCREEN-SHARE ERROR ', err)
-      BizLogger.error(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     } finally {
       this.waitingShare = false
     }
@@ -720,7 +725,8 @@ export class SceneStore extends SimpleInterval {
       this.joiningRTC = true
     } catch (err) {
       this.appStore.uiStore.addToast(t('toast.failed_to_join_rtc_please_refresh_and_try_again'))
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
       throw err
     }
   }
@@ -735,7 +741,8 @@ export class SceneStore extends SimpleInterval {
       this.appStore.reset()
     } catch (err) {
       this.appStore.uiStore.addToast(t('toast.failed_to_leave_rtc'))
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1048,6 +1055,9 @@ export class SceneStore extends SimpleInterval {
 
   async startOrStopRecording(){
     try {
+      if (this.recording) {
+        return
+      }
       this.recording = true
       if (this.isRecording) {
         await this.stopRecording()

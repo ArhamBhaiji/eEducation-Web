@@ -1,3 +1,4 @@
+import { GenericErrorWrapper } from "@/sdk/education/core/utils/generic-error";
 import { HttpClient } from "@/sdk/education/core/utils/http-client";
 import { AgoraFetchParams } from "@/sdk/education/interfaces";
 
@@ -85,7 +86,7 @@ export abstract class ApiBase {
       resp = await HttpClient(`${this.prefix}${url}`, opts);
     }
     if (resp.code !== 0) {
-      throw {msg: resp.msg}
+      throw new GenericErrorWrapper({message: resp.msg})
     }
     return resp
   }

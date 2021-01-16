@@ -487,6 +487,17 @@ export class MediaService extends EventEmitter implements IMediaService {
   async changeTestCamera(deviceId: string): Promise<any> {
     if (this.isWeb) {
       await this.sdkWrapper.changeTestCamera(deviceId)
+      if (!this.cameraTestRenderer) {
+        this.cameraTestRenderer = new LocalUserRenderer({
+          context: this,
+          uid: 0,
+          channel: 0,
+          sourceType: 'default',
+          videoTrack: this.web.cameraTestTrack
+        })
+      } else {
+        this.cameraTestRenderer.videoTrack = this.web.cameraTestTrack
+      }
     }
     if (this.isElectron) {
       await this.sdkWrapper.changeTestCamera(deviceId)

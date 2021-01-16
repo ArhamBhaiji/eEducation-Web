@@ -1,6 +1,7 @@
 import { get } from "lodash"
 import { EduStreamData, EduCustomMessage, EduTextMessage, EduUserData } from "../../interfaces/index.d"
 import { EduLogger } from "../logger"
+import { GenericErrorWrapper } from "../utils/generic-error"
 
 export class MessageSerializer {
 
@@ -8,7 +9,7 @@ export class MessageSerializer {
     try {
       return JSON.parse(message)
     } catch (err) {
-      EduLogger.warn(err)
+      EduLogger.warn(`${new GenericErrorWrapper(err)}`)
       return null
     }
   }

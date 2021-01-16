@@ -34,6 +34,7 @@ import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 import { AgoraEduEvent } from '@/edu-sdk';
 import { isEmpty } from 'lodash';
 import { eduSDKApi } from '@/services/edu-sdk-api';
+import { MemoryStorage } from '@/utils/custom-storage';
 
 type RoomInfoParams = {
   roomName: string
@@ -86,8 +87,12 @@ export type RoomInfo = {
   groupUuid?: string
 }
 
-export class AppStore {
+export type DeviceInfo = {
+  cameraName: string
+  microphoneName: string
+}
 
+export class AppStore {
   // stores
   uiStore!: UIStore;
   boardStore!: BoardStore;
@@ -129,6 +134,9 @@ export class AppStore {
     return this.mediaService.sdkWrapper instanceof AgoraElectronRTCWrapper
   }
 
+  @observable
+  deviceInfo!: DeviceInfo
+
   private load() {
     const storage = GlobalStorage.read('agora_edu_room')
     if (storage || !isEmpty(storage)) {
@@ -147,6 +155,20 @@ export class AppStore {
         userUuid: "",
         rtmUid: "",
         rtmToken: "",
+      }
+    }
+
+    const deviceStorage = GlobalStorage.read('agora_edu_device')
+    if (deviceStorage || !isEmpty(deviceStorage)) {
+      this.deviceInfo = deviceStorage.deviceInfo
+      this.updateDeviceInfo({
+        cameraName: this.deviceInfo.cameraName,
+        microphoneName: this.deviceInfo.microphoneName,
+      })
+    } else {
+      this.deviceInfo = {
+        cameraName: "",
+        microphoneName: ""
       }
     }
   }
@@ -251,6 +273,9 @@ export class AppStore {
         const data = toJS(this)
         GlobalStorage.save('agora_edu_room', {
           roomInfo: data.roomInfo,
+        })
+        GlobalStorage.save('agora_edu_device', {
+          deviceInfo: data.deviceInfo
         })
       })
     } else {
@@ -359,6 +384,15 @@ export class AppStore {
   }
 
   @action
+  updateDeviceInfo(info: {
+    cameraName: string
+    microphoneName: string
+  }) {
+    this.deviceInfo.cameraName = info.cameraName
+    this.deviceInfo.microphoneName = info.microphoneName
+  }
+
+  @action
   updateRtmInfo(info: {
     rtmUid: string
     rtmToken: string
@@ -448,7 +482,8 @@ export class AppStore {
         this.uiStore.addToast(t('toast.failed_to_enable_screen_sharing') + `${err.message}`)
       }
       BizLogger.info('SCREEN-SHARE ERROR ', err)
-      BizLogger.error(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.error(`${error}`)
     } finally {
       this.waitingShare = false
     }
@@ -549,7 +584,8 @@ export class AppStore {
       this.removeScreenShareWindow()
       this.sharing = true
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
       // if (!this.mediaService.screenRenderer) {
       //   await this.mediaService.stopScreenShare()
       // }

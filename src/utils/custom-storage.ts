@@ -2,7 +2,7 @@ import { isEmpty } from "lodash";
 
 type AppStorage = Storage | MemoryStorage
 
-class MemoryStorage {
+export class MemoryStorage {
   constructor(
     private readonly _storage = new Map<string, string>()
   ) {

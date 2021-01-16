@@ -40,6 +40,10 @@ export const routesMap: Record<string, AppRouteComponent> = {
     path: '/replay/record/:roomUuid',
     component: () => <ReplayPage />
   },
+  'recordPage': {
+    path: '/record/:roomUuid',
+    component: () => <ReplayPage />
+  },
   'middleClass': {
     path: '/classroom/middle-class',
     component: () => <MiddleRoomPage />

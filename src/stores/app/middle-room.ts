@@ -16,6 +16,7 @@ import { BizLogger } from '@/utils/biz-logger';
 import { EduBoardService } from '@/sdk/board/edu-board-service';
 import { EduRecordService } from '@/sdk/record/edu-record-service';
 import { CustomPeerApply, UnmuteMediaEnum } from './scene';
+import { GenericErrorWrapper } from '@/sdk/education/core/utils/generic-error';
 
 type VideoMarqueeItem = {
   mainStream: EduMediaStream | null
@@ -415,9 +416,10 @@ export class MiddleRoomStore extends SimpleInterval {
               BizLogger.info(`[demo] tag: ${tag}, [${Date.now()}], main stream closed local-stream-removed, `, JSON.stringify(evt))
             }
             BizLogger.info("[demo] local-stream-removed emit done", evt)
-          } catch (error) {
+          } catch (err) {
             BizLogger.error(`[demo] local-stream-removed async handler failed`)
-            BizLogger.error(error)
+            const error = new GenericErrorWrapper(err)
+            BizLogger.error(`${error}`)
           }
         })
       })
@@ -901,7 +903,8 @@ export class MiddleRoomStore extends SimpleInterval {
           }
         } catch (err) {
           this.appStore.uiStore.addToast(t('toast.media_method_call_failed') + `: ${err.message}`)
-          BizLogger.warn(err)
+          const error = new GenericErrorWrapper(err)
+          BizLogger.warn(`${error}`)
         }
       }
   
@@ -1405,7 +1408,8 @@ async groupPlatform (group:any) {
     try {
       await this.roomManager?.userService.batchUpdateStreamAttributes(streams)
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1413,7 +1417,8 @@ async groupPlatform (group:any) {
     try {
       await this.roomManager?.userService.batchRemoveStreamAttributes(streams)
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1421,7 +1426,8 @@ async groupPlatform (group:any) {
     try {
       await this.roomManager?.userService.batchUpdateRoomAttributes(properties)
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1429,7 +1435,8 @@ async groupPlatform (group:any) {
     try {
       await this.roomManager?.userService.batchRemoveRoomAttributes()
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1437,7 +1444,8 @@ async groupPlatform (group:any) {
     try {
       await this.roomManager?.userService.batchRemoveUserAttributes(userUuid)
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1453,7 +1461,8 @@ async groupPlatform (group:any) {
         sender: true,
       })
     } catch (err) {
-      BizLogger.warn(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.warn(`${error}`)
     }
   }
 
@@ -1500,7 +1509,8 @@ async groupPlatform (group:any) {
       this.appStore.uiStore.updateLastSeqId(0)
     } catch (err) {
       this.reset()
-      BizLogger.error(err)
+      const error = new GenericErrorWrapper(err)
+      BizLogger.error(`${error}`)
     }
   }
 

@@ -22,4 +22,15 @@ export class GenericErrorWrapper extends Error {
       }
     }
   }
+
+  [Symbol.toPrimitive](hint: string) {
+    if (hint === "string") {
+      return `GenericError: ${JSON.stringify({
+        name: this.name,
+        code: this.code,
+        message: this.message,
+        stack: this.stack
+      })}`
+    }
+  }
 }

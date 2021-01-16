@@ -1,3 +1,4 @@
+import { GenericErrorWrapper } from '@/sdk/education/core/utils/generic-error';
 import { getIntlError } from '../services/intl-error-helper';
 import { BizLogger } from './biz-logger';
 
@@ -18,8 +19,9 @@ export async function Fetch (input: RequestInfo, init?: RequestInit, retryCount:
     }
 
     const rescueError = (error: any) => {
-      BizLogger.warn(error)
-      throw error;
+      const err = new GenericErrorWrapper(error)
+      BizLogger.warn(`${err}`)
+      throw err;
     }
 
     function fetchRequest() {

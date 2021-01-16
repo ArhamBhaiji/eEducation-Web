@@ -220,6 +220,7 @@ export class DeviceStore {
     this._cameraRenderer = this.mediaService.cameraTestRenderer
     this.cameraLabel = this.mediaService.getTestCameraLabel()
     this._cameraId = this.cameraId
+    this.appStore.deviceInfo.cameraName = this.cameraLabel
   }
 
   @action
@@ -231,8 +232,10 @@ export class DeviceStore {
   @action
   async changeTestCamera(deviceId: string) {
     await this.mediaService.changeTestCamera(deviceId)
+    this._cameraRenderer = this.mediaService.cameraTestRenderer
     this.cameraLabel = this.mediaService.getTestCameraLabel()
-    this._cameraId = deviceId
+    this._cameraId = this.cameraId
+    this.appStore.deviceInfo.cameraName = this.cameraLabel
   }
 
   @action
@@ -243,6 +246,8 @@ export class DeviceStore {
       this._microphoneTrack = this.web.microphoneTrack
     }
     this.microphoneLabel = this.mediaService.getTestMicrophoneLabel()
+    this.appStore.deviceInfo.microphoneName = this.microphoneLabel
+    this._microphoneId = this.microphoneId
     this.mediaService.on('volume-indication', ({speakers, speakerNumber, totalVolume}: any) => {
       runInAction(() => {
         if (this.isElectron) {
@@ -252,7 +257,6 @@ export class DeviceStore {
         }
       })
     })
-    this._microphoneId = this.microphoneId
   }
 
   @action
@@ -266,8 +270,14 @@ export class DeviceStore {
   @action
   async changeTestMicrophone(deviceId: string) {
     await this.mediaService.changeTestMicrophone(deviceId)
+    // this.microphoneLabel = this.mediaService.getTestMicrophoneLabel()
+    // this._microphoneId = deviceId
+    if (this.isWeb) {
+      this._microphoneTrack = this.web.microphoneTrack
+    }
     this.microphoneLabel = this.mediaService.getTestMicrophoneLabel()
-    this._microphoneId = deviceId
+    this.appStore.deviceInfo.microphoneName = this.microphoneLabel
+    this._microphoneId = this.microphoneId
   }
 
   @action

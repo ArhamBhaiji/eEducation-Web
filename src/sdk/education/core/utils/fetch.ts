@@ -26,7 +26,7 @@ export async function Fetch (input: RequestInfo, init?: RequestInit, retryCount:
     }
 
     const rescueError = (error: any) => {
-      EduLogger.warn(error)
+      EduLogger.warn(`${new GenericErrorWrapper(error)}`)
       throw error;
     }
 

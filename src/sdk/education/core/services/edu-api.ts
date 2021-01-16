@@ -187,7 +187,7 @@ export class AgoraEduApi extends ApiBase {
     
     // WARN: 需要约定状态码
     if (resp.code !== 0) {
-      throw {msg: resp.msg}
+      throw {message: resp.msg}
     }
 
     if (resp.data && resp.data.ts) {

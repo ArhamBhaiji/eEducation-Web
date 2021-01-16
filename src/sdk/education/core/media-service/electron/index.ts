@@ -165,7 +165,10 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       EduLogger.info("call electron media service main client removeAllListeners")
       this.client.removeAllListeners()
     }
+    this.releaseSubChannels()
+  }
 
+  releaseSubChannels() {
     if (this._subClient) {
       for (let key of Object.keys(this._subClient)) {
         if (this._subClient[key]) {
@@ -176,9 +179,9 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
       }
       this._subClient = {}
     }
-  } 
+  }
 
-  reset () {
+  resetState() {
     this.role = 2
     this.joined = false
     this.videoMuted = false
@@ -186,7 +189,12 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     this.localUid = undefined
     this.channel = undefined
     this.subscribedList = []
-    this.releaseAllClient()
+    this.releaseSubChannels()
+  }
+
+  reset() {
+    this.resetState()
+    // this.releaseAllClient()
   }
 
   private fire(...eventArgs: any[]) {

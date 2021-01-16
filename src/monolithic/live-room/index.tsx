@@ -9,6 +9,7 @@ const routes: string[] = [
   "1v1",
   "smallClass",
   "bigClass",
+  "replayPage",
   // "home"
 ]
 

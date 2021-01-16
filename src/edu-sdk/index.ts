@@ -174,6 +174,7 @@ export class AgoraEduSDK {
     Object.assign(sdkConfig.configParams, params)
     eduSDKApi.updateConfig({
       // restToken: sdkConfig.configParams.restToken,
+      // sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       appId: sdkConfig.configParams.appId,
       // token: sdkConfig.configParams.token
