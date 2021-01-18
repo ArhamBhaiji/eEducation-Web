@@ -43,39 +43,53 @@ export class EduLogger {
     }
     const prefix = `${this.currentTime} %cAgoraEdu-SDK [${type}]: `
 
+
+    let modifiedArgs: any[] = args.slice()
+
+    // try converting log args to string
+    try {
+      modifiedArgs = modifiedArgs.map(v => JSON.stringify(v) || v)
+    } catch(e) {
+      //give up
+    }
+
     let loggerArgs: any[] = [] 
+
+
 
     const pattern: {[key: string]: any} = {
       'WARN': {
         call: () => {
-          loggerArgs = [prefix, "color: #9C640C;"].concat(args) as any
+          loggerArgs = [prefix, "color: #9C640C;"].concat(modifiedArgs) as any
           (console as any).log.apply(console, loggerArgs)
         }
       },
       'DEBUG': {
         call: () => {
-          loggerArgs = [prefix, "color: #99CC66;"].concat(args) as any
+          loggerArgs = [prefix, "color: #99CC66;"].concat(modifiedArgs) as any
           (console as any).log.apply(console, loggerArgs)
         }
       },
       'INFO': {
         call: () => {
-          loggerArgs = [prefix, "color: #99CC99; font-weight: bold;"].concat(args) as any
+          loggerArgs = [prefix, "color: #99CC99; font-weight: bold;"].concat(modifiedArgs) as any
           (console as any).log.apply(console, loggerArgs)
         }
       },
       'ERROR': {
         call: () => {
-          loggerArgs = [prefix, "color: #B22222; font-weight: bold;"].concat(args) as any
+          loggerArgs = [prefix, "color: #B22222; font-weight: bold;"].concat(modifiedArgs) as any
           (console as any).log.apply(console, loggerArgs)
         }
       }
     }
   
+    
+
     if (pattern.hasOwnProperty(type)) {
       (pattern[type] as any).call()
     } else {
-      loggerArgs = [prefix, "color: #64B5F6;"].concat(args) as any
+      loggerArgs = [prefix, "color: #64B5F6;"].concat(modifiedArgs) as any
       (console as any).log.apply(console, loggerArgs)
     }
   }
