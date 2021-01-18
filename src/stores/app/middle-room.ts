@@ -656,7 +656,7 @@ export class MiddleRoomStore extends SimpleInterval {
         BizLogger.info("classroom-property-updated", classroom)
         // if (evt.reason === EduClassroomStateType.EduClassroomStateTypeRoomAttrs) {
           this.roomProperties = classroom.roomProperties
-          console.log("roomProperties >>>>>>> ", classroom.roomProperties)
+          BizLogger.info("roomProperties >>>>>>> ", classroom.roomProperties)
           const record = get(classroom, 'roomProperties.record')
           if (record) {
             const state = record.state
