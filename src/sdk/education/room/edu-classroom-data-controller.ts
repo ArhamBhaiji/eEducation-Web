@@ -197,6 +197,7 @@ export class EduClassroomDataController {
             }
           }
         } else {
+          EduLogger.info(`curSeqId not exists, init current seq id`)
           taskBuffer.push({
             seqId: +seqId,
             ...buffer

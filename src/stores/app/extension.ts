@@ -116,7 +116,9 @@ export class ExtensionStore {
 
   @computed
   get enableCoVideo(): boolean {
-    return !!get(this.appStore.middleRoomStore,'roomProperties.handUpStates.state', 0)
+    let val = !!get(this.appStore.middleRoomStore,'roomProperties.handUpStates.state', 0)
+    BizLogger.info('enableCoVideo: ', val)
+    return val
   }
 
   @action
