@@ -5,7 +5,6 @@ const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const PurifyCSS = require('purifycss-webpack');
 const glob = require('glob-all');
 
 const config = require('dotenv').config().parsed
@@ -57,14 +56,17 @@ module.exports = {
       {
         test: /\.(scss|css)$/i,
         use: [
-          process.env.NODE_ENV === 'production' ? {
-            loader: MiniCssExtractPlugin.loader,
-            options: { publicPath: '' },
-          } : {
+          // process.env.NODE_ENV === 'production' ? {
+          //   loader: MiniCssExtractPlugin.loader,
+          //   options: { publicPath: '' },
+          // } : {
+          //   loader: 'style-loader',
+          //   options: {
+          //     // cacheDirectory: false,
+          //   }
+          // },
+          {
             loader: 'style-loader',
-            options: {
-              // cacheDirectory: false,
-            }
           },
           {
             loader: 'css-loader',
@@ -133,11 +135,11 @@ module.exports = {
       REACT_APP_AGORA_LOG: JSON.stringify(config.REACT_APP_AGORA_LOG),
 
       REACT_APP_AGORA_APP_SDK_DOMAIN: JSON.stringify(config.REACT_APP_AGORA_APP_SDK_DOMAIN),
-      REACT_APP_YOUR_OWN_OSS_BUCKET_KEY: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_KEY),
-      REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET),
-      REACT_APP_YOUR_OWN_OSS_BUCKET_NAME: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_NAME),
-      REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE),
-      REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER: JSON.stringify(config.REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER),
+      REACT_APP_YOUR_OWN_OSS_BUCKET_KEY: JSON.stringify(""),
+      REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET: JSON.stringify(""),
+      REACT_APP_YOUR_OWN_OSS_BUCKET_NAME: JSON.stringify(""),
+      REACT_APP_YOUR_OWN_OSS_CDN_ACCELERATE: JSON.stringify(""),
+      REACT_APP_YOUR_OWN_OSS_BUCKET_FOLDER: JSON.stringify(""),
       // 'process': 'utils'
     }),
     new HardSourceWebpackPlugin({
@@ -157,16 +159,6 @@ module.exports = {
           'webpack.config.js',
         ],
       }
-    }),
-    new BundleAnalyzerPlugin(),
-    new PurifyCSS({
-      paths: glob.sync([
-        path.resolve(__dirname, './src/pages/*.tsx'),
-        path.resolve(__dirname, './src/components/*.tsx'),
-        path.resolve(__dirname, './src/components/**/*.tsx'),
-        path.resolve(__dirname, './src/**/*.ts'),
-        path.resolve(__dirname, './src/*.ts')
-      ])
     })
   ],
 };

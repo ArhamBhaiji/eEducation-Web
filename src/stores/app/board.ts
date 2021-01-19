@@ -199,7 +199,7 @@ export class BoardStore {
     return this._boardClient as BoardClient;
   }
 
-  ossClient: OSS
+  ossClient!: OSS
 
   @observable
   folder: string = ''

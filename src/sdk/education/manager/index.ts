@@ -9,6 +9,7 @@ import { AgoraEduApi } from '../core/services/edu-api';
 import { EduConfiguration } from '../interfaces';
 import { EduClassroomDataController } from '../room/edu-classroom-data-controller';
 import { GenericErrorWrapper } from '../core/utils/generic-error';
+import { AgoraEduSDK } from '@/edu-sdk';
 
 export type ClassroomInitParams = {
   roomUuid: string
@@ -60,7 +61,9 @@ export class EduManager extends EventEmitter {
       }
     }
     this._mediaService = new MediaService(buildOption)
-    console.log("EduManager this.config ", JSON.stringify(this.config))
+    if (AgoraEduSDK._debug) {
+      console.log("EduManager this.config ", JSON.stringify(this.config))
+    }
     this.apiService = new AgoraEduApi(
       {
         appId: this.config.appId,

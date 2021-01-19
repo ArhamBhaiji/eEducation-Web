@@ -105,6 +105,14 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
     this.client.enableWebSdkInteroperability(true)
     this.client.enableAudioVolumeIndication(1000, 3, true)
     this.client.setVideoProfile(43, false);
+    const config = {
+      bitrate: 0,
+      frameRate: 15,
+      height: 360,
+      width: 640,
+    }
+    this.client.setVideoEncoderConfiguration(config)
+    console.log("[electron] video encoder config ", JSON.stringify(config))
     this.client.setClientRole(2)
     if (this.logPath) {
       EduLogger.info(`[electron-log-path] set logPath: ${this.logPath}`)
@@ -652,6 +660,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
         }
       }
       EduLogger.info('startScreenShare#options', options)
+      EduLogger.info('startScreenShare ', JSON.stringify(config))
       try {
         let ret = this.client.videoSourceInitialize(this.appId)
         if (ret < 0) {
@@ -660,6 +669,7 @@ export class AgoraElectronRTCWrapper extends EventEmitter implements IElectronRT
             code: ret
           })
         }
+        // this.client.
         this.client.videoSourceSetChannelProfile(1)
         this.client.videoSourceEnableWebSdkInteroperability(true)
         this.client.videoSourceSetVideoProfile(config && config.profile ? config.profile : 50, false)

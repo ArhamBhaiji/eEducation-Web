@@ -8,7 +8,8 @@ import { ReplayAppStore } from "@/stores/replay-app"
 import { unmountComponentAtNode } from "react-dom"
 import { AgoraEduSDKConfigParams, ListenerCallback } from "./declare"
 import { eduSDKApi } from '@/services/edu-sdk-api'
-import { EduRoleTypeEnum } from "@/sdk/education/interfaces"
+import { EduRoleTypeEnum, EduRoomTypeEnum } from "@/sdk/education/interfaces/index.d"
+import { AgoraSDKError, checkConfigParams, checkLaunchOption, checkReplayOption } from './validator'
 
 export enum AgoraEduEvent {
   ready = 1,
@@ -38,19 +39,6 @@ export interface ApplicationConfigParameters {
   ossConfig?: WhiteboardOSSConfig
 }
 
-// const configParams: AgoraEduSDKConfigParams = {
-//   userName: '',
-//   userUuid: '',
-//   roomName: '',
-//   roomUuid: '',
-//   roomType: '',
-//   roleType: '',
-//   appId: '',
-//   whiteboardAppId: '',
-//   token: '',
-//   restToken: ''
-// }
-
 type SDKConfig = {
   configParams: AgoraEduSDKConfigParams
   sdkDomain: string
@@ -58,17 +46,17 @@ type SDKConfig = {
 
 const sdkConfig: SDKConfig = {
   configParams: {
-    userName: '',
-    userUuid: '',
-    roomName: '',
-    roomUuid: '',
-    roomType: '',
-    roleType: '',
     appId: '',
-    whiteboardAppId: '',
-    token: '',
-    rtmUid: '',
-    rtmToken: '',
+    // rtmToken: '',
+    // userName: '',
+    // userUuid: '',
+    // roomName: '',
+    // roomUuid: '',
+    // roomType: '',
+    // roleType: '',
+    // appId: '',
+    // whiteboardAppId: '',
+    // rtmUid: '',
   },
   sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`
 }
@@ -76,31 +64,28 @@ const sdkConfig: SDKConfig = {
 export type LanguageEnum = "" | "en" | "zh"
 
 export type LaunchOption = {
-  token: string
   userUuid: string
   userName: string
   roomUuid: string
   roleType: EduRoleTypeEnum
-  roomType: string
+  roomType: EduRoomTypeEnum
   roomName: string
   listener: ListenerCallback
   pretest: boolean
-  rtmUid: string
+  // rtmUid: string
   rtmToken: string
   language: LanguageEnum
 }
 
 export type ReplayOption = {
-  logoUrl: string
+  // logoUrl: string
   whiteboardAppId: string
-  whiteboardUrl: string
+  videoUrl: string
   whiteboardId: string
   whiteboardToken: string
-  startTime: number
+  beginTime: number
   endTime: number
   listener: ListenerCallback
-  rtmUid: string
-  rtmToken: string
   language: LanguageEnum
 }
 
@@ -150,38 +135,35 @@ const instances: Record<string, any> = {
 
 }
 
-const roomTypes = [
-  {
+const roomTypes = {
+  [EduRoomTypeEnum.Room1v1Class]: {
     path: '/classroom/one-to-one'
   },
-  {
+  [EduRoomTypeEnum.Room1v1Class]: {
     path: '/classroom/small-class'
   },
-  {
+  [EduRoomTypeEnum.Room1v1Class]: {
     path: '/classroom/big-class'
-  },
-]
+  }
+}
 
 const devicePath = '/setting'
-
 export class AgoraEduSDK {
 
   static get version(): string {
     return '1.0.0'
   }
 
+  static _debug: boolean = false 
+
   static config (params: AgoraEduSDKConfigParams) {
+
+    checkConfigParams(params);
+
     Object.assign(sdkConfig.configParams, params)
     eduSDKApi.updateConfig({
-      // restToken: sdkConfig.configParams.restToken,
-      // sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       sdkDomain: `${REACT_APP_AGORA_APP_SDK_DOMAIN}`,
       appId: sdkConfig.configParams.appId,
-      // token: sdkConfig.configParams.token
-    })
-    eduSDKApi.updateRtmInfo({
-      rtmToken: sdkConfig.configParams.rtmToken,
-      rtmUid: sdkConfig.configParams.rtmUid
     })
   }
 
@@ -199,13 +181,18 @@ export class AgoraEduSDK {
   }
 
   static async launch(dom: Element, option: LaunchOption) {
+    console.log("launch ", dom, " option ", option)
+
+    checkLaunchOption(dom, option)
+
     if (locks.has("launch") || instances["launch"]) {
       throw new GenericErrorWrapper("already launched")
     }
+
     try {
       locks.set("launch", true)
       eduSDKApi.updateRtmInfo({
-        rtmUid: option.rtmUid,
+        rtmUid: option.userUuid,
         rtmToken: option.rtmToken,
       })
       const data = await eduSDKApi.getConfig()
@@ -231,7 +218,7 @@ export class AgoraEduSDK {
             secretKey: data.netless.oss.secretKey,
             endpoint: data.netless.oss.endpoint
           },
-          rtmUid: option.rtmUid,
+          rtmUid: option.userUuid,
           rtmToken: option.rtmToken,
         },
         language: option.language,
@@ -266,28 +253,30 @@ export class AgoraEduSDK {
   }
 
   static async replay(dom: Element, option: ReplayOption) {
+
     console.log(" replay ", dom, " option ", JSON.stringify(option))
     if (locks.has("replay") || instances["replay"]) {
       throw new GenericErrorWrapper("already replayed")
     }
 
+    checkReplayOption(dom, option)
+
     const store = new ReplayAppStore({
       config: {
         agoraAppId: sdkConfig.configParams.appId,
         agoraNetlessAppId: option.whiteboardAppId,
-        // agoraRestFullToken: sdkConfig.configParams.restToken,
         enableLog: true,
         sdkDomain: sdkConfig.sdkDomain,
-        rtmUid: option.rtmUid,
-        rtmToken: option.rtmToken,
+        rtmUid: '',
+        rtmToken: '',
       },
       language: option.language,
       replayConfig: {
-        whiteboardUrl: option.whiteboardUrl,
-        logoUrl: option.logoUrl,
+        whiteboardUrl: option.videoUrl,
+        logoUrl: '',
         whiteboardId: option.whiteboardId,
         whiteboardToken: option.whiteboardToken,
-        startTime: option.startTime,
+        startTime: option.beginTime,
         endTime: option.endTime,
       },
       listener: option.listener,

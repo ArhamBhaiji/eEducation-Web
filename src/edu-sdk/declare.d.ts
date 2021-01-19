@@ -26,18 +26,7 @@ declare enum AgoraEduEvent {
 
 
 declare type AgoraEduSDKConfigParams = {
-  userName: string
-  userUuid: string
-  roomName: string
-  roomUuid: string
-  roomType: string
-  roleType: string
   appId: string
-  whiteboardAppId: string
-  token: string
-  // restToken: string
-  rtmToken: string
-  rtmUid: string
 }
 
 declare interface RoomParameters {

@@ -52,13 +52,15 @@ export class EduSDKApi extends ApiBase {
     roomName: string,
     roomType: number,
     userUuid: string,
+    role: number,
   }) {
     const res = await this.fetch({
       url: `/v2/rooms/${params.roomUuid}/users/${params.userUuid}`,
       method: 'PUT',
       data: {
         roomName: params.roomName,
-        roomType: params.roomType
+        roomType: params.roomType,
+        role: params.role
       }
     })
 

@@ -175,7 +175,7 @@ export class ReplayStore {
     this.player.bindHtmlElement($board)
 
     const combinePlayerFactory = new CombinePlayerFactory(this.player, {
-      url: `${cdnPrefix}/${this.mediaUrl}`,
+      url: `${this.mediaUrl}`,
       videoDOM: $el
     }, true)
 

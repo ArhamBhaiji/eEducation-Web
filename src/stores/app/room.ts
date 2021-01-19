@@ -206,7 +206,8 @@ export class RoomStore extends SimpleInterval {
         roomUuid,
         roomName: `${this.roomInfo.roomName}`,
         roomType: +this.roomInfo.roomType as number,
-        userUuid: this.roomInfo.userUuid
+        userUuid: this.roomInfo.userUuid,
+        role: this.roomInfo.userRole,
       })
       EduLogger.info("## classroom ##: checkIn:  ", JSON.stringify(checkInResult))
       if (checkInResult.state === EduClassroomStateEnum.end) {

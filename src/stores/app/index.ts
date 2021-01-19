@@ -32,7 +32,7 @@ import { SceneStore } from './scene';
 import { AgoraEduSDK, ListenerCallback } from '@/edu-sdk/declare';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
 import { AgoraEduEvent } from '@/edu-sdk';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { eduSDKApi } from '@/services/edu-sdk-api';
 import { MemoryStorage } from '@/utils/custom-storage';
 
@@ -157,20 +157,6 @@ export class AppStore {
         rtmToken: "",
       }
     }
-
-    const deviceStorage = GlobalStorage.read('agora_edu_device')
-    if (deviceStorage || !isEmpty(deviceStorage)) {
-      this.deviceInfo = deviceStorage.deviceInfo
-      this.updateDeviceInfo({
-        cameraName: this.deviceInfo.cameraName,
-        microphoneName: this.deviceInfo.microphoneName,
-      })
-    } else {
-      this.deviceInfo = {
-        cameraName: "",
-        microphoneName: ""
-      }
-    }
   }
 
   @observable
@@ -274,9 +260,6 @@ export class AppStore {
         GlobalStorage.save('agora_edu_room', {
           roomInfo: data.roomInfo,
         })
-        GlobalStorage.save('agora_edu_device', {
-          deviceInfo: data.deviceInfo
-        })
       })
     } else {
       this.setRoomInfo({
@@ -285,6 +268,31 @@ export class AppStore {
         ...roomInfoParams!
       })
     }
+
+    autorun(() => {
+      const data = toJS(this)
+      GlobalStorage.save('agora_edu_device', {
+        deviceInfo: data.deviceInfo
+      })
+    })
+
+    const deviceStorage = GlobalStorage.read('agora_edu_device')
+    if (deviceStorage || !isEmpty(deviceStorage)) {
+      this.deviceInfo = {
+        cameraName: "",
+        microphoneName: ""
+      }
+      this.updateDeviceInfo({
+        cameraName: get(deviceStorage, 'deviceInfo.cameraName', ''),
+        microphoneName: get(deviceStorage, 'deviceInfo.microphoneName', '')
+      })
+    } else {
+      this.deviceInfo = {
+        cameraName: "",
+        microphoneName: ""
+      }
+    }
+
     if (config.enableLog) {
       EduManager.enableDebugLog(true);
     }
