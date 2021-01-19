@@ -139,10 +139,10 @@ const roomTypes = {
   [EduRoomTypeEnum.Room1v1Class]: {
     path: '/classroom/one-to-one'
   },
-  [EduRoomTypeEnum.Room1v1Class]: {
+  [EduRoomTypeEnum.RoomSmallClass]: {
     path: '/classroom/small-class'
   },
-  [EduRoomTypeEnum.Room1v1Class]: {
+  [EduRoomTypeEnum.RoomBigClass]: {
     path: '/classroom/big-class'
   }
 }
@@ -199,6 +199,8 @@ export class AgoraEduSDK {
 
       let mainPath = roomTypes[option.roomType]?.path || '/classroom/one-to-one'
       let roomPath = mainPath
+
+      console.log("main Path", mainPath, " room Path", roomPath)
 
       if (option.pretest) {
         mainPath = '/setting'
