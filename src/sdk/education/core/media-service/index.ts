@@ -320,19 +320,52 @@ export class MediaService extends EventEmitter implements IMediaService {
     }
   }
 
-  async leave(): Promise<any> {
-    if (this.isWeb) {
-      await this.sdkWrapper.leave()
-    }
-    if (this.isElectron) {
-      await this.sdkWrapper.leave()
-    }
-    for (let render of this.remoteUsersRenderer) {
-      if (render._playing) {
-        render.stop()
+  private destroyAllRenderers() {
+    if (this.cameraRenderer) {
+      if (this.cameraRenderer._playing) {
+        this.cameraRenderer.stop()
       }
+      this.cameraRenderer = undefined
+      EduLogger.info("remove local camera renderer success")
     }
-    this.remoteUsersRenderer = []
+    if (this.screenRenderer) {
+      if (this.screenRenderer._playing) {
+        this.screenRenderer.stop()
+      }
+      this.screenRenderer = undefined
+      EduLogger.info("remove local screen renderer success")
+    }
+    if (this.microphoneTrack) {
+      if (this.microphoneTrack.isPlaying) {
+        this.microphoneTrack.stop()
+      }
+      this.microphoneTrack = undefined
+      EduLogger.info("remove local microphone track success")
+    }
+    if (this.remoteUsersRenderer && this.remoteUsersRenderer.length) {
+      for (let render of this.remoteUsersRenderer) {
+        if (render._playing) {
+          render.stop()
+        }
+      }
+      this.remoteUsersRenderer = []
+      EduLogger.info("remove remote users renderer success")
+    }
+  }
+
+  async leave(): Promise<any> {
+    try {
+      if (this.isWeb) {
+        await this.sdkWrapper.leave()
+      }
+      if (this.isElectron) {
+        await this.sdkWrapper.leave()
+      }
+      this.destroyAllRenderers()
+    } catch (err) {
+      this.destroyAllRenderers()
+      new GenericErrorWrapper(err)
+    }
   }
 
   async joinSubChannel(option: JoinOption): Promise<any> {
