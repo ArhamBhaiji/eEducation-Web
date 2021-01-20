@@ -29,7 +29,7 @@ type VideoMarqueePropsType = {
   id?: string
 }
 
-export const VideoMarquee = observer((props: VideoMarqueePropsType) => {
+export const VideoMarquee = (props: VideoMarqueePropsType) => {
   const {mainStream, othersStreams} = props
 
   const marqueeEl = useRef(null);
@@ -103,4 +103,4 @@ export const VideoMarquee = observer((props: VideoMarqueePropsType) => {
       </div>
     </div>
   )
-})
+}

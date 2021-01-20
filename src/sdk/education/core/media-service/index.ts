@@ -327,6 +327,12 @@ export class MediaService extends EventEmitter implements IMediaService {
     if (this.isElectron) {
       await this.sdkWrapper.leave()
     }
+    for (let render of this.remoteUsersRenderer) {
+      if (render._playing) {
+        render.stop()
+      }
+    }
+    this.remoteUsersRenderer = []
   }
 
   async joinSubChannel(option: JoinOption): Promise<any> {
