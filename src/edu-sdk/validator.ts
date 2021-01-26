@@ -164,19 +164,19 @@ export const checkReplayOption = (dom:Element, option: ReplayOption) => {
     throw new AgoraSDKError(`${option.language} language is not supported`)
   }
 
-  if (isEmpty(option.beginTime)) {
+  if (!option.beginTime) {
     throw new AgoraSDKError('beginTime parameter cannot be empty')
   }
 
-  if (isEmpty(option.endTime)) {
+  if (!option.endTime) {
     throw new AgoraSDKError('endTime parameter cannot be empty')
   }
 
-  if (isEmpty(option.videoUrl)) {
+  if (!option.videoUrl) {
     throw new AgoraSDKError('videoUrl parameter cannot be empty')
   }
 
-  if (isEmpty(option.listener)) {
+  if (!option.listener) {
     throw new AgoraSDKError('listener parameter cannot be empty')
   }
 

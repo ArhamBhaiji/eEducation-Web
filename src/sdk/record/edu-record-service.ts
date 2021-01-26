@@ -24,7 +24,11 @@ export class EduRecordService {
     })
   }
 
-  async getCourseRecordBy(roomUuid: string) {
+  async getCourseRecordBy(roomUuid: string, rtmUid: string, rtmToken: string) {
+    this.apiService.updateRtmConfig({
+      rtmUid,
+      rtmToken
+    })
     return await this.apiService.queryRoomRecordBy(roomUuid)
   }
   

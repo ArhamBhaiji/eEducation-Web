@@ -28,7 +28,7 @@ export class AgoraRecordApi extends ApiBase {
       const url = nextId > 0 ? `/v2/rooms/${roomUuid}/records?nextId=${nextId}` : `/v2/rooms/${roomUuid}/records`
       let {data} = await this.fetch({
         url,
-        restToken: 'OGJmMzUzMzM1MjA2NDg1NThhZDFiNzM2Y2ZhNWQyZjE6NzQ1NDIxYzgxYWJiNGFjOWExZmM3YzdlNTBlOTE5OTk=',
+        // restToken: 'OGJmMzUzMzM1MjA2NDg1NThhZDFiNzM2Y2ZhNWQyZjE6NzQ1NDIxYzgxYWJiNGFjOWExZmM3YzdlNTBlOTE5OTk=',
         method: 'GET',
       })
       nextId = data.nextId

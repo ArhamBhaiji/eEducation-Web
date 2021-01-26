@@ -2,6 +2,9 @@ import React from 'react';
 import './index.scss';
 import { Link } from 'react-router-dom';
 import { t } from '@/i18n';
+import { observer } from 'mobx-react';
+import { useAppStore } from '@/hooks';
+import { get } from 'lodash';
 interface MessageProps {
   nickname: string
   content: string
@@ -21,7 +24,7 @@ const roles = [
   'assistant_role',
 ]
 
-export const Message: React.FC<MessageProps> = ({
+export const Message: React.FC<MessageProps> = observer(({
   nickname,
   content,
   isUrl,
@@ -33,6 +36,11 @@ export const Message: React.FC<MessageProps> = ({
   className
 }) => {
 
+  const appStore = useAppStore()
+
+  const rtmUid = get(appStore.roomInfo, 'rtmUid', '')
+  const rtmToken = get(appStore.roomInfo, 'rtmToken', '')
+
   return (
   <div ref={ref} className={`message ${sender ? 'sent': 'receive'} ${className ? className : ''}`}>
     <div className="nickname">
@@ -40,7 +48,7 @@ export const Message: React.FC<MessageProps> = ({
     </div>
     <div className="content">
       {link ?
-        <Link to={`/replay/record/${link}`} target="_blank">{t('course_recording')}</Link>
+        <Link to={`/replay/record/${link}?rtmUid=${encodeURIComponent(rtmUid)}&rtmToken=${encodeURIComponent(rtmToken)}`} target="_blank">{t('course_recording')}</Link>
         : 
         isUrl ?
         <div dangerouslySetInnerHTML={{__html: content}} />
@@ -51,13 +59,13 @@ export const Message: React.FC<MessageProps> = ({
     {children ? children : null}
   </div>
   )
-}
+})
 
 interface RoomMessageProps extends MessageProps {
   roomName?: string
 }
 
-export const RoomMessage: React.FC<RoomMessageProps> = ({
+export const RoomMessage: React.FC<RoomMessageProps> = observer(({
   nickname,
   roomName,
   content,
@@ -69,6 +77,11 @@ export const RoomMessage: React.FC<RoomMessageProps> = ({
   className
 }) => {
 
+  const appStore = useAppStore()
+
+  const rtmUid = get(appStore.roomInfo, 'rtmUid', '')
+  const rtmToken = get(appStore.roomInfo, 'rtmToken', '')
+
   return (
   <div ref={ref} className={`message ${sender ? 'sent': 'receive'} ${className ? className : ''}`}>
     {!sender && roomName && (<div className="roomname">{t('from_room')}{roomName}</div>)}
@@ -77,11 +90,11 @@ export const RoomMessage: React.FC<RoomMessageProps> = ({
     </div>
     <div className="content">
       {link ?
-        <Link to={`/replay/record/${link}`} target="_blank">{t('course_recording')}</Link>
+        <Link to={`/replay/record/${link}?rtmUid=${encodeURIComponent(rtmUid)}&rtmToken=${encodeURIComponent(rtmToken)}`} target="_blank">{t('course_recording')}</Link>
         : content
       }
     </div>
     {children ? children : null}
   </div>
   )
-}
+})

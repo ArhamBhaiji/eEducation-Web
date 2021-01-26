@@ -276,13 +276,13 @@ export class ReplayStore {
   }
 
   @action
-  async getCourseRecordBy(roomUuid: string) {
+  async getCourseRecordBy(roomUuid: string, rtmUid: string, rtmToken: string) {
     if (this.recordStatus === 2 && this.mediaUrl) {
       // BizLogger.info("recordStatus changed", roomUuid)
       return
     }
     try {
-      let res = await this.recordService.getCourseRecordBy(roomUuid)
+      let res = await this.recordService.getCourseRecordBy(roomUuid, rtmUid, rtmToken)
       const recordList = res.list
       recordList.sort((prev: any, cur: any) => {
         return prev.startTime - cur.startTime

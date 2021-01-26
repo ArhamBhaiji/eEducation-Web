@@ -76,12 +76,18 @@ export const ReplayController: React.FC<any> = observer(() => {
 
   const {roomUuid} = useParams<{roomUuid: string}>()
 
+
+  const urlParams = new URLSearchParams(location.search)
+
+  const rtmUid = decodeURIComponent(`${urlParams.get("rtmUid")}`)
+  const rtmToken = decodeURIComponent(`${urlParams.get("rtmToken")}`)
+
   const replayRef = useRef<HTMLDivElement | null>(null)
 
   const videoEl = useRef<HTMLVideoElement | null>(null)
 
   useInterval(() => {
-    replayStore.getCourseRecordBy(roomUuid as string)
+    replayStore.getCourseRecordBy(roomUuid as string, rtmUid, rtmToken)
   }, 2500)
 
   useEffect(() => {
