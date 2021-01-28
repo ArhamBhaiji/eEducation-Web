@@ -7,7 +7,7 @@ import {CustomIcon} from '@/components/icon';
 import {FormInput} from '@/components/form-input';
 import {FormSelect} from '@/components/form-select';
 import {LangSelect} from '@/components/lang-select';
-import {useHistory} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import { Loading } from '@/components/loading';
 import {GithubIcon} from '@/components/github-icon';
 import { t } from '../i18n';
@@ -154,6 +154,7 @@ export const HomePage = observer(() => {
   return (
     <div className={`flex-container home-cover-web`}>
       {loading ? <Loading /> : null}
+      <Link to="/home" target="_new">新窗口</Link>
       {uiStore.isElectron ? null : 
       <div className="web-menu">
         <div className="web-menu-container">
