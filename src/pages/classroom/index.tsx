@@ -58,6 +58,20 @@ const RoomController = observer(({children}: any) => {
       return
     }
 
+
+    // listen to remote join events
+    appStore.eduManager.on("ConnectionStateChanged", async evt => {
+      const {newState, reason} = evt
+      // exit room if same account login from remote
+      if(newState === "ABORTED" && reason === "REMOTE_LOGIN") {
+        await appStore.destroy()
+        uiStore.unblock()
+        uiStore.reset()
+        history.push('/')
+        uiStore.addToast(t('toast.classroom_remote_join'))
+      }
+    })
+
     roomStore.join().then(() => {
       uiStore.addToast(t('toast.successfully_joined_the_room'))
     }).catch((err) => {
@@ -65,7 +79,7 @@ const RoomController = observer(({children}: any) => {
       uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.message)}`)
     })
   }, [])
-  
+
   let pathList = location.pathname.split('/')
   let path = pathList[pathList.length - 1]
   const index = roomTypes.findIndex((it: any) => path === it.path)

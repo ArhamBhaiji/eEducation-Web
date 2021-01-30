@@ -171,6 +171,7 @@ const zhCN: any = {
     'failed_to_initiate_a_raise_of_hand_application': '发起举手申请失败',
     'failed_to_end_the_call': '结束通话失败',
     'failed_to_join_board': '加入白板失败',
+    'classroom_remote_join': '账号在远端设备登录, 您已离开教室',
   },
   'end_class_confirm': '确定要结束教室吗？',
   'notice': {

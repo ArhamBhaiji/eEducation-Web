@@ -172,6 +172,7 @@ const en = {
     'failed_to_initiate_a_raise_of_hand_application': 'Failed to initiate a raise of hand application',
     'failed_to_end_the_call': 'Failed to end the call',
     'failed_to_join_board': 'Failed to join board',
+    'classroom_remote_join': 'Account was logged in from remote device, you have left the classroom',
   },
   'end_class_confirm': 'Are you sure to end class room？',
   'notice': {

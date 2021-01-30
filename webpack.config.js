@@ -9,6 +9,10 @@ const glob = require('glob-all');
 
 const config = require('dotenv').config().parsed
 
+if(!config) {
+  throw new Error(`${require('dotenv').config().error}`)
+}
+
 // const HtmlWebpackPlugin = require("html-webpack-plugin");
 // const ModuleFederationPlugin = require("webpack").container
 //   .ModuleFederationPlugin;
