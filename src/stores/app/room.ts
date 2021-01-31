@@ -168,6 +168,33 @@ export class RoomStore extends SimpleInterval {
     return `${this.appStore.mediaStore.delay}`
   }
 
+  @computed
+  get videoEncoderConfiguration(): any {
+    const userRole = this.roomInfo.userRole
+    if(+this.roomInfo.roomType === 0) {
+      // 1v1 use 640 x 480
+      return {
+        width: 640,
+        height: 480,
+        frameRate: 15
+      }
+    } else if(+this.roomInfo.roomType === 1) {
+      // small classroom, teacher use 640 x 480, student use 320 x 240
+      if(userRole === EduRoleTypeEnum.teacher) {
+        return {
+          width: 640,
+          height: 480,
+          frameRate: 15
+        }
+      }
+    }
+    return {
+      width: 320,
+      height: 240,
+      frameRate: 15
+    }
+  }
+
   isBigClassStudent(): boolean {
     const userRole = this.roomInfo.userRole
     return +this.roomInfo.roomType === 2 && userRole === EduRoleTypeEnum.student
@@ -300,7 +327,7 @@ export class RoomStore extends SimpleInterval {
               if (this.sceneStore.joiningRTC) {
                 if (this.sceneStore._hasCamera) {
                   if (this.sceneStore.cameraEduStream.hasVideo) {
-                    await this.sceneStore.openCamera()
+                    await this.sceneStore.openCamera(this.videoEncoderConfiguration)
                     BizLogger.info(`[demo] local-stream-updated tag: ${tag}, seq[${evt.seqId}], time: ${Date.now()}  after openCamera  local-stream-updated, main stream is online`, ' _hasCamera', this.sceneStore._hasCamera, ' _hasMicrophone ', this.sceneStore._hasMicrophone, this.sceneStore.joiningRTC, ' _eduStream', JSON.stringify(this.sceneStore._cameraEduStream))
                   } else {
                     await this.sceneStore.closeCamera()
@@ -454,7 +481,7 @@ export class RoomStore extends SimpleInterval {
                   await this.sceneStore.prepareMicrophone()
                   BizLogger.info("propertys ", this.sceneStore._hasCamera, this.sceneStore._hasMicrophone)
                   if (this.sceneStore._hasCamera) {
-                    await this.sceneStore.openCamera()
+                    await this.sceneStore.openCamera(this.videoEncoderConfiguration)
                   }
       
                   if (this.sceneStore._hasMicrophone) {
@@ -624,7 +651,7 @@ export class RoomStore extends SimpleInterval {
           await this.sceneStore.prepareMicrophone()
           if (this.sceneStore._cameraEduStream) {
             if (this.sceneStore._cameraEduStream.hasVideo) {
-              await this.sceneStore.openCamera()
+              await this.sceneStore.openCamera(this.videoEncoderConfiguration)
             } else {
               await this.sceneStore.closeCamera()
             }

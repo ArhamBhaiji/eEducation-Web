@@ -6,13 +6,15 @@ import {ChatBoard} from '@/components/chat/board';
 import { NetlessBoard } from '@/components/netless-board';
 import { ScreenSharing } from '@/components/screen-sharing';
 import { observer } from 'mobx-react';
-import { useRoomStore, useSceneStore } from '@/hooks';
+import { useRoomStore, useUIStore, useSceneStore } from '@/hooks';
 import { EduRoleTypeEnum } from '@/sdk/education/interfaces/index.d.ts';
+import { t } from '@/i18n';
 
 export const BigClass = observer(() => {
 
   const sceneStore = useSceneStore()
   const roomStore = useRoomStore()
+  const uiStore = useUIStore()
 
   const {
     mutedChat,
@@ -44,6 +46,7 @@ export const BigClass = observer(() => {
 
   const handleHandClick = async (type: string) => {
     if (type === 'hands_up') {
+      uiStore.addToast(t('invitation.apply_sent'))
       await roomStore.callApply()
     }
   

@@ -410,7 +410,7 @@ export class SceneStore extends SimpleInterval {
   }
 
   @action
-  async openCamera() {
+  async openCamera(encoderConfig?:any) {
     if (this._cameraRenderer) {
       return BizLogger.warn('[demo] Camera already exists')
     }
@@ -420,7 +420,7 @@ export class SceneStore extends SimpleInterval {
     this.lockCamera()
     try {
       const deviceId = this.appStore.deviceStore.cameraId
-      await this.mediaService.openCamera({deviceId})
+      await this.mediaService.openCamera({deviceId, encoderConfig})
       this._cameraRenderer = this.mediaService.cameraRenderer
       // this.cameraLabel = this.mediaService.getCameraLabel()
       // this._cameraId = this.cameraId
