@@ -14,7 +14,8 @@ const zhCN: any = {
     "stop_success": "取消举手成功",
     "reject_success": "拒绝举手成功",
     "apply_failed": "举手发起失败",
-    "stop_failed": "取消举手失败"
+    "stop_failed": "取消举手失败",
+    "apply_sent": "已发送举手请求给老师"
   },
   "switch": {
     "enable_auto_hands_up": "举手即上台",

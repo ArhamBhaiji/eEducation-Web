@@ -15,7 +15,8 @@ const en = {
     "reject_success": "Reject Success",
     "reject_failed": "Reject Failed",
     "apply_failed": "Apply Failed",
-    "stop_failed": "Stop Failed"
+    "stop_failed": "Stop Failed",
+    "apply_sent": "HandsUp request has been sent to teacher"
   },
   "switch": {
     "enable_auto_hands_up": "HandsUp CoVideo",
