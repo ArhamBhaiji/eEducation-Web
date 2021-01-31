@@ -154,7 +154,6 @@ export const HomePage = observer(() => {
   return (
     <div className={`flex-container home-cover-web`}>
       {loading ? <Loading /> : null}
-      <Link to="/home" target="_new">新窗口</Link>
       {uiStore.isElectron ? null : 
       <div className="web-menu">
         <div className="web-menu-container">
