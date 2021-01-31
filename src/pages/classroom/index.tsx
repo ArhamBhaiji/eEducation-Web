@@ -74,9 +74,18 @@ const RoomController = observer(({children}: any) => {
 
     roomStore.join().then(() => {
       uiStore.addToast(t('toast.successfully_joined_the_room'))
-    }).catch((err) => {
+    }).catch(async (err) => {
       BizLogger.warn(err.message)
-      uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.message)}`)
+      if(err.code === 20403001) {
+        // role full
+        await appStore.destroy()
+        uiStore.unblock()
+        uiStore.reset()
+        history.push('/')
+        uiStore.addToast(`${t('toast.failed_to_join_the_room')}: ${t('toast.room_full')}`)
+      } else {
+        uiStore.addToast(t('toast.failed_to_join_the_room') + `${JSON.stringify(err.message)}`)
+      }
     })
   }, [])
 
