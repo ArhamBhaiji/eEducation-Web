@@ -77,7 +77,7 @@ const BasicSceneFooterMenu = observer((props: any) => {
       </Tooltip>
       <div className="menu-split" style={{ marginLeft: '7px', marginRight: '7px' }}></div>
       </> : null }
-      <Tooltip title={t(sceneStore.recordId ? 'control_items.stop_recording' : 'control_items.recording')} placement="top">
+      <Tooltip title={t(sceneStore.isRecording ? 'control_items.stop_recording' : 'control_items.recording')} placement="top">
         <span>
           <ControlItem
             loading={sceneStore.recording}
