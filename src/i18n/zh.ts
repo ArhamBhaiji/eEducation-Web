@@ -128,7 +128,8 @@ const zhCN: any = {
     'close_youself_co_video': '你关闭了自己的连麦',
     'accept_co_video': '您同意了连麦',
     'successfully_joined_the_room': '加入房间成功',
-    'failed_to_join_the_room': '加入房间失败',
+    'failed_to_join_the_room': '加入教室失败',
+    'room_full': '教室人数已满',
     'failed_to_authorize_whiteboard': '授权白板失败',
     'failed_to_deauthorize_whiteboard': '取消授权白板失败',
     'failed_to_query_playback_list': '查询回放列表失败',
@@ -218,7 +219,7 @@ const zhCN: any = {
     'room_type': '房间类型',
     'room_join': '加入房间',
     'short_title': {
-      'title': '声网云课堂',
+      'title': '声网灵动课堂',
       'subtitle': '由声网提供',
     },
     'name_too_long': '名字过长，不得超过20个字符',
