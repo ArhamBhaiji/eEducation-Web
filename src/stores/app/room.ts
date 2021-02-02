@@ -178,8 +178,8 @@ export class RoomStore extends SimpleInterval {
         height: 480,
         frameRate: 15
       }
-    } else if(+this.roomInfo.roomType === 1) {
-      // small classroom, teacher use 640 x 480, student use 320 x 240
+    } else if(+this.roomInfo.roomType === 2) {
+      // large classroom, teacher use 640 x 480, student use 320 x 240
       if(userRole === EduRoleTypeEnum.teacher) {
         return {
           width: 640,
