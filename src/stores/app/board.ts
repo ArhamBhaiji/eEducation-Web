@@ -23,6 +23,16 @@ export const resolveFileInfo = (file: any) => {
   }
 }
 
+const isDynamicPPT = (sceneState: any) => {
+  const src = get(sceneState, 'ppt.src', 'staticConvert')
+  if (src.match('dynamicConvert')) {
+    console.log(' match dynamic convert return true')
+    return true
+  }
+  console.log(' match dynamic convert return false')
+  return false
+}
+
 export const demoOssConfig: OSSConfig = {
   "accessKeyId": `${REACT_APP_YOUR_OWN_OSS_BUCKET_KEY}`,
   "accessKeySecret": `${REACT_APP_YOUR_OWN_OSS_BUCKET_SECRET}`,
@@ -444,24 +454,7 @@ export class BoardStore {
     this.activeFooterItem = itemName
     const room = this.room
     if (!room || !room.isWritable) return
-    switch(this.activeFooterItem) {
-      case 'first_page': {
-        this.changePage(0, true)
-        return
-      }
-      case 'last_page': {
-        this.changePage(this.totalPage-1, true)
-        return
-      }
-      case 'next_page': {
-        this.changePage(room.state.sceneState.index + 1)
-        return
-      }
-      case 'prev_page' : {
-        this.changePage(room.state.sceneState.index - 1)
-        return
-      }
-    }
+    this.changePage()
   }
 
   @action
@@ -642,29 +635,32 @@ export class BoardStore {
     return '';
   }
 
-  changePage(idx: number, force?: boolean) {
+  changePage() {
     const room = this.room
     if (!room || !room.isWritable) return;
-    const _idx = idx
-    if (_idx < 0 || _idx >= this.totalPage) {
-      BizLogger.warn(_idx < 0, _idx >= this.totalPage)
-      return
-    }
-    if (force) {
-      room.setSceneIndex(_idx);
-      this.updateSceneItems()
-      return
-    }
-    if (this.sceneType === 'dynamic') {
-      if (_idx > this.currentPage) {
-        room.pptNextStep();
-      } else {
-        room.pptPreviousStep();
+
+    switch(this.activeFooterItem) {
+      case 'first_page': {
+        room.setSceneIndex(0)
+        this.updateSceneItems()
+        return
       }
-    } else {
-      room.setSceneIndex(_idx);
+      case 'last_page': {
+        room.setSceneIndex(this.totalPage-1)
+        this.updateSceneItems()
+        return
+      }
+      case 'next_page': {
+        room.pptNextStep()
+        this.updateSceneItems()
+        return
+      }
+      case 'prev_page' : {
+        room.pptPreviousStep()
+        this.updateSceneItems()
+        return
+      }
     }
-    this.updateSceneItems()
   }
 
   @action

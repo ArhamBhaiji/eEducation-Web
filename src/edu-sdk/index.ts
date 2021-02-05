@@ -151,7 +151,7 @@ const devicePath = '/setting'
 export class AgoraEduSDK {
 
   static get version(): string {
-    return '1.0.0'
+    return '1.0.1'
   }
 
   static _debug: boolean = false 
