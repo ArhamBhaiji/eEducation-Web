@@ -97,6 +97,7 @@ class ReplayRoom {
 
   private readonly store!: ReplayAppStore
   private dom!: Element
+  public _isReleased: boolean = false
 
   constructor(store: ReplayAppStore, dom: Element) {
     this.store = store
@@ -104,9 +105,17 @@ class ReplayRoom {
   }
 
   async destroy () {
-    await this.store.destroy()
+    if (this._isReleased) {
+      throw new GenericErrorWrapper("replay room already destroyed")
+    }
+    try {
+      await this.store.destroy()
+    } catch (err) {
+      console.error(err)
+    }
     unmountComponentAtNode(this.dom)
     instances["replay"] = undefined
+    this._isReleased = true
   }
 }
 
@@ -115,14 +124,24 @@ class ClassRoom {
   private readonly store!: AppStore
   private dom!: Element
 
+  public _isReleased: boolean = false
+
   constructor(store: AppStore, dom: Element) {
     this.store = store
     this.dom = dom
   }
 
   async destroy () {
-    await this.store.destroy()
+    if (this._isReleased) {
+      throw new GenericErrorWrapper("classroom already destroyed")
+    }
+    try {
+      await this.store.destroy()
+    } catch (err) {
+      console.error(err)
+    }
     unmountComponentAtNode(this.dom)
+    this._isReleased = true
     instances["launch"] = undefined
   }
 }
@@ -151,7 +170,7 @@ const devicePath = '/setting'
 export class AgoraEduSDK {
 
   static get version(): string {
-    return '1.0.1'
+    return '1.0.1-rc.1'
   }
 
   static _debug: boolean = false 
@@ -237,6 +256,15 @@ export class AgoraEduSDK {
         roomPath: roomPath,
         pretest: option.pretest,
         listener: option.listener,
+        unmountDom: () => {
+          unmountComponentAtNode(dom)
+          if (instances["launch"]) {
+            instances["launch"]._isReleased = true
+            instances["launch"] = undefined
+            console.log("release launch instance")
+          }
+          console.log("unmount dom")
+        }
       })
       //@ts-ignore
       window.globalStore = store

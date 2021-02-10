@@ -1,3 +1,4 @@
+import { unmountComponentAtNode } from 'react-dom';
 import { GenericErrorWrapper } from './../../sdk/education/core/utils/generic-error';
 import { EduRecordService } from './../../sdk/record/edu-record-service';
 import { EduBoardService } from './../../sdk/board/edu-board-service';
@@ -72,6 +73,7 @@ export type AppStoreInitParams = {
   mainPath?: string
   roomPath?: string
   resetRoomInfo: boolean
+  unmountDom?: CallableFunction
 }
 
 export type RoomInfo = {
@@ -620,20 +622,28 @@ export class AppStore {
     this.removeScreenShareWindow()
   }
 
+  unmountDom() {
+    if (this.params.unmountDom) {
+      this.params.unmountDom()
+    }
+  }
+
   @action
   async releaseRoom() {
     try {
       await this.roomStore.leave()
-      this.resetStates()
+      this.unmountDom()
       if (this.params && this.params.listener) {
         this.params.listener(AgoraEduEvent.destroyed)
       }
+      this.resetStates()
     } catch (err) {
+      this.unmountDom()
+      if (this.params && this.params.listener) {
+        this.params.listener(AgoraEduEvent.destroyed)
+      }
       this.resetStates()
       const exception = new GenericErrorWrapper(err)
-      if (this.params && this.params.listener) {
-        this.params.listener(AgoraEduEvent.destroyed)
-      }
       throw exception
     }
   }

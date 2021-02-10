@@ -102,7 +102,7 @@ export const RoomNavigationDialog = observer((props: any) => {
         await middleRoomStore.leave()
       }
       else {
-        await roomStore.leave()
+        await appStore.releaseRoom()
       }
       uiStore.unblock()
       history.replace('/')
@@ -132,6 +132,7 @@ export const RoomNavigationDialog = observer((props: any) => {
       await roomStore.endRoom()
     }
     else if (type === 'classSessionEnded') {
+      await appStore.releaseRoom()
       uiStore.unblock()
       uiStore.reset()
       history.push('/')

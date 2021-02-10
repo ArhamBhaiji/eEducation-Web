@@ -107,7 +107,7 @@ export class RoomStore extends SimpleInterval {
     // this.appStore.mediaStore.resetRoomState()
     // this.appStore.resetTime()
     // this.appStore.resetRoomInfo()
-    this.appStore.resetStates()
+    // this.appStore.resetStates()
     this.sceneStore.reset()
     this.roomChatMessages = []
     this.unreadMessageCount = 0
@@ -229,25 +229,43 @@ export class RoomStore extends SimpleInterval {
         rtmUid: this.appStore.params.config.rtmUid,
       })
       const roomUuid = this.roomInfo.roomUuid
-      let checkInResult = await eduSDKApi.checkIn({
-        roomUuid,
-        roomName: `${this.roomInfo.roomName}`,
-        roomType: +this.roomInfo.roomType as number,
-        userUuid: this.roomInfo.userUuid,
-        role: this.roomInfo.userRole,
-      })
+      let checkInResult: any = {}
+      try {
+        checkInResult = await eduSDKApi.checkIn({
+          roomUuid,
+          roomName: `${this.roomInfo.roomName}`,
+          roomType: +this.roomInfo.roomType as number,
+          userUuid: this.roomInfo.userUuid,
+          role: this.roomInfo.userRole,
+        })      
+      } catch (err) {
+        if (err.code === 20410100) {
+          try {
+            this.appStore.uiStore.stopLoading()
+            this.appStore.uiStore.showDialog({
+              type: 'classSessionEnded',
+              message: t('class_ended'),
+            })
+          } catch (err) {
+            EduLogger.info(" appStore.releaseRoom ", JSON.stringify(err))
+          }
+          return
+        }
+        console.log('err', err)
+      }
+
       EduLogger.info("## classroom ##: checkIn:  ", JSON.stringify(checkInResult))
       if (checkInResult.state === EduClassroomStateEnum.end) {
-        try {
-          await this.appStore.releaseRoom()
-        } catch (err) {
-          EduLogger.info(" appStore.releaseRoom ", JSON.stringify(err))
-        }
+        // try {
+        //   await this.appStore.releaseRoom()
+        // } catch (err) {
+        //   EduLogger.info(" appStore.releaseRoom ", JSON.stringify(err))
+        // }
+        this.appStore.uiStore.stopLoading()
         this.appStore.uiStore.showDialog({
           type: 'classSessionEnded',
           message: t('class_ended'),
         })
-        this.appStore.uiStore.stopLoading()
         return
       }
       this.sceneStore.isMuted = checkInResult.muteChat
