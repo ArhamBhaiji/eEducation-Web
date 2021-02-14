@@ -643,11 +643,22 @@ export class RoomStore extends SimpleInterval {
       })
   
       const localStreamData = roomManager.data.localStreamData
+      const mediaOptions = this.appStore.mediaOptions
   
       let canPublish = this.roomInfo.userRole === EduRoleTypeEnum.teacher ||
          localStreamData && !!(+localStreamData.state) ||
          (this.roomInfo.userRole === EduRoleTypeEnum.student && +this.roomInfo.roomType !== 2)
   
+      let hasVideo = localStreamData && localStreamData.stream ? localStreamData.stream.hasVideo : true
+      let hasAudio = localStreamData && localStreamData.stream ? localStreamData.stream.hasAudio : true
+
+      if(mediaOptions !== null) {
+        // always use mediaOption if it's not null
+        // however canPublish must be respected
+        hasVideo = mediaOptions.video
+        hasAudio = mediaOptions.audio
+      }
+
       if (canPublish) {
   
         const localStreamData = roomManager.data.localStreamData
@@ -658,8 +669,8 @@ export class RoomStore extends SimpleInterval {
           audioSourceType: EduAudioSourceType.mic,
           streamUuid: mainStream.streamUuid,
           streamName: '',
-          hasVideo: localStreamData && localStreamData.stream ? localStreamData.stream.hasVideo : true,
-          hasAudio: localStreamData && localStreamData.stream ? localStreamData.stream.hasAudio : true,
+          hasVideo: hasVideo,
+          hasAudio: hasAudio,
           userInfo: {} as EduUser
         })
         this.appStore.uiStore.addToast(t('toast.publish_business_flow_successfully'))

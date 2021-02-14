@@ -63,6 +63,11 @@ const sdkConfig: SDKConfig = {
 
 export type LanguageEnum = "" | "en" | "zh"
 
+export type MediaOptions = {
+  video: boolean,
+  audio: boolean
+}
+
 export type LaunchOption = {
   userUuid: string
   userName: string
@@ -75,6 +80,7 @@ export type LaunchOption = {
   // rtmUid: string
   rtmToken: string
   language: LanguageEnum
+  mediaOptions?: MediaOptions
 }
 
 export type ReplayOption = {
@@ -264,7 +270,8 @@ export class AgoraEduSDK {
             console.log("release launch instance")
           }
           console.log("unmount dom")
-        }
+        },
+        mediaOptions: option.mediaOptions
       })
       //@ts-ignore
       window.globalStore = store

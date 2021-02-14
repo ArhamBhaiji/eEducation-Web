@@ -6,7 +6,7 @@ import { DeviceStore } from './device';
 import { UIStore } from './ui';
 import { EduManager } from '@/sdk/education/manager';
 import { EduUserService } from '@/sdk/education/user/edu-user-service';
-import { LanguageEnum } from '@/edu-sdk';
+import { LanguageEnum, MediaOptions } from '@/edu-sdk';
 import { BoardStore } from './board';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { RoomStore } from './room';
@@ -74,6 +74,7 @@ export type AppStoreInitParams = {
   roomPath?: string
   resetRoomInfo: boolean
   unmountDom?: CallableFunction
+  mediaOptions?: MediaOptions
 }
 
 export type RoomInfo = {
@@ -115,6 +116,12 @@ export class AppStore {
 
   _boardService?: EduBoardService;
   _recordService?: EduRecordService;
+
+  _mediaOptions?: MediaOptions
+
+  get mediaOptions() {
+    return this._mediaOptions ?? null
+  }
 
   get boardService() {
     return this._boardService as EduBoardService;
@@ -218,6 +225,7 @@ export class AppStore {
 
   constructor(params: AppStoreInitParams) {
     this.params = params
+    this._mediaOptions = params.mediaOptions
     console.log(" roomInfoParams ", params.roomInfoParams)
     console.log(" config >>> params: ", {...this.params})
     const {config, roomInfoParams, language} = this.params
