@@ -8,14 +8,14 @@ import { CircleLoading } from '../circle-loading';
 
 const MAX_LENGTH = 4
 interface TickProps {
-  tick: number
+  tick: number,
   className: string
 }
 
 interface StudentApplyCardProps {
-  userName: string
-  userUuid: string
-  streamUuid: string
+  userName: string,
+  userUuid: string,
+  streamUuid: string,
   state: boolean
 }
 
